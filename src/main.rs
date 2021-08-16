@@ -13,20 +13,30 @@
 // limitations under the License.
 
 use log::*;
+use nioruntime_http::{HttpConfig, HttpServer};
 use nioruntime_util::Error;
 
 debug!();
 
 fn main() {
 	match real_main() {
-		Ok(_) => {},
+		Ok(_) => {}
 		Err(e) => {
 			error!("real_main returned error: {}", e.to_string());
-		},
+		}
 	}
 }
 
 fn real_main() -> Result<(), Error> {
+	let config = HttpConfig {
+		debug: true,
+		..Default::default()
+	};
+	let mut http_server: HttpServer = HttpServer::new(config);
+
+	http_server.start()?;
+	http_server.add_mapping("/rustlet".to_string())?;
+	std::thread::park();
+
 	Ok(())
 }
-
