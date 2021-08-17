@@ -29,28 +29,20 @@ fn main() {
 	let x = Arc::new(Mutex::new(0));
 	let x_clone = x.clone();
 
-	rustlet!(
-		"myrustlet",
-		move |request: &mut RustletRequest, response: &mut RustletResponse| {
-			let query = request!(request, "query").unwrap_or("".to_string());
-			let mut x = x.lock().unwrap();
-			*x += 1;
-			response!(response, "q: {}, x={}", query, x);
-			Ok(())
-		}
-	);
+	rustlet!("myrustlet", {
+		let query = request!("query");
+		let mut x = x.lock().unwrap();
+		*x += 1;
+		response!("q: {}, x={}", query, x);
+	});
 
-	rustlet!(
-		"myrustlet2",
-		move |request: &mut RustletRequest, response: &mut RustletResponse| {
-			let query = request!(request, "query").unwrap_or("".to_string());
-			let mut x = x_clone.lock().unwrap();
-			*x += 1;
-			response!(response, "ok\n");
-			response!(response, "q2: {} x={}", query, x);
-			Ok(())
-		}
-	);
+	rustlet!("myrustlet2", {
+		let query = request!("query");
+		let mut x = x_clone.lock().unwrap();
+		*x += 1;
+		response!("ok\n");
+		response!("q2: {} x={}", query, x);
+	});
 
 	rustlet_mapping!("/myrustlet", "myrustlet");
 	rustlet_mapping!("/myrustlet2", "myrustlet2");
