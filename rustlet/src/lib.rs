@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod rustlet;
+pub mod macros;
+pub mod rustlet_impls;
 
 pub use nioruntime_util::Error;
+pub use rustlet_impls::{
+	HttpConfig, RustletConfig, RustletContainer, RustletRequest, RustletResponse,
+};

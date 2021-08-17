@@ -12,41 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use librustlet::*;
 use log::*;
-use rustlet::*;
+use std::sync::{Arc, Mutex};
 
 debug!();
 
-fn rustlet1(request: &mut RustletRequest, response: &mut RustletResponse) -> Result<(), Error> {
-	let query = request.get_query()?;
-	let query = format!("query={}", query);
-	response.write(query.as_bytes())?;
-	Ok(())
-}
-
 fn main() {
-	match real_main() {
-		Ok(_) => {}
-		Err(e) => {
-			error!("real_main returned error: {}", e.to_string());
-		}
-	}
-}
-
-fn real_main() -> Result<(), Error> {
-	let config = RustletConfig {
+	rustlet_init!(RustletConfig {
 		http_config: HttpConfig {
 			debug: true,
 			..Default::default()
 		},
-	};
+	});
 
-	let mut rustlet_container = RustletContainer::new(config);
-	rustlet_container.start()?;
-	rustlet_container.add_rustlet("myrustlet", rustlet1)?;
-	rustlet_container.add_rustlet_mapping("myrustlet", "/myrustlet")?;
+	let x = Arc::new(Mutex::new(0));
+	let x_clone = x.clone();
+
+	rustlet!(
+		"myrustlet",
+		move |request: &mut RustletRequest, response: &mut RustletResponse| {
+			let query = request!(request, "query").unwrap_or("".to_string());
+			let mut x = x.lock().unwrap();
+			*x += 1;
+			response!(response, "q: {}, x={}", query, x);
+			Ok(())
+		}
+	);
+
+	rustlet!(
+		"myrustlet2",
+		move |request: &mut RustletRequest, response: &mut RustletResponse| {
+			let query = request!(request, "query").unwrap_or("".to_string());
+			let mut x = x_clone.lock().unwrap();
+			*x += 1;
+			response!(response, "ok\n");
+			response!(response, "q2: {} x={}", query, x);
+			Ok(())
+		}
+	);
+
+	rustlet_mapping!("/myrustlet", "myrustlet");
+	rustlet_mapping!("/myrustlet2", "myrustlet2");
 
 	std::thread::park();
-
-	Ok(())
 }
