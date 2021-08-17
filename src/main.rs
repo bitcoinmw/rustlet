@@ -13,10 +13,16 @@
 // limitations under the License.
 
 use log::*;
-use nioruntime_http::{HttpConfig, HttpServer};
-use nioruntime_util::Error;
+use rustlet::*;
 
 debug!();
+
+fn rustlet1(request: &mut RustletRequest, response: &mut RustletResponse) -> Result<(), Error> {
+	let query = request.get_query()?;
+	let query = format!("query={}", query);
+	response.write(query.as_bytes())?;
+	Ok(())
+}
 
 fn main() {
 	match real_main() {
@@ -28,14 +34,18 @@ fn main() {
 }
 
 fn real_main() -> Result<(), Error> {
-	let config = HttpConfig {
-		debug: true,
-		..Default::default()
+	let config = RustletConfig {
+		http_config: HttpConfig {
+			debug: true,
+			..Default::default()
+		},
 	};
-	let mut http_server: HttpServer = HttpServer::new(config);
 
-	http_server.start()?;
-	http_server.add_mapping("/rustlet".to_string())?;
+	let mut rustlet_container = RustletContainer::new(config);
+	rustlet_container.start()?;
+	rustlet_container.add_rustlet("myrustlet", rustlet1)?;
+	rustlet_container.add_rustlet_mapping("myrustlet", "/myrustlet")?;
+
 	std::thread::park();
 
 	Ok(())

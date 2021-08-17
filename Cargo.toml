@@ -12,16 +12,12 @@ build = "src/build/build.rs"
 edition = "2018"
 
 [workspace]
+members = ["rustlet"]
 
 [dependencies]
 
-log             = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_evh  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-
-clap = { version = "2.33", features = ["yaml"] }
-lazy_static = "1.4.0"
+librustlet = { path = "./rustlet" }
+log        = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 
 [build-dependencies]
 built = { version = "0.4", features = ["git2"]}

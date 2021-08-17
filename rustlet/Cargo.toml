@@ -1,0 +1,19 @@
+[package]
+name = "librustlet"
+version = "0.0.1"
+authors = ["BMW Developers"]
+description = "rustlet/rsp library"
+license = "Apache-2.0"
+repository = "https://github.com/bitcoinmw/rustlet"
+keywords = [ "crypto", "nioruntime", "rustlet" ]
+exclude = ["**/*.rustlet"]
+edition = "2018"
+
+[dependencies]
+
+nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+log             = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+
+lazy_static = "1.4.0"
+
