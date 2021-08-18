@@ -13,10 +13,9 @@
 // limitations under the License.
 
 use librustlet::*;
-use log::*;
 use std::sync::{Arc, Mutex};
 
-debug!();
+log::debug!();
 
 fn main() {
 	rustlet_init!(RustletConfig {
