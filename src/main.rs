@@ -28,6 +28,10 @@ fn main() {
 	let x = Arc::new(Mutex::new(0));
 	let x_clone = x.clone();
 
+	rustlet!("redir", {
+		set_redirect!("http://www.disney.com");
+	});
+
 	rustlet!("myrustlet", {
 		let name = request!("query", "name");
 		let mut x = x.lock().unwrap();
@@ -70,6 +74,7 @@ fn main() {
 	rustlet_mapping!("/myrustlet", "myrustlet");
 	rustlet_mapping!("/myrustlet2", "myrustlet2");
 	rustlet_mapping!("/printheaders", "printheaders");
+	rustlet_mapping!("/redir", "redir");
 
 	std::thread::park();
 }

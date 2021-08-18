@@ -192,6 +192,7 @@ pub struct RustletResponse {
 	config: HttpConfig,
 	headers_written: bool,
 	additional_headers: Vec<(String, String)>,
+	redirect: Option<String>,
 	keep_alive: bool,
 }
 
@@ -203,6 +204,7 @@ impl RustletResponse {
 			headers_written: false,
 			keep_alive,
 			additional_headers: vec![],
+			redirect: None,
 		}
 	}
 
@@ -226,6 +228,7 @@ impl RustletResponse {
 			)
 			.into())
 		} else {
+			self.redirect = Some(location.to_string());
 			Ok(())
 		}
 	}
@@ -251,6 +254,7 @@ impl RustletResponse {
 				true,
 				self.keep_alive,
 				self.additional_headers.clone(),
+				self.redirect.clone(),
 			)?;
 			self.headers_written = true;
 		}
@@ -271,9 +275,9 @@ impl RustletResponse {
 	}
 
 	fn complete(&mut self) -> Result<(), Error> {
-		let headers_written = crate::macros::LOCALRUSTLET.with(|f| match &(*f.borrow()) {
-			Some((_request, response)) => response.headers_written,
-			None => false,
+		let (headers_written, redir) = crate::macros::LOCALRUSTLET.with(|f| match &(*f.borrow()) {
+			Some((_request, response)) => (response.headers_written, response.redirect.clone()),
+			None => (false, None),
 		});
 		if !headers_written {
 			HttpServer::write_headers(
@@ -282,6 +286,7 @@ impl RustletResponse {
 				true,
 				self.keep_alive,
 				self.additional_headers.clone(),
+				redir,
 			)?;
 			self.headers_written = true;
 		}

@@ -192,6 +192,33 @@ macro_rules! add_header {
 }
 
 #[macro_export]
+macro_rules! set_redirect {
+	($a:expr) => {{
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {
+			Some((request, response)) => {
+				let res = response.set_redirect($a);
+				match res {
+					Ok(_) => {}
+					Err(e) => {
+						const MAIN_LOG: &str = "mainlog";
+						log::log_multi!(
+							log::ERROR,
+							MAIN_LOG,
+							"Couldn't call response.write: {}",
+							e.to_string()
+						);
+					}
+				}
+			}
+			None => {
+				const MAIN_LOG: &str = "mainlog";
+				log::log_multi!(log::ERROR, MAIN_LOG, "Couldn't find response struct",);
+			}
+		});
+	}};
+}
+
+#[macro_export]
 macro_rules! response {
 	($a:expr)=>{
                 {
