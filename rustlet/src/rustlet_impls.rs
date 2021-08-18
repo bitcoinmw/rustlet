@@ -34,6 +34,8 @@ pub struct RustletRequest {
 	query: String,
 	headers: Vec<(Vec<u8>, Vec<u8>)>,
 	keep_alive: bool,
+	query_map: Option<HashMap<String, String>>,
+	header_map: Option<HashMap<String, String>>,
 }
 
 impl RustletRequest {
@@ -56,7 +58,76 @@ impl RustletRequest {
 			http_config,
 			headers,
 			keep_alive,
+			query_map: None,
+			header_map: None,
 		}
+	}
+
+	pub fn get_header_len(&mut self) -> Result<usize, Error> {
+		if self.header_map.is_none() {
+			self.build_header_map()?;
+		}
+
+		Ok(match self.header_map.as_ref() {
+			Some(map) => map.len(),
+			None => 0,
+		})
+	}
+
+	pub fn get_header_i_value(&self, i: usize) -> Result<String, Error> {
+		let vec_len = self.headers.len();
+		if i >= vec_len {
+			Ok("".to_string())
+		} else {
+			Ok(std::str::from_utf8(&self.headers[i].1)
+				.unwrap_or(&"".to_string())
+				.to_string())
+		}
+	}
+
+	pub fn get_header_i_name(&self, i: usize) -> Result<String, Error> {
+		let vec_len = self.headers.len();
+		if i >= vec_len {
+			Ok("".to_string())
+		} else {
+			Ok(std::str::from_utf8(&self.headers[i].0)
+				.unwrap_or(&"".to_string())
+				.to_string())
+		}
+	}
+
+	pub fn get_header(&mut self, name: &str) -> Result<Option<String>, Error> {
+		let name = name.to_string();
+		if self.header_map.is_none() {
+			self.build_header_map()?;
+		}
+
+		match self.header_map.as_ref() {
+			Some(map) => {
+				let value = map.get(&name);
+				match value {
+					Some(value) => Ok(Some((*value).clone())),
+					None => Ok(None),
+				}
+			}
+			None => Ok(None),
+		}
+	}
+
+	pub fn get_headers(&self) -> Result<Vec<(Vec<u8>, Vec<u8>)>, Error> {
+		Ok(self.headers.clone())
+	}
+
+	pub fn get_http_method(&self) -> Result<HttpMethod, Error> {
+		Ok(self.http_method.clone())
+	}
+
+	pub fn get_http_version(&self) -> Result<HttpVersion, Error> {
+		Ok(self.http_version.clone())
+	}
+
+	pub fn get_content(&self) -> Result<Vec<u8>, Error> {
+		Ok(self.content.clone())
 	}
 
 	pub fn get_uri(&self) -> Result<String, Error> {
@@ -65,6 +136,53 @@ impl RustletRequest {
 
 	pub fn get_query(&self) -> Result<String, Error> {
 		Ok(self.query.clone())
+	}
+
+	pub fn get_query_parameter(&mut self, name: &str) -> Result<Option<String>, Error> {
+		let name = name.to_string();
+		if self.query_map.is_none() {
+			self.build_query_map()?;
+		}
+
+		match self.query_map.as_ref() {
+			Some(map) => {
+				let value = map.get(&name);
+				match value {
+					Some(value) => Ok(Some((*value).clone())),
+					None => Ok(None),
+				}
+			}
+			None => Ok(None),
+		}
+	}
+
+	fn build_header_map(&mut self) -> Result<(), Error> {
+		let mut map = HashMap::new();
+		let vec_len = self.headers.len();
+		for i in 0..vec_len {
+			let key = std::str::from_utf8(&self.headers[i].0);
+			let value = std::str::from_utf8(&self.headers[i].1);
+
+			// we don't accept non utf-8 headers
+			if key.is_err() || value.is_err() {
+				continue;
+			}
+
+			map.insert(key.unwrap().to_string(), value.unwrap().to_string());
+		}
+		self.header_map = Some(map);
+		Ok(())
+	}
+
+	fn build_query_map(&mut self) -> Result<(), Error> {
+		let vec = querystring::querify(&self.query);
+		let vec_len = vec.len();
+		let mut map = HashMap::new();
+		for i in 0..vec_len {
+			map.insert(vec[i].0.to_string(), vec[i].1.to_string());
+		}
+		self.query_map = Some(map);
+		Ok(())
 	}
 }
 
@@ -108,6 +226,15 @@ impl RustletResponse {
 	}
 
 	fn complete(&mut self) -> Result<(), Error> {
+		let headers_written = crate::macros::LOCALRUSTLET.with(|f| match &(*f.borrow()) {
+			Some((_request, response)) => response.headers_written,
+			None => false,
+		});
+		if !headers_written {
+			HttpServer::write_headers(&self.wh, &self.config, true, self.keep_alive)?;
+			self.headers_written = true;
+		}
+
 		if self.keep_alive {
 			self.wh.write("0\r\n\r\n".as_bytes(), 0, 5, false)?;
 		} else {
@@ -172,10 +299,9 @@ fn api_callback(
 	})?;
 
 	let rustlet = rustlets.mappings.get(uri);
-
 	match rustlet {
-		Some(rustlet) => {
-			let rustlet = rustlets.rustlets.get(rustlet);
+		Some(rustlet_name) => {
+			let rustlet = rustlets.rustlets.get(rustlet_name);
 			match rustlet {
 				Some(rustlet) => {
 					let mut request = RustletRequest::new(
@@ -193,12 +319,19 @@ fn api_callback(
 					response.complete()?;
 				}
 				None => {
-					// return error
+					let mut response = RustletResponse::new(wh.clone(), config, keep_alive);
+					response
+						.write(format!("Rustlet '{}' does not exist.", rustlet_name).as_bytes())?;
+					if keep_alive {
+						wh.write("0\r\n\r\n".as_bytes(), 0, 5, false)?;
+					} else {
+						wh.close()?;
+					}
 				}
 			}
 		}
 		None => {
-			// return error
+			log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
 		}
 	}
 

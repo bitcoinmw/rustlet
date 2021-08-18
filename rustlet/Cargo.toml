@@ -16,4 +16,4 @@ nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", branch = "ma
 log             = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 
 lazy_static = "1.4.0"
-
+querystring = "1.1.0"
