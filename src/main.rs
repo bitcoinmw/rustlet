@@ -32,6 +32,8 @@ fn main() {
 		let name = request!("query", "name");
 		let mut x = x.lock().unwrap();
 		*x += 1;
+		add_header!("my_header", "ok");
+		set_content_type!("text/plain");
 		response!("name: {}, x={}", name, x);
 	});
 

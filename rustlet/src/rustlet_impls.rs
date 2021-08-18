@@ -191,6 +191,7 @@ pub struct RustletResponse {
 	wh: WriteHandle,
 	config: HttpConfig,
 	headers_written: bool,
+	additional_headers: Vec<(String, String)>,
 	keep_alive: bool,
 }
 
@@ -201,12 +202,56 @@ impl RustletResponse {
 			config,
 			headers_written: false,
 			keep_alive,
+			additional_headers: vec![],
+		}
+	}
+
+	pub fn add_header(&mut self, name: &str, value: &str) -> Result<(), Error> {
+		if self.headers_written {
+			Err(ErrorKind::OrderingError(
+				"headers already written. Cannot add a header".to_string(),
+			)
+			.into())
+		} else {
+			self.additional_headers
+				.push((name.to_string(), value.to_string()));
+			Ok(())
+		}
+	}
+
+	pub fn set_redirect(&mut self, location: &str) -> Result<(), Error> {
+		if self.headers_written {
+			Err(ErrorKind::OrderingError(
+				"headers already written. Cannot set redirect".to_string(),
+			)
+			.into())
+		} else {
+			Ok(())
+		}
+	}
+
+	pub fn set_content_type(&mut self, ctype: &str) -> Result<(), Error> {
+		if self.headers_written {
+			Err(ErrorKind::OrderingError(
+				"headers already written. Cannot set content-type".to_string(),
+			)
+			.into())
+		} else {
+			self.additional_headers
+				.push(("Content-Type".to_string(), ctype.to_string()));
+			Ok(())
 		}
 	}
 
 	pub fn write(&mut self, data: &[u8]) -> Result<(), Error> {
 		if !self.headers_written {
-			HttpServer::write_headers(&self.wh, &self.config, true, self.keep_alive)?;
+			HttpServer::write_headers(
+				&self.wh,
+				&self.config,
+				true,
+				self.keep_alive,
+				self.additional_headers.clone(),
+			)?;
 			self.headers_written = true;
 		}
 
@@ -231,7 +276,13 @@ impl RustletResponse {
 			None => false,
 		});
 		if !headers_written {
-			HttpServer::write_headers(&self.wh, &self.config, true, self.keep_alive)?;
+			HttpServer::write_headers(
+				&self.wh,
+				&self.config,
+				true,
+				self.keep_alive,
+				self.additional_headers.clone(),
+			)?;
 			self.headers_written = true;
 		}
 

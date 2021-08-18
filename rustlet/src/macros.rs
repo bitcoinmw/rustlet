@@ -158,6 +158,40 @@ macro_rules! rustlet_mapping {
 }
 
 #[macro_export]
+macro_rules! set_content_type {
+	($a:expr) => {
+		add_header!("Content-Type", $a);
+	};
+}
+
+#[macro_export]
+macro_rules! add_header {
+	($a:expr, $b:expr) => {{
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {
+			Some((request, response)) => {
+				let res = response.add_header($a, $b);
+				match res {
+					Ok(_) => {}
+					Err(e) => {
+						const MAIN_LOG: &str = "mainlog";
+						log::log_multi!(
+							log::ERROR,
+							MAIN_LOG,
+							"Couldn't call response.write: {}",
+							e.to_string()
+						);
+					}
+				}
+			}
+			None => {
+				const MAIN_LOG: &str = "mainlog";
+				log::log_multi!(log::ERROR, MAIN_LOG, "Couldn't find response struct",);
+			}
+		});
+	}};
+}
+
+#[macro_export]
 macro_rules! response {
 	($a:expr)=>{
                 {
