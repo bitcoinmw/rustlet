@@ -345,6 +345,48 @@ fn api_callback(
 	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
 	keep_alive: bool,                 // keep-alive
 ) -> Result<(), Error> {
+	let res = do_api_callback(
+		content,
+		method,
+		config.clone(),
+		wh.clone(),
+		version,
+		uri,
+		query,
+		headers,
+		keep_alive,
+	);
+
+	match res {
+		Ok(_) => {}
+		Err(e) => {
+			log_multi!(
+				ERROR,
+				MAIN_LOG,
+				"error calling rustlet: '{}'",
+				e.to_string()
+			);
+
+			let mut response = RustletResponse::new(wh.clone(), config, false);
+			response.write("Internal Server error. See logs for details.".as_bytes())?;
+			wh.close()?;
+		}
+	}
+
+	Ok(())
+}
+
+fn do_api_callback(
+	content: &[u8],                   // content of the request. len == 0 if none.
+	method: HttpMethod,               // GET or POST
+	config: HttpConfig,               // HttpServer's configuration
+	wh: WriteHandle,                  // WriteHandle to write back data
+	version: HttpVersion,             // HttpVersion
+	uri: &str,                        // uri
+	query: &str,                      // query
+	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
+	keep_alive: bool,                 // keep-alive
+) -> Result<(), Error> {
 	let rustlets = RUSTLETS.read().map_err(|e| {
 		let error: Error = ErrorKind::InternalError(format!(
 			"unexpected error: couldn't obtain RUSTLETS lock: {}",

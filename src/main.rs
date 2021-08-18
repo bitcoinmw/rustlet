@@ -13,9 +13,26 @@
 // limitations under the License.
 
 use librustlet::*;
+use nioruntime_util::{Error, ErrorKind};
 use std::sync::{Arc, Mutex};
 
 log::debug!();
+
+#[allow(unreachable_code)]
+fn fun() -> Result<(), Error> {
+	rustlet!("error", {
+		return Err(ErrorKind::InternalError("test error".to_string()).into());
+	});
+	Ok(())
+}
+
+#[allow(unreachable_code)]
+fn fun2() -> Result<(), Error> {
+	rustlet!("panic", {
+		panic!("test panic");
+	});
+	Ok(())
+}
 
 fn main() {
 	rustlet_init!(RustletConfig {
@@ -71,10 +88,15 @@ fn main() {
 		response!("content={:?}\n", content);
 	});
 
+	let _ = fun();
+	let _ = fun2();
+
 	rustlet_mapping!("/myrustlet", "myrustlet");
 	rustlet_mapping!("/myrustlet2", "myrustlet2");
 	rustlet_mapping!("/printheaders", "printheaders");
 	rustlet_mapping!("/redir", "redir");
+	rustlet_mapping!("/error", "error");
+	rustlet_mapping!("/panic", "panic");
 
 	std::thread::park();
 }
