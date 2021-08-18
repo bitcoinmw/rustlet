@@ -21,15 +21,17 @@ log::debug!();
 #[allow(unreachable_code)]
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
+		response!("hi");
 		return Err(ErrorKind::InternalError("test error".to_string()).into());
 	});
 	Ok(())
 }
 
-#[allow(unreachable_code)]
 fn fun2() -> Result<(), Error> {
 	rustlet!("panic", {
-		panic!("test panic");
+		response!("hi");
+		let x: Option<bool> = None;
+		x.unwrap();
 	});
 	Ok(())
 }

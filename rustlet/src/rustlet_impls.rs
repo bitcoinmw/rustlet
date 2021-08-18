@@ -18,11 +18,17 @@ pub use nioruntime_http::{HttpConfig, HttpServer};
 use nioruntime_http::{HttpMethod, HttpVersion, WriteHandle};
 pub use nioruntime_util::{Error, ErrorKind};
 use std::collections::HashMap;
+use std::convert::TryInto;
+use std::fs::metadata;
+use std::fs::File;
+use std::io::Read;
 use std::pin::Pin;
 use std::sync::{Arc, RwLock};
 
 info!();
 const MAIN_LOG: &str = "mainlog";
+const MAX_CHUNK_SIZE: usize = 10 * 1024 * 1024;
+const MAX_ESCAPE_SEQUENCE: usize = 100;
 
 #[derive(Clone)]
 pub struct RustletRequest {
@@ -194,10 +200,11 @@ pub struct RustletResponse {
 	additional_headers: Vec<(String, String)>,
 	redirect: Option<String>,
 	keep_alive: bool,
+	chained: bool,
 }
 
 impl RustletResponse {
-	pub fn new(wh: WriteHandle, config: HttpConfig, keep_alive: bool) -> Self {
+	pub fn new(wh: WriteHandle, config: HttpConfig, keep_alive: bool, chained: bool) -> Self {
 		RustletResponse {
 			wh,
 			config,
@@ -205,6 +212,7 @@ impl RustletResponse {
 			keep_alive,
 			additional_headers: vec![],
 			redirect: None,
+			chained,
 		}
 	}
 
@@ -247,7 +255,7 @@ impl RustletResponse {
 	}
 
 	pub fn write(&mut self, data: &[u8]) -> Result<(), Error> {
-		if !self.headers_written {
+		if !self.headers_written && !self.chained {
 			HttpServer::write_headers(
 				&self.wh,
 				&self.config,
@@ -275,6 +283,11 @@ impl RustletResponse {
 	}
 
 	fn complete(&mut self) -> Result<(), Error> {
+		if self.chained {
+			// don't close the connection or send 0 len if we're in a chained request
+			return Ok(());
+		}
+
 		let (headers_written, redir) = crate::macros::LOCALRUSTLET.with(|f| match &(*f.borrow()) {
 			Some((_request, response)) => (response.headers_written, response.redirect.clone()),
 			None => (false, None),
@@ -363,16 +376,68 @@ fn api_callback(
 			log_multi!(
 				ERROR,
 				MAIN_LOG,
-				"error calling rustlet: '{}'",
+				"error calling rustlet/rsp: '{}'",
 				e.to_string()
 			);
 
-			let mut response = RustletResponse::new(wh.clone(), config, false);
+			let mut response = RustletResponse::new(wh.clone(), config, false, false);
 			response.write("Internal Server error. See logs for details.".as_bytes())?;
 			wh.close()?;
 		}
 	}
 
+	Ok(())
+}
+
+fn execute_rustlet(
+	rustlet_name: &str,
+	content: &[u8],                   // content of the request. len == 0 if none.
+	method: HttpMethod,               // GET or POST
+	config: HttpConfig,               // HttpServer's configuration
+	wh: WriteHandle,                  // WriteHandle to write back data
+	version: HttpVersion,             // HttpVersion
+	uri: &str,                        // uri
+	query: &str,                      // query
+	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
+	keep_alive: bool,                 // keep-alive
+	chained: bool,                    // is this a chained rustlet call?
+) -> Result<(), Error> {
+	let rustlets = RUSTLETS.read().map_err(|e| {
+		let error: Error = ErrorKind::InternalError(format!(
+			"unexpected error: couldn't obtain RUSTLETS lock: {}",
+			e.to_string(),
+		))
+		.into();
+		error
+	})?;
+
+	let rustlet = rustlets.rustlets.get(rustlet_name);
+	match rustlet {
+		Some(rustlet) => {
+			let mut request = RustletRequest::new(
+				uri.to_string(),
+				query.to_string(),
+				content.to_vec(),
+				method,
+				version,
+				config.clone(),
+				headers,
+				keep_alive,
+			);
+			let mut response = RustletResponse::new(wh, config, keep_alive, chained);
+			(rustlet)(&mut request, &mut response)?;
+			response.complete()?;
+		}
+		None => {
+			let mut response = RustletResponse::new(wh.clone(), config, keep_alive, chained);
+			response.write(format!("Rustlet '{}' does not exist.", rustlet_name).as_bytes())?;
+			if keep_alive {
+				wh.write("0\r\n\r\n".as_bytes(), 0, 5, false)?;
+			} else {
+				wh.close()?;
+			}
+		}
+	}
 	Ok(())
 }
 
@@ -399,38 +464,139 @@ fn do_api_callback(
 	let rustlet = rustlets.mappings.get(uri);
 	match rustlet {
 		Some(rustlet_name) => {
-			let rustlet = rustlets.rustlets.get(rustlet_name);
-			match rustlet {
-				Some(rustlet) => {
-					let mut request = RustletRequest::new(
-						uri.to_string(),
-						query.to_string(),
-						content.to_vec(),
-						method,
-						version,
-						config.clone(),
-						headers,
-						keep_alive,
-					);
-					let mut response = RustletResponse::new(wh, config, keep_alive);
-					(rustlet)(&mut request, &mut response)?;
-					response.complete()?;
+			execute_rustlet(
+				rustlet_name,
+				content,
+				method,
+				config,
+				wh,
+				version,
+				uri,
+				query,
+				headers,
+				keep_alive,
+				false,
+			)?;
+		}
+		None => {
+			// see if it's an RSP.
+			if uri.to_lowercase().ends_with(".rsp") {
+				process_rsp(
+					content, method, config, wh, version, uri, query, headers, keep_alive,
+				)?;
+			} else {
+				log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
+				let mut response = RustletResponse::new(wh.clone(), config, false, false);
+				response.write("Internal Server error. See logs for details.".as_bytes())?;
+				wh.close()?;
+			}
+		}
+	}
+
+	Ok(())
+}
+
+fn process_rsp(
+	content: &[u8],                   // content of the request. len == 0 if none.
+	method: HttpMethod,               // GET or POST
+	config: HttpConfig,               // HttpServer's configuration
+	wh: WriteHandle,                  // WriteHandle to write back data
+	version: HttpVersion,             // HttpVersion
+	uri: &str,                        // uri
+	query: &str,                      // query
+	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
+	keep_alive: bool,                 // keep-alive
+) -> Result<(), Error> {
+	let rsp_path = HttpServer::get_path(&config, uri)?;
+	let mut flen = metadata(rsp_path.clone())?.len();
+	let mut file = File::open(rsp_path.clone())?;
+
+	let buflen: usize = if flen.try_into().unwrap_or(MAX_CHUNK_SIZE) > MAX_CHUNK_SIZE {
+		MAX_CHUNK_SIZE
+	} else {
+		flen.try_into().unwrap_or(MAX_CHUNK_SIZE)
+	};
+
+	let mut buf = vec![0; (buflen + MAX_ESCAPE_SEQUENCE) as usize];
+	let mut first_loop = true;
+
+	loop {
+		let amt = file.read(&mut buf[0..buflen])?;
+		if first_loop {
+			HttpServer::write_headers(&wh, &config, true, keep_alive, vec![], None)?;
+		}
+
+		let mut start = 0;
+		let mut end;
+		loop {
+			end = amt;
+			for i in (start + 2)..amt {
+				if buf[i] == '=' as u8 && buf[i - 1] == '@' as u8 && buf[i - 2] == '<' as u8 {
+					// we have begun an escape sequence
+					end = i - 2;
+					break;
 				}
-				None => {
-					let mut response = RustletResponse::new(wh.clone(), config, keep_alive);
-					response
-						.write(format!("Rustlet '{}' does not exist.", rustlet_name).as_bytes())?;
-					if keep_alive {
-						wh.write("0\r\n\r\n".as_bytes(), 0, 5, false)?;
-					} else {
-						wh.close()?;
+			}
+			let wlen = end - start;
+			if keep_alive {
+				let msg_len_bytes = format!("{:X}\r\n", wlen);
+				let msg_len_bytes = msg_len_bytes.as_bytes();
+				wh.write(msg_len_bytes, 0, msg_len_bytes.len(), false)?;
+				wh.write(&buf, start, end - start, false)?;
+				if flen <= end.try_into().unwrap_or(0) {
+					wh.write("\r\n0\r\n\r\n".as_bytes(), 0, 7, !keep_alive)?;
+				} else {
+					wh.write("\r\n".as_bytes(), 0, 2, false)?;
+				}
+			} else {
+				if flen <= end.try_into().unwrap_or(0) {
+					wh.write(&buf, start, end - start, !keep_alive)?;
+				} else {
+					wh.write(&buf, start, end - start, false)?;
+				}
+			}
+
+			if end == amt {
+				break;
+			} else {
+				// find the end of the escape sequence
+				for i in end + 3..(amt - 1) {
+					if buf[i] == '>' as u8 {
+						let rustlet_name = std::str::from_utf8(&buf[(end + 3)..i])?;
+						execute_rustlet(
+							rustlet_name,
+							content,
+							method.clone(),
+							config.clone(),
+							wh.clone(),
+							version.clone(),
+							uri,
+							query,
+							headers.clone(),
+							keep_alive,
+							true,
+						)?;
+						start = i + 1;
+						break;
 					}
+				}
+				if start < end {
+					// error we didn't find the end of it
+					// TODO: handle chunk overlapping escape sequences
+					// TODO: handle invalid RSP better, show linenum, etc
+					return Err(ErrorKind::InvalidRSPError(
+						"non-terminated escape sequence in RSP".to_string(),
+					)
+					.into());
 				}
 			}
 		}
-		None => {
-			log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
+		flen -= amt.try_into().unwrap_or(0);
+
+		if flen <= 0 {
+			break;
 		}
+		first_loop = false;
 	}
 
 	Ok(())
