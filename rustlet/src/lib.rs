@@ -19,5 +19,6 @@ pub use log;
 pub use nioruntime_http;
 pub use nioruntime_util::Error;
 pub use rustlet_impls::{
-	HttpConfig, RustletConfig, RustletContainer, RustletRequest, RustletResponse,
+	HttpConfig, RustletAsyncContext, RustletConfig, RustletContainer, RustletRequest,
+	RustletResponse,
 };

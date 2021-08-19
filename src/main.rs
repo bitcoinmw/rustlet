@@ -47,6 +47,19 @@ fn main() {
 	let x = Arc::new(Mutex::new(0));
 	let x_clone = x.clone();
 
+	rustlet!("async", {
+		let ac = async_context!();
+		response!("first message\n");
+
+		std::thread::spawn(move || {
+			async_context!(ac);
+			// simulate long running task:
+			std::thread::sleep(std::time::Duration::from_millis(1000));
+			response!("second message\n");
+			async_complete!();
+		});
+	});
+
 	rustlet!("redir", {
 		set_redirect!("http://www.disney.com");
 	});
@@ -99,6 +112,7 @@ fn main() {
 	rustlet_mapping!("/redir", "redir");
 	rustlet_mapping!("/error", "error");
 	rustlet_mapping!("/panic", "panic");
+	rustlet_mapping!("/async", "async");
 
 	std::thread::park();
 }

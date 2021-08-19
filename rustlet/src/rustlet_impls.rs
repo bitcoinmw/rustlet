@@ -33,6 +33,26 @@ const SEPARATOR_LINE: &str =
 	"------------------------------------------------------------------------------------------------------------------------------------";
 
 #[derive(Clone)]
+pub struct RustletAsyncContext {
+	pub request: Option<RustletRequest>,
+	pub response: Option<RustletResponse>,
+}
+
+impl RustletAsyncContext {
+	pub fn complete(&mut self) -> Result<(), Error> {
+		match &mut self.response {
+			Some(response) => {
+				response.async_complete()?;
+			}
+			None => {
+				log_multi!(ERROR, MAIN_LOG, "response not found in async context");
+			}
+		}
+		Ok(())
+	}
+}
+
+#[derive(Clone)]
 pub struct RustletRequest {
 	content: Vec<u8>,
 	http_method: HttpMethod,
@@ -203,6 +223,7 @@ pub struct RustletResponse {
 	redirect: Arc<Mutex<Option<String>>>,
 	keep_alive: bool,
 	chained: bool,
+	is_async: Arc<RwLock<bool>>,
 }
 
 impl RustletResponse {
@@ -215,6 +236,7 @@ impl RustletResponse {
 			additional_headers: vec![],
 			redirect: Arc::new(Mutex::new(None)),
 			chained,
+			is_async: Arc::new(RwLock::new(false)),
 		}
 	}
 
@@ -308,8 +330,19 @@ impl RustletResponse {
 		Ok(())
 	}
 
-	fn complete(&mut self) -> Result<(), Error> {
-		if self.chained {
+	pub fn set_is_async(&mut self, value: bool) -> Result<(), Error> {
+		(*nioruntime_util::lockw!(self.is_async)) = value;
+		Ok(())
+	}
+
+	pub fn async_complete(&mut self) -> Result<(), Error> {
+		self.set_is_async(false)?;
+		self.complete()?;
+		Ok(())
+	}
+
+	pub fn complete(&mut self) -> Result<(), Error> {
+		if self.chained || (*nioruntime_util::lockr!(self.is_async)) {
 			// don't close the connection or send 0 len if we're in a chained request
 			return Ok(());
 		}

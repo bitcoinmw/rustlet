@@ -33,6 +33,68 @@ lazy_static! {
 }
 
 #[macro_export]
+macro_rules! async_complete {
+	() => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((_request, response)) => match response.async_complete() {
+				Ok(_) => {}
+				Err(e) => {
+					mainlogerror!("async_complete generated error: {}", e.to_string());
+				}
+			},
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+			}
+		});
+	};
+}
+
+#[macro_export]
+macro_rules! async_context {
+	() => {{
+		let mut ret: librustlet::RustletAsyncContext = librustlet::RustletAsyncContext {
+			request: None,
+			response: None,
+		};
+
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((request, response)) => {
+				match response.set_is_async(true) {
+					Ok(_) => {}
+					Err(e) => {
+						mainlogerror!("async_context generated error: {}", e.to_string());
+					}
+				}
+
+				ret = librustlet::RustletAsyncContext {
+					request: Some(request.clone()),
+					response: Some(response.clone()),
+				};
+			}
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+			}
+		});
+		ret
+	}};
+	($a:expr) => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match $a.request {
+			Some(request) => match $a.response {
+				Some(response) => {
+					*f.borrow_mut() = Some((request.clone(), response.clone()));
+				}
+				None => {
+					mainlogerror!("no response in local rustlet");
+				}
+			},
+			None => {
+				mainlogerror!("no request in local rustlet");
+			}
+		});
+	};
+}
+
+#[macro_export]
 macro_rules! rustlet {
 	($a:expr,$b:expr) => {
 		let mut container = librustlet::macros::RUSTLET_CONTAINER.write();
