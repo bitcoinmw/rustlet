@@ -23,12 +23,14 @@ use std::fs::metadata;
 use std::fs::File;
 use std::io::Read;
 use std::pin::Pin;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 
 info!();
 const MAIN_LOG: &str = "mainlog";
-const MAX_CHUNK_SIZE: usize = 10 * 1024 * 1024;
+const MAX_CHUNK_SIZE: usize = 1024 * 1024 * 10;
 const MAX_ESCAPE_SEQUENCE: usize = 100;
+const SEPARATOR_LINE: &str =
+	"------------------------------------------------------------------------------------------------------------------------------------";
 
 #[derive(Clone)]
 pub struct RustletRequest {
@@ -196,9 +198,9 @@ impl RustletRequest {
 pub struct RustletResponse {
 	wh: WriteHandle,
 	config: HttpConfig,
-	headers_written: bool,
+	headers_written: Arc<Mutex<bool>>,
 	additional_headers: Vec<(String, String)>,
-	redirect: Option<String>,
+	redirect: Arc<Mutex<Option<String>>>,
 	keep_alive: bool,
 	chained: bool,
 }
@@ -208,16 +210,52 @@ impl RustletResponse {
 		RustletResponse {
 			wh,
 			config,
-			headers_written: false,
+			headers_written: Arc::new(Mutex::new(false)),
 			keep_alive,
 			additional_headers: vec![],
-			redirect: None,
+			redirect: Arc::new(Mutex::new(None)),
 			chained,
 		}
 	}
 
+	fn get_headers_written(&self) -> bool {
+		match self.headers_written.lock() {
+			Ok(v) => *v,
+			Err(e) => *e.into_inner(),
+		}
+	}
+
+	fn set_headers_written(&self, value: bool) {
+		match self.headers_written.lock() {
+			Ok(mut v) => *v = value,
+			Err(e) => *e.into_inner() = value,
+		}
+	}
+
+	fn get_redirect(&self) -> Option<String> {
+		match self.redirect.lock() {
+			Ok(r) => (*r).clone(),
+			Err(e) => (*e.into_inner()).clone(),
+		}
+	}
+
+	pub fn set_redirect(&self, value: &str) -> Result<(), Error> {
+		if self.get_headers_written() {
+			return Err(ErrorKind::OrderingError(
+				"headers already written. Cannot set redirect".to_string(),
+			)
+			.into());
+		}
+		match self.redirect.lock() {
+			Ok(mut r) => *r = Some(value.to_string()),
+			Err(e) => *e.into_inner() = Some(value.to_string()),
+		}
+
+		Ok(())
+	}
+
 	pub fn add_header(&mut self, name: &str, value: &str) -> Result<(), Error> {
-		if self.headers_written {
+		if self.get_headers_written() {
 			Err(ErrorKind::OrderingError(
 				"headers already written. Cannot add a header".to_string(),
 			)
@@ -229,20 +267,8 @@ impl RustletResponse {
 		}
 	}
 
-	pub fn set_redirect(&mut self, location: &str) -> Result<(), Error> {
-		if self.headers_written {
-			Err(ErrorKind::OrderingError(
-				"headers already written. Cannot set redirect".to_string(),
-			)
-			.into())
-		} else {
-			self.redirect = Some(location.to_string());
-			Ok(())
-		}
-	}
-
 	pub fn set_content_type(&mut self, ctype: &str) -> Result<(), Error> {
-		if self.headers_written {
+		if self.get_headers_written() {
 			Err(ErrorKind::OrderingError(
 				"headers already written. Cannot set content-type".to_string(),
 			)
@@ -255,16 +281,16 @@ impl RustletResponse {
 	}
 
 	pub fn write(&mut self, data: &[u8]) -> Result<(), Error> {
-		if !self.headers_written && !self.chained {
+		if !self.get_headers_written() && !self.chained {
 			HttpServer::write_headers(
 				&self.wh,
 				&self.config,
 				true,
 				self.keep_alive,
 				self.additional_headers.clone(),
-				self.redirect.clone(),
+				self.get_redirect(),
 			)?;
-			self.headers_written = true;
+			self.set_headers_written(true);
 		}
 
 		let amt = data.len();
@@ -288,10 +314,9 @@ impl RustletResponse {
 			return Ok(());
 		}
 
-		let (headers_written, redir) = crate::macros::LOCALRUSTLET.with(|f| match &(*f.borrow()) {
-			Some((_request, response)) => (response.headers_written, response.redirect.clone()),
-			None => (false, None),
-		});
+		let headers_written = self.get_headers_written();
+		let redir = self.get_redirect();
+
 		if !headers_written {
 			HttpServer::write_headers(
 				&self.wh,
@@ -301,7 +326,7 @@ impl RustletResponse {
 				self.additional_headers.clone(),
 				redir,
 			)?;
-			self.headers_written = true;
+			self.set_headers_written(true);
 		}
 
 		if self.keep_alive {
@@ -347,6 +372,11 @@ impl Default for RustletConfig {
 	}
 }
 
+fn on_panic() -> Result<(), Error> {
+	info!("11111on panic!");
+	Ok(())
+}
+
 fn api_callback(
 	content: &[u8],                   // content of the request. len == 0 if none.
 	method: HttpMethod,               // GET or POST
@@ -376,13 +406,51 @@ fn api_callback(
 			log_multi!(
 				ERROR,
 				MAIN_LOG,
-				"error calling rustlet/rsp: '{}'",
+				"error calling [{}?{}]: '{}'",
+				uri,
+				query,
 				e.to_string()
 			);
 
-			let mut response = RustletResponse::new(wh.clone(), config, false, false);
-			response.write("Internal Server error. See logs for details.".as_bytes())?;
-			wh.close()?;
+			let (headers_written, _redir) =
+				crate::macros::LOCALRUSTLET.with(|f| match &(*f.borrow()) {
+					Some((_request, response)) => {
+						(response.get_headers_written(), response.get_redirect())
+					}
+					None => (false, None),
+				});
+
+			if headers_written {
+				if !keep_alive {
+					let mut response = RustletResponse::new(wh.clone(), config, false, true);
+					response.write(
+						format!(
+							"{}{}{}",
+							"\n</br>",
+							SEPARATOR_LINE,
+							"\n</br>Internal Server error. See logs for details.</body></html>"
+						)
+						.as_bytes(),
+					)?;
+					wh.close()?;
+				} else {
+					let msg_str = format!(
+						"{}{}{}",
+						"\n</br>",
+						SEPARATOR_LINE,
+						"\n</br>Internal Server error. See logs for details.</body></html>"
+					);
+					let msg = msg_str.as_bytes();
+					let msg_len_bytes = format!("{:X}\r\n", msg.len());
+					wh.write(msg_len_bytes.as_bytes(), 0, msg_len_bytes.len(), false)?;
+					wh.write(msg, 0, msg.len(), false)?;
+					wh.write("\r\n0\r\n\r\n".as_bytes(), 0, 7, true)?;
+				}
+			} else {
+				let mut response = RustletResponse::new(wh.clone(), config, false, false);
+				response.write("Internal Server error. See logs for details.".as_bytes())?;
+				wh.close()?;
+			}
 		}
 	}
 
@@ -512,7 +580,11 @@ fn process_rsp(
 	let mut file = File::open(rsp_path.clone())?;
 
 	let buflen: usize = if flen.try_into().unwrap_or(MAX_CHUNK_SIZE) > MAX_CHUNK_SIZE {
-		MAX_CHUNK_SIZE
+		return Err(ErrorKind::InvalidRSPError(format!(
+			"RSPs are limited to {} bytes.",
+			MAX_CHUNK_SIZE
+		))
+		.into());
 	} else {
 		flen.try_into().unwrap_or(MAX_CHUNK_SIZE)
 	};
@@ -627,6 +699,7 @@ impl RustletContainer {
 		match http {
 			Some(mut http) => {
 				http.config.callback = api_callback;
+				http.config.on_panic = on_panic;
 				http.start()?;
 				http.add_api_extension("rsp".to_string())?;
 			}

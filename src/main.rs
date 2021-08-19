@@ -21,7 +21,7 @@ log::debug!();
 #[allow(unreachable_code)]
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
-		response!("hi");
+		response!("<html><body>hi");
 		return Err(ErrorKind::InternalError("test error".to_string()).into());
 	});
 	Ok(())
