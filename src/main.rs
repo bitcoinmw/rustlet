@@ -21,7 +21,7 @@ log::debug!();
 #[allow(unreachable_code)]
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
-		response!("<html><body>hi");
+		response!("<html><body>test of error");
 		return Err(ErrorKind::InternalError("test error".to_string()).into());
 	});
 	Ok(())
@@ -29,7 +29,7 @@ fn fun() -> Result<(), Error> {
 
 fn fun2() -> Result<(), Error> {
 	rustlet!("panic", {
-		response!("hi");
+		response!("<html><body>test of panic");
 		let x: Option<bool> = None;
 		x.unwrap();
 	});

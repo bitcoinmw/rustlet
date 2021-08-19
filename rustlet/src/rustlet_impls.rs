@@ -14,7 +14,7 @@
 
 use lazy_static::lazy_static;
 use log::*;
-pub use nioruntime_http::{HttpConfig, HttpServer};
+pub use nioruntime_http::{ConnData, HttpConfig, HttpServer};
 use nioruntime_http::{HttpMethod, HttpVersion, WriteHandle};
 pub use nioruntime_util::{Error, ErrorKind};
 use std::collections::HashMap;
@@ -358,6 +358,8 @@ impl RustletContainerHolder {
 lazy_static! {
 	pub(crate) static ref RUSTLETS: Arc<RwLock<RustletContainerHolder>> =
 		Arc::new(RwLock::new(RustletContainerHolder::new()));
+	pub(crate) static ref IN_PROGRESS: Arc<RwLock<HashMap<u128, (RustletRequest, RustletResponse, Arc<RwLock<ConnData>>)>>> =
+		Arc::new(RwLock::new(HashMap::new()));
 }
 
 pub struct RustletConfig {
@@ -373,11 +375,101 @@ impl Default for RustletConfig {
 }
 
 fn on_panic() -> Result<(), Error> {
-	info!("11111on panic!");
+	let mut del_list = vec![];
+	let mut con_ids = vec![];
+
+	{
+		let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
+		log_multi!(
+			ERROR,
+			MAIN_LOG,
+			"panic occurred. on_panic checking {} connection(s)",
+			inprog.len(),
+		);
+		for (k, v) in &mut *inprog {
+			let res = v.2.write();
+			match res {
+				Ok(_) => {}
+				Err(_e) => {
+					log_multi!(
+						ERROR,
+						MAIN_LOG,
+						"Request [{}?{}] panicked. Disconnecting connection.",
+						v.0.uri,
+						v.0.query,
+					);
+					del_list.push(k.clone());
+					let response = &mut v.1;
+					con_ids.push(response.wh.get_connection_id());
+					let keep_alive = response.keep_alive;
+					let headers_written = response.get_headers_written();
+					if !response.get_headers_written() {
+						HttpServer::write_headers(
+							&response.wh,
+							&response.config,
+							true,
+							response.keep_alive,
+							response.additional_headers.clone(),
+							response.get_redirect(),
+						)?;
+					}
+					if !keep_alive {
+						let wh = &mut response.wh;
+						let msg = if headers_written {
+							format!(
+								"{}{}{}",
+								"\n</br>",
+								SEPARATOR_LINE,
+								"\n</br>Internal Server error. See logs for details.</body></html>"
+							)
+						} else {
+							format!("Internal Server error. See logs for details.")
+						};
+						let bytes_to_write = msg.as_bytes();
+						wh.write(bytes_to_write, 0, bytes_to_write.len(), true)?;
+					} else {
+						let wh = &response.wh;
+						let msg_str = if headers_written {
+							format!(
+								"{}{}{}",
+								"\n</br>",
+								SEPARATOR_LINE,
+								"\n</br>Internal Server error. See logs for details.</body></html>"
+							)
+						} else {
+							format!("Internal Server error. See logs for details.")
+						};
+						let msg = msg_str.as_bytes();
+						let msg_len_bytes = format!("{:X}\r\n", msg.len());
+						wh.write(msg_len_bytes.as_bytes(), 0, msg_len_bytes.len(), false)?;
+						wh.write(msg, 0, msg.len(), false)?;
+						wh.write("\r\n0\r\n\r\n".as_bytes(), 0, 7, true)?;
+					}
+				}
+			}
+		}
+	}
+
+	{
+		let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
+		let mut i = 0;
+		for id in del_list {
+			log_multi!(
+				ERROR,
+				MAIN_LOG,
+				"on panic handler removed connection id = {}",
+				con_ids[i],
+			);
+			inprog.remove(&id);
+			i += 1;
+		}
+	}
+
 	Ok(())
 }
 
 fn api_callback(
+	conn_data: Arc<RwLock<ConnData>>, // connection_data
 	content: &[u8],                   // content of the request. len == 0 if none.
 	method: HttpMethod,               // GET or POST
 	config: HttpConfig,               // HttpServer's configuration
@@ -389,6 +481,7 @@ fn api_callback(
 	keep_alive: bool,                 // keep-alive
 ) -> Result<(), Error> {
 	let res = do_api_callback(
+		conn_data,
 		content,
 		method,
 		config.clone(),
@@ -459,6 +552,7 @@ fn api_callback(
 
 fn execute_rustlet(
 	rustlet_name: &str,
+	conn_data: Arc<RwLock<ConnData>>, // connection_data
 	content: &[u8],                   // content of the request. len == 0 if none.
 	method: HttpMethod,               // GET or POST
 	config: HttpConfig,               // HttpServer's configuration
@@ -493,7 +587,34 @@ fn execute_rustlet(
 				keep_alive,
 			);
 			let mut response = RustletResponse::new(wh, config, keep_alive, chained);
-			(rustlet)(&mut request, &mut response)?;
+			let id: u128 = rand::random();
+			{
+				let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
+				inprog.insert(id, (request.clone(), response.clone(), conn_data));
+			}
+			(rustlet)(&mut request, &mut response).map_err(|e| {
+				{
+					let inprog = IN_PROGRESS.write();
+					match inprog {
+						Ok(mut inprog) => {
+							inprog.remove(&id);
+						}
+						Err(e) => {
+							log_multi!(
+								ERROR,
+								MAIN_LOG,
+								"error getting IN_PROG lock: {}",
+								e.to_string()
+							);
+						}
+					}
+				}
+				return e;
+			})?;
+			{
+				let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
+				inprog.remove(&id);
+			}
 			response.complete()?;
 		}
 		None => {
@@ -510,6 +631,7 @@ fn execute_rustlet(
 }
 
 fn do_api_callback(
+	conn_data: Arc<RwLock<ConnData>>, // connection_data
 	content: &[u8],                   // content of the request. len == 0 if none.
 	method: HttpMethod,               // GET or POST
 	config: HttpConfig,               // HttpServer's configuration
@@ -534,6 +656,7 @@ fn do_api_callback(
 		Some(rustlet_name) => {
 			execute_rustlet(
 				rustlet_name,
+				conn_data,
 				content,
 				method,
 				config,
@@ -550,7 +673,8 @@ fn do_api_callback(
 			// see if it's an RSP.
 			if uri.to_lowercase().ends_with(".rsp") {
 				process_rsp(
-					content, method, config, wh, version, uri, query, headers, keep_alive,
+					conn_data, content, method, config, wh, version, uri, query, headers,
+					keep_alive,
 				)?;
 			} else {
 				log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
@@ -565,6 +689,7 @@ fn do_api_callback(
 }
 
 fn process_rsp(
+	conn_data: Arc<RwLock<ConnData>>, // connection_data
 	content: &[u8],                   // content of the request. len == 0 if none.
 	method: HttpMethod,               // GET or POST
 	config: HttpConfig,               // HttpServer's configuration
@@ -637,6 +762,7 @@ fn process_rsp(
 						let rustlet_name = std::str::from_utf8(&buf[(end + 3)..i])?;
 						execute_rustlet(
 							rustlet_name,
+							conn_data.clone(),
 							content,
 							method.clone(),
 							config.clone(),
