@@ -1,0 +1,27 @@
+name: rustlet
+author: The BMW Developers
+
+args:
+    - client:
+        help: Run the test client
+        short: c
+        long: client
+        takes_value: false
+    - count:
+        help: Number of iterations to run per thread
+        short: x
+        long: count
+        value_name: count
+        takes_value: true
+    - threads:
+        help: Number of client threads to run
+        short: t
+        long: threads
+        value_name: threads
+        takes_value: true
+    - itt:
+        help: Number of times to repeat the test
+        short: i
+        long: itt
+        value_name: itt
+        takes_value: true
