@@ -16,6 +16,8 @@ members = ["rustlet"]
 
 [dependencies]
 
+rand = "0.8.4"
+
 librustlet = { path = "./rustlet" }
 
 # master

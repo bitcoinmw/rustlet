@@ -359,6 +359,42 @@ macro_rules! request_content {
 }
 
 #[macro_export]
+macro_rules! cookie {
+	($a:expr) => {{
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {
+			Some((request, response)) => match request.get_cookie($a) {
+				Ok(cookie) => cookie,
+				Err(e) => {
+					mainlogerror!("unexpected error getting cookie: {}", e.to_string());
+					None
+				}
+			},
+			None => {
+				mainlogerror!("unexpected error no request/response found");
+				None
+			}
+		})
+	}};
+}
+
+#[macro_export]
+macro_rules! set_cookie {
+	($a:expr,$b:expr) => {{
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {
+			Some((request, response)) => match response.set_cookie($a, $b, "") {
+				Ok(_) => {}
+				Err(e) => {
+					mainlogerror!("error setting cookie: {}", e.to_string());
+				}
+			},
+			None => {
+				mainlogerror!("unexpected error no request/response found");
+			}
+		})
+	}};
+}
+
+#[macro_export]
 macro_rules! request {
 	($a:expr) => {{
 		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {

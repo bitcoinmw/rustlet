@@ -18,11 +18,12 @@ use std::sync::{Arc, Mutex};
 
 log::debug!();
 
-#[allow(unreachable_code)]
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
 		response!("<html><body>test of error");
-		return Err(ErrorKind::InternalError("test error".to_string()).into());
+		if true {
+			return Err(ErrorKind::InternalError("test error".to_string()).into());
+		}
 	});
 	Ok(())
 }
@@ -46,6 +47,19 @@ fn main() {
 
 	let x = Arc::new(Mutex::new(0));
 	let x_clone = x.clone();
+
+	rustlet!("cookies", {
+		let header_count: usize = request!("header_len").parse().unwrap_or(0);
+		let cookie = cookie!("abc");
+		set_cookie!("abc", "def");
+		response!("cookie={:?}\n", cookie);
+
+		for i in 0..header_count {
+			let header_name = request!("header_i_name", &format!("{}", i));
+			let header_value = request!("header_i_value", &format!("{}", i));
+			response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
+		}
+	});
 
 	rustlet!("async", {
 		let ac = async_context!();
@@ -113,6 +127,7 @@ fn main() {
 	rustlet_mapping!("/error", "error");
 	rustlet_mapping!("/panic", "panic");
 	rustlet_mapping!("/async", "async");
+	rustlet_mapping!("/cookies", "cookies");
 
 	std::thread::park();
 }

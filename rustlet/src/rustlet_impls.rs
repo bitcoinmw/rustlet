@@ -32,6 +32,9 @@ const MAX_ESCAPE_SEQUENCE: usize = 100;
 const SEPARATOR_LINE: &str =
 	"------------------------------------------------------------------------------------------------------------------------------------";
 
+// note: AsyncContext currently does not support HTTP pipelining. No major browsers appear to support HTTP pipelining.
+// but this should technically be supported as part of the HTTP standard.
+
 #[derive(Clone)]
 pub struct RustletAsyncContext {
 	pub request: Option<RustletRequest>,
@@ -89,6 +92,29 @@ impl RustletRequest {
 			query_map: None,
 			header_map: None,
 		}
+	}
+
+	pub fn get_cookie(&mut self, name: &str) -> Result<Option<String>, Error> {
+		if self.header_map.is_none() {
+			self.build_header_map()?;
+		}
+
+		let cookie_str = self.header_map.as_ref().unwrap().get("Cookie");
+		match cookie_str {
+			Some(cookie_str) => {
+				let cookie_spl = cookie_str.split(";");
+				for cookie in cookie_spl {
+					let cookie = cookie.trim();
+					let cookie_spl: Vec<&str> = cookie.split("=").collect();
+					if cookie_spl.len() >= 2 && cookie_spl[0] == name {
+						return Ok(Some(cookie_spl[1].to_string()));
+					}
+				}
+			}
+			None => {}
+		}
+
+		Ok(None)
 	}
 
 	pub fn get_header_len(&mut self) -> Result<usize, Error> {
@@ -237,6 +263,22 @@ impl RustletResponse {
 			redirect: Arc::new(Mutex::new(None)),
 			chained,
 			is_async: Arc::new(RwLock::new(false)),
+		}
+	}
+
+	pub fn set_cookie(&mut self, name: &str, value: &str, other: &str) -> Result<(), Error> {
+		match self.get_headers_written() {
+			true => Err(ErrorKind::OrderingError(
+				"Headers already written. Cannot set a cookie".to_string(),
+			)
+			.into()),
+			false => {
+				self.additional_headers.push((
+					"Set-Cookie".to_string(),
+					format!("{}={}; {}", name, value, other),
+				));
+				Ok(())
+			}
 		}
 	}
 
