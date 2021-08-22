@@ -12,10 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(target_os = "windows")]
+use std::os::windows::io::AsRawSocket;
+
+#[cfg(unix)]
+use std::os::unix::io::AsRawFd;
+
+#[cfg(unix)]
+use libc::close;
+
 use clap::load_yaml;
 use clap::App;
 use errno::errno;
-use libc::close;
 use librustlet::*;
 use log::*;
 use nioruntime_util::{Error, ErrorKind};
@@ -23,7 +31,6 @@ use std::convert::TryInto;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
-use std::os::unix::io::AsRawFd;
 use std::sync::{Arc, Mutex};
 
 const MAX_BUF: usize = 100_000;
