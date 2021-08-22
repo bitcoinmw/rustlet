@@ -237,7 +237,7 @@ fn main() {
 	} else {
 		rustlet_init!(RustletConfig {
 			http_config: HttpConfig {
-				debug: false,
+				debug: true,
 				..Default::default()
 			},
 		});

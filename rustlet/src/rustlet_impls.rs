@@ -697,6 +697,13 @@ fn execute_rustlet(
 				inprog.insert(id, (request.clone(), response.clone(), conn_data));
 			}
 			(rustlet)(&mut request, &mut response).map_err(|e| {
+				match response.flush() {
+					Ok(_) => {}
+					Err(e) => {
+						log_multi!(ERROR, MAIN_LOG, "error flushing: {}", e.to_string());
+					}
+				}
+
 				{
 					let inprog = IN_PROGRESS.write();
 					match inprog {
