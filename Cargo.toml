@@ -27,9 +27,12 @@ librustlet = { path = "./rustlet" }
 
 # master
 nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+nioruntime_evh = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 
 # local testing
 #nioruntime_util = { path = "../nioruntime/util" }
+#nioruntime_evh = { path = "../nioruntime/eventhandler" }
+
 
 [build-dependencies]
 built = { version = "0.4", features = ["git2"]}

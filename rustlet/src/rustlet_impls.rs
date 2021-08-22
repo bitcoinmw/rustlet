@@ -250,6 +250,8 @@ pub struct RustletResponse {
 	keep_alive: bool,
 	chained: bool,
 	is_async: Arc<RwLock<bool>>,
+	buffer: Arc<RwLock<Vec<u8>>>,
+	is_complete: bool,
 }
 
 impl RustletResponse {
@@ -263,6 +265,8 @@ impl RustletResponse {
 			redirect: Arc::new(Mutex::new(None)),
 			chained,
 			is_async: Arc::new(RwLock::new(false)),
+			buffer: Arc::new(RwLock::new(vec![])),
+			is_complete: false,
 		}
 	}
 
@@ -344,31 +348,67 @@ impl RustletResponse {
 		}
 	}
 
-	pub fn write(&mut self, data: &[u8]) -> Result<(), Error> {
-		if !self.get_headers_written() && !self.chained {
-			HttpServer::write_headers(
-				&self.wh,
+	pub fn flush(&mut self) -> Result<(), Error> {
+		let mut buffer = self.buffer.write().map_err(|_e| {
+			let error: Error =
+				ErrorKind::PoisonError("flush buffer poison lock error".to_string()).into();
+			error
+		})?;
+		let headers = if !self.get_headers_written() && !self.chained {
+			self.set_headers_written(true);
+			HttpServer::build_headers(
 				&self.config,
 				true,
 				self.keep_alive,
 				self.additional_headers.clone(),
 				self.get_redirect(),
-			)?;
-			self.set_headers_written(true);
-		}
-
-		let amt = data.len();
-		if self.keep_alive {
-			let msg_len_bytes = format!("{:X}\r\n", amt);
-			let msg_len_bytes = msg_len_bytes.as_bytes();
-			self.wh
-				.write(msg_len_bytes, 0, msg_len_bytes.len(), false)?;
-			self.wh.write(&data, 0, amt, false)?;
-			self.wh.write("\r\n".as_bytes(), 0, 2, false)?;
+			)?
 		} else {
-			self.wh.write(&data, 0, amt, false)?;
+			"".to_string()
+		};
+
+		if self.keep_alive {
+			let buffer_len = buffer.len();
+			if buffer_len > 0 {
+				let msg_len_bytes = format!("{:X}\r\n", buffer_len);
+				let msg_len_bytes = msg_len_bytes.as_bytes();
+				let len = msg_len_bytes.len();
+				for i in 0..len {
+					buffer.insert(i, msg_len_bytes[i]);
+				}
+				buffer.push('\r' as u8);
+				buffer.push('\n' as u8);
+			}
+			if self.is_complete {
+				buffer.push('0' as u8);
+				buffer.push('\r' as u8);
+				buffer.push('\n' as u8);
+				buffer.push('\r' as u8);
+				buffer.push('\n' as u8);
+			}
 		}
 
+		let headers = headers.as_bytes();
+		// TODO: optimize this?
+		for i in 0..headers.len() {
+			buffer.insert(i, headers[i]);
+		}
+
+		let data = &buffer[..];
+		self.wh.write(&data, 0, data.len(), false)?;
+		self.set_headers_written(true);
+		buffer.clear();
+
+		Ok(())
+	}
+
+	pub fn write(&mut self, data: &[u8]) -> Result<(), Error> {
+		let mut buffer = self.buffer.write().map_err(|_e| {
+			let error: Error =
+				ErrorKind::PoisonError("flush buffer poison lock error".to_string()).into();
+			error
+		})?;
+		buffer.append(&mut data.to_vec());
 		Ok(())
 	}
 
@@ -385,30 +425,19 @@ impl RustletResponse {
 
 	pub fn complete(&mut self) -> Result<(), Error> {
 		if self.chained || (*nioruntime_util::lockr!(self.is_async)) {
+			if self.chained {
+				self.flush()?;
+			}
 			// don't close the connection or send 0 len if we're in a chained request
 			return Ok(());
 		}
 
-		let headers_written = self.get_headers_written();
-		let redir = self.get_redirect();
-
-		if !headers_written {
-			HttpServer::write_headers(
-				&self.wh,
-				&self.config,
-				true,
-				self.keep_alive,
-				self.additional_headers.clone(),
-				redir,
-			)?;
-			self.set_headers_written(true);
-		}
-
-		if self.keep_alive {
-			self.wh.write("0\r\n\r\n".as_bytes(), 0, 5, false)?;
-		} else {
+		self.is_complete = true;
+		self.flush()?;
+		if !self.keep_alive {
 			self.wh.close()?;
 		}
+
 		Ok(())
 	}
 }
@@ -778,7 +807,6 @@ fn process_rsp(
 	let rsp_path = HttpServer::get_path(&config, uri)?;
 	let mut flen = metadata(rsp_path.clone())?.len();
 	let mut file = File::open(rsp_path.clone())?;
-
 	let buflen: usize = if flen.try_into().unwrap_or(MAX_CHUNK_SIZE) > MAX_CHUNK_SIZE {
 		return Err(ErrorKind::InvalidRSPError(format!(
 			"RSPs are limited to {} bytes.",
