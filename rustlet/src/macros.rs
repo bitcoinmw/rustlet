@@ -33,6 +33,23 @@ lazy_static! {
 }
 
 #[macro_export]
+macro_rules! flush {
+	() => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((_request, response)) => match response.flush() {
+				Ok(_) => {}
+				Err(e) => {
+					mainlogerror!("async_complete generated error: {}", e.to_string());
+				}
+			},
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+			}
+		});
+	};
+}
+
+#[macro_export]
 macro_rules! async_complete {
 	() => {
 		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {

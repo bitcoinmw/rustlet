@@ -294,6 +294,7 @@ fn main() {
 				let header_name = request!("header_i_name", &format!("{}", i));
 				let header_value = request!("header_i_value", &format!("{}", i));
 				response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
+				flush!();
 			}
 			let method = request!("method");
 			response!("method='{}'\n", method);
