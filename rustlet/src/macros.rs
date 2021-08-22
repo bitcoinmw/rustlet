@@ -425,6 +425,35 @@ macro_rules! set_cookie {
 }
 
 #[macro_export]
+macro_rules! header_len {
+	() => {{
+		let res: usize = request!("header_len").parse().unwrap_or(0);
+		res
+	}};
+}
+
+#[macro_export]
+macro_rules! header_name {
+	($a:expr) => {{
+		request!("header_i_name", &format!("{}", $a))
+	}};
+}
+
+#[macro_export]
+macro_rules! header_value {
+	($a:expr) => {{
+		request!("header_i_value", &format!("{}", $a))
+	}};
+}
+
+#[macro_export]
+macro_rules! query {
+	($a:expr) => {{
+		request!("query", $a)
+	}};
+}
+
+#[macro_export]
 macro_rules! request {
 	($a:expr) => {{
 		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {

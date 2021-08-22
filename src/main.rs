@@ -43,6 +43,7 @@ fn fun() -> Result<(), Error> {
 fn fun2() -> Result<(), Error> {
 	rustlet!("panic", {
 		response!("<html><body>test of panic");
+		flush!();
 		let x: Option<bool> = None;
 		x.unwrap();
 	});
@@ -271,7 +272,7 @@ fn main() {
 		});
 
 		rustlet!("myrustlet", {
-			let name = request!("query", "name");
+			let name = query!("name");
 			let mut x = x.lock().unwrap();
 			*x += 1;
 			add_header!("my_header", "ok");
@@ -289,10 +290,9 @@ fn main() {
 		});
 
 		rustlet!("printheaders", {
-			let header_count: usize = request!("header_len").parse().unwrap_or(0);
-			for i in 0..header_count {
-				let header_name = request!("header_i_name", &format!("{}", i));
-				let header_value = request!("header_i_value", &format!("{}", i));
+			for i in 0..header_len!() {
+				let header_name = header_name!(i);
+				let header_value = header_value!(i);
 				response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
 				flush!();
 			}
