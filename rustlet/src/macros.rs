@@ -410,7 +410,8 @@ macro_rules! async_context {
 /// so variables can be moved into them and shared among other rustlets or any other closure.
 /// Rustlets are processed in the [nioruntime](https://github.com/bitcoinmw/nioruntime). So, the
 /// exectuion is performant. See the other macros for detailed examples on how to use all of the
-/// functionality of rustlets.
+/// functionality of rustlets. To try out a minimally simple rustlet as a project, see
+/// [rustlet-simple](https://github.com/bitcoinmw/rustlet-simple/).
 /// # Also see
 ///
 /// * [`add_header`]
