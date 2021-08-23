@@ -33,6 +33,68 @@ lazy_static! {
 }
 
 #[macro_export]
+macro_rules! session_delete {
+	($a:expr) => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((request, _response)) => match request.remove_session_entry($a) {
+				Ok(_) => {}
+				Err(e) => {
+					mainlogerror!("session_delete generated error: {}", e.to_string());
+				}
+			},
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+			}
+		});
+	};
+	() => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((request, _response)) => match request.invalidate_session() {
+				Ok(_) => {}
+				Err(e) => {
+					mainlogerror!("invalide_session generated error: {}", e.to_string());
+				}
+			},
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+			}
+		});
+	};
+}
+
+#[macro_export]
+macro_rules! session {
+	($a:expr) => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((request, _response)) => match request.get_session($a) {
+				Ok(value) => value,
+				Err(e) => {
+					mainlogerror!("get_session generated error: {}", e.to_string());
+					None
+				}
+			},
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+				None
+			}
+		})
+	};
+	($a:expr,$b:expr) => {
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {
+			Some((request, _response)) => match request.set_session($a, $b) {
+				Ok(_) => {}
+				Err(e) => {
+					mainlogerror!("get_session generated error: {}", e.to_string());
+				}
+			},
+			None => {
+				mainlogerror!("Error: not in a rustlet context");
+			}
+		})
+	};
+}
+
+#[macro_export]
 macro_rules! flush {
 	() => {
 		librustlet::macros::LOCALRUSTLET.with(|f| match &mut *(f.borrow_mut()) {

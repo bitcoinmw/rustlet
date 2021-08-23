@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{Readable, Writeable};
 use lazy_static::lazy_static;
 use log::*;
 pub use nioruntime_http::{ConnData, HttpConfig, HttpServer};
 use nioruntime_http::{HttpMethod, HttpVersion, WriteHandle};
-pub use nioruntime_util::{Error, ErrorKind};
+use nioruntime_util::ser::BinReader;
+use nioruntime_util::ser::BinWriter;
+use nioruntime_util::{Error, ErrorKind};
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::fs::metadata;
@@ -24,6 +27,7 @@ use std::fs::File;
 use std::io::Read;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex, RwLock};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 info!();
 const MAIN_LOG: &str = "mainlog";
@@ -55,6 +59,25 @@ impl RustletAsyncContext {
 	}
 }
 
+pub struct SessionData {
+	mod_time: u128,
+	data: HashMap<String, Vec<u8>>,
+}
+
+impl SessionData {
+	fn new() -> Self {
+		let now = SystemTime::now().duration_since(UNIX_EPOCH);
+		let now = now
+			.unwrap_or(std::time::Duration::from_millis(0))
+			.as_millis();
+
+		SessionData {
+			mod_time: now,
+			data: HashMap::new(),
+		}
+	}
+}
+
 #[derive(Clone)]
 pub struct RustletRequest {
 	content: Vec<u8>,
@@ -67,6 +90,8 @@ pub struct RustletRequest {
 	keep_alive: bool,
 	query_map: Option<HashMap<String, String>>,
 	header_map: Option<HashMap<String, String>>,
+	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
+	session_id: u128,
 }
 
 impl RustletRequest {
@@ -79,6 +104,7 @@ impl RustletRequest {
 		http_config: HttpConfig,
 		headers: Vec<(Vec<u8>, Vec<u8>)>,
 		keep_alive: bool,
+		session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 	) -> Self {
 		RustletRequest {
 			uri,
@@ -91,7 +117,122 @@ impl RustletRequest {
 			keep_alive,
 			query_map: None,
 			header_map: None,
+			session_map,
+			session_id: 0,
 		}
+	}
+
+	pub fn set_session_id(&mut self, session_id: u128) -> Result<(), Error> {
+		self.session_id = session_id;
+
+		Ok(())
+	}
+
+	pub fn get_session<T: Readable>(&mut self, name: &str) -> Result<Option<T>, Error> {
+		let mut create_session = false;
+		{
+			let mut session_map = nioruntime_util::lockw!(self.session_map);
+			match session_map.get_mut(&self.session_id) {
+				Some(mut data) => {
+					let value = data.data.get(&name.to_string());
+					let now = SystemTime::now()
+						.duration_since(UNIX_EPOCH)
+						.map_err(|e| {
+							let error: Error =
+								ErrorKind::InternalError(format!("time went backwards, {}", e))
+									.into();
+							error
+						})?
+						.as_millis();
+					data.mod_time = now;
+					match value {
+						Some(value) => {
+							return Ok(Some(Readable::read(&mut BinReader::new(
+								&mut value.as_slice(),
+							))?))
+						}
+						None => {}
+					}
+				}
+				None => {
+					create_session = true;
+				}
+			}
+			if create_session {
+				session_map.insert(self.session_id, SessionData::new());
+			}
+		}
+
+		Ok(None)
+	}
+
+	pub fn set_session<T: Writeable>(&mut self, name: &str, value: T) -> Result<(), Error> {
+		let mut session_map = nioruntime_util::lockw!(self.session_map);
+		match session_map.get_mut(&self.session_id) {
+			Some(session_data) => {
+				let mut sink: Vec<u8> = vec![];
+				let mut writer = BinWriter::new(&mut sink);
+				value.write(&mut writer)?;
+				session_data.data.insert(name.to_string(), sink);
+				let now = SystemTime::now()
+					.duration_since(UNIX_EPOCH)
+					.map_err(|e| {
+						let error: Error =
+							ErrorKind::InternalError(format!("time went backwards, {}", e)).into();
+						error
+					})?
+					.as_millis();
+				session_data.mod_time = now;
+			}
+			None => {
+				let mut session_data = SessionData::new();
+				let mut sink: Vec<u8> = vec![];
+				let mut writer = BinWriter::new(&mut sink);
+				value.write(&mut writer)?;
+				session_data.data.insert(name.to_string(), sink);
+				let now = SystemTime::now()
+					.duration_since(UNIX_EPOCH)
+					.map_err(|e| {
+						let error: Error =
+							ErrorKind::InternalError(format!("time went backwards, {}", e)).into();
+						error
+					})?
+					.as_millis();
+				session_data.mod_time = now;
+				session_map.insert(self.session_id, session_data);
+			}
+		};
+
+		Ok(())
+	}
+
+	pub fn remove_session_entry(&mut self, name: &str) -> Result<(), Error> {
+		let mut session_map = nioruntime_util::lockw!(self.session_map);
+
+		match session_map.get_mut(&self.session_id) {
+			Some(session_data) => {
+				session_data.data.remove(&name.to_string());
+				let now = SystemTime::now()
+					.duration_since(UNIX_EPOCH)
+					.map_err(|e| {
+						let error: Error =
+							ErrorKind::InternalError(format!("time went backwards, {}", e)).into();
+						error
+					})?
+					.as_millis();
+				session_data.mod_time = now;
+			}
+			None => {}
+		}
+
+		Ok(())
+	}
+
+	pub fn invalidate_session(&mut self) -> Result<(), Error> {
+		let mut session_map = nioruntime_util::lockw!(self.session_map);
+		session_map.remove(&self.session_id);
+
+		Ok(())
 	}
 
 	pub fn get_cookie(&mut self, name: &str) -> Result<Option<String>, Error> {
@@ -464,18 +605,62 @@ lazy_static! {
 		Arc::new(RwLock::new(RustletContainerHolder::new()));
 	pub(crate) static ref IN_PROGRESS: Arc<RwLock<HashMap<u128, (RustletRequest, RustletResponse, Arc<RwLock<ConnData>>)>>> =
 		Arc::new(RwLock::new(HashMap::new()));
+	pub(crate) static ref SESSION_MAP: Arc<RwLock<HashMap<u128, SessionData>>> =
+		Arc::new(RwLock::new(HashMap::new()));
+	pub(crate) static ref RUSTLET_CONFIG: Arc<RwLock<Option<RustletConfig>>> =
+		Arc::new(RwLock::new(None));
 }
 
+#[derive(Clone)]
 pub struct RustletConfig {
+	pub session_timeout: u64,
 	pub http_config: HttpConfig,
 }
 
 impl Default for RustletConfig {
 	fn default() -> RustletConfig {
 		RustletConfig {
+			session_timeout: 60 * 30, // 30 mins
 			http_config: HttpConfig::default(),
 		}
 	}
+}
+
+fn housekeeper() -> Result<(), Error> {
+	let session_timeout = {
+		let config = nioruntime_util::lockr!(RUSTLET_CONFIG);
+		match &(*config) {
+			Some(config) => config.session_timeout,
+			None => 0,
+		}
+	};
+
+	if session_timeout > 0 {
+		let mut session_map = nioruntime_util::lockw!(SESSION_MAP);
+
+		let now = SystemTime::now()
+			.duration_since(UNIX_EPOCH)
+			.map_err(|e| {
+				let error: Error =
+					ErrorKind::InternalError(format!("time went backwards, {}", e)).into();
+				error
+			})?
+			.as_millis();
+
+		let mut rem_list = vec![];
+		for (k, v) in &*session_map {
+			let diff = (now - v.mod_time) / 1000;
+			if diff > session_timeout.into() {
+				rem_list.push(k.clone());
+			}
+		}
+
+		for id in rem_list {
+			session_map.remove(&id);
+		}
+	}
+
+	Ok(())
 }
 
 fn on_panic() -> Result<(), Error> {
@@ -595,6 +780,7 @@ fn api_callback(
 		query,
 		headers,
 		keep_alive,
+		SESSION_MAP.clone(),
 	);
 
 	match res {
@@ -667,6 +853,7 @@ fn execute_rustlet(
 	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
 	keep_alive: bool,                 // keep-alive
 	chained: bool,                    // is this a chained rustlet call?
+	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
 	let rustlets = RUSTLETS.read().map_err(|e| {
 		let error: Error = ErrorKind::InternalError(format!(
@@ -680,18 +867,47 @@ fn execute_rustlet(
 	let rustlet = rustlets.rustlets.get(rustlet_name);
 	match rustlet {
 		Some(rustlet) => {
+			let mut response = RustletResponse::new(wh, config.clone(), keep_alive, chained);
 			let mut request = RustletRequest::new(
 				uri.to_string(),
 				query.to_string(),
 				content.to_vec(),
 				method,
 				version,
-				config.clone(),
+				config,
 				headers,
 				keep_alive,
+				session_map,
 			);
-			let mut response = RustletResponse::new(wh, config, keep_alive, chained);
 			let id: u128 = rand::random();
+			let rsessionid = request.get_cookie("rustletsessionid");
+
+			let rsessionid = match rsessionid {
+				Ok(rsessionid) => match rsessionid {
+					Some(rsessionid) => match rsessionid.parse() {
+						Ok(rsessionid) => rsessionid,
+						Err(_) => id,
+					},
+					None => id,
+				},
+				Err(e) => {
+					log_multi!(
+						ERROR,
+						MAIN_LOG,
+						"error getting rsessionid: {}",
+						e.to_string()
+					);
+					id
+				}
+			};
+
+			if rsessionid == id {
+				// we have to set this as it's a new id
+				response.set_cookie("rustletsessionid", &format!("{}", id), "path=/")?;
+			}
+
+			request.set_session_id(rsessionid)?;
+
 			{
 				let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
 				inprog.insert(id, (request.clone(), response.clone(), conn_data));
@@ -752,6 +968,7 @@ fn do_api_callback(
 	query: &str,                      // query
 	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
 	keep_alive: bool,                 // keep-alive
+	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
 	let rustlets = RUSTLETS.read().map_err(|e| {
 		let error: Error = ErrorKind::InternalError(format!(
@@ -778,14 +995,24 @@ fn do_api_callback(
 				headers,
 				keep_alive,
 				false,
+				session_map,
 			)?;
 		}
 		None => {
 			// see if it's an RSP.
 			if uri.to_lowercase().ends_with(".rsp") {
 				process_rsp(
-					conn_data, content, method, config, wh, version, uri, query, headers,
+					conn_data,
+					content,
+					method,
+					config,
+					wh,
+					version,
+					uri,
+					query,
+					headers,
 					keep_alive,
+					session_map,
 				)?;
 			} else {
 				log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
@@ -810,6 +1037,7 @@ fn process_rsp(
 	query: &str,                      // query
 	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
 	keep_alive: bool,                 // keep-alive
+	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
 	let rsp_path = HttpServer::get_path(&config, uri)?;
 	let mut flen = metadata(rsp_path.clone())?.len();
@@ -883,6 +1111,7 @@ fn process_rsp(
 							headers.clone(),
 							keep_alive,
 							true,
+							session_map.clone(),
 						)?;
 						start = i + 1;
 						break;
@@ -925,8 +1154,12 @@ impl RustletContainer {
 
 	pub fn set_config(&mut self, config: RustletConfig) -> Result<(), Error> {
 		let http = HttpServer::new(config.http_config.clone());
-		self.config = Some(config);
+		self.config = Some(config.clone());
 		self.http = Some(http);
+		let mut static_config = nioruntime_util::lockw!(RUSTLET_CONFIG);
+
+		*static_config = Some(config);
+
 		Ok(())
 	}
 
@@ -936,6 +1169,7 @@ impl RustletContainer {
 			Some(mut http) => {
 				http.config.callback = api_callback;
 				http.config.on_panic = on_panic;
+				http.config.on_housekeeper = housekeeper;
 				http.start()?;
 				http.add_api_extension("rsp".to_string())?;
 			}

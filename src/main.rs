@@ -165,6 +165,58 @@ fn client_thread(
 	Ok(())
 }
 
+#[derive(Debug)]
+struct Example {
+	num: u32,
+}
+
+impl Example {
+	pub fn new(num: u32) -> Self {
+		Example { num }
+	}
+}
+
+impl Writeable for Example {
+	fn write<W: Writer>(&self, writer: &mut W) -> Result<(), Error> {
+		writer.write_u32(self.num)?;
+
+		Ok(())
+	}
+}
+
+impl Readable for Example {
+	fn read<R: Reader>(reader: &mut R) -> Result<Self, Error> {
+		let num = reader.read_u32()?;
+		Ok(Example { num })
+	}
+}
+
+#[derive(Debug)]
+struct Example2 {
+	num: u64,
+}
+
+impl Example2 {
+	pub fn _new(num: u64) -> Self {
+		Example2 { num }
+	}
+}
+
+impl Writeable for Example2 {
+	fn write<W: Writer>(&self, writer: &mut W) -> Result<(), Error> {
+		writer.write_u64(self.num)?;
+
+		Ok(())
+	}
+}
+
+impl Readable for Example2 {
+	fn read<R: Reader>(reader: &mut R) -> Result<Self, Error> {
+		let num = reader.read_u64()?;
+		Ok(Example2 { num })
+	}
+}
+
 fn main() {
 	let yml = load_yaml!("rustlet.yml");
 	let args = App::from_yaml(yml)
@@ -244,16 +296,39 @@ fn main() {
 		info!("Max latency={}ms", (*lat_max) as f64 / (1_000_000 as f64));
 	} else {
 		rustlet_init!(RustletConfig {
+			session_timeout: 60,
 			http_config: HttpConfig {
 				debug: true,
 				..Default::default()
 			},
 		});
 
-		let x = Arc::new(Mutex::new(0));
-		let x_clone = x.clone();
-
 		rustlet!("empty", {});
+
+		rustlet!("get_session", {
+			let value: Option<Example> = session!("abc");
+			match value {
+				Some(value) => {
+					response!("abc={:?}", value);
+				}
+				None => {
+					response!("none");
+				}
+			}
+		});
+
+		rustlet!("set_session", {
+			let val: u32 = query!("abc").parse()?;
+			session!("abc", Example::new(val));
+		});
+
+		rustlet!("delete_session", {
+			session_delete!();
+		});
+
+		rustlet!("delete_abc", {
+			session_delete!("abc");
+		});
 
 		rustlet!("cookies", {
 			let cookie = cookie!("abc");
@@ -277,6 +352,9 @@ fn main() {
 		rustlet!("redir", {
 			set_redirect!("http://www.disney.com");
 		});
+
+		let x = Arc::new(Mutex::new(0));
+		let x_clone = x.clone();
 
 		rustlet!("myrustlet", {
 			let name = query!("name");
@@ -329,6 +407,10 @@ fn main() {
 		rustlet_mapping!("/async", "async");
 		rustlet_mapping!("/cookies", "cookies");
 		rustlet_mapping!("/empty", "empty");
+		rustlet_mapping!("/set_session", "set_session");
+		rustlet_mapping!("/get_session", "get_session");
+		rustlet_mapping!("/delete_session", "delete_session");
+		rustlet_mapping!("/delete_abc", "delete_abc");
 
 		std::thread::park();
 	}

@@ -22,3 +22,5 @@ pub use rustlet_impls::{
 	HttpConfig, RustletAsyncContext, RustletConfig, RustletContainer, RustletRequest,
 	RustletResponse,
 };
+
+pub use nioruntime_util::ser::{Readable, Reader, Writeable, Writer};
