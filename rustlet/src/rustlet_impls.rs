@@ -611,9 +611,12 @@ lazy_static! {
 		Arc::new(RwLock::new(None));
 }
 
+/// The configuration of the rustlet container.
 #[derive(Clone)]
 pub struct RustletConfig {
+	/// The timeout (in seconds) for sessions in this container. The default value is 1,800 seconds (30 minutes).
 	pub session_timeout: u64,
+	/// The [`nioruntime_http::HttpConfig`] configuration for this container.
 	pub http_config: HttpConfig,
 }
 

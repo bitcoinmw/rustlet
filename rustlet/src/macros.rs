@@ -32,6 +32,80 @@ lazy_static! {
 		Arc::new(RwLock::new(RustletContainer::new()));
 }
 
+/// Delete the session. See [`session`] for more information on sessions. If a parameter is specified,
+/// only that parameter is deleted from the session. With no parameter specified, the entire session
+/// is invalidated.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// // implement a simple `Writeable` and `Readable` struct to demonstrate how the session works.
+/// #[derive(Debug)]
+/// struct Example {
+///    num: u32,
+/// }
+///
+/// impl Example {
+///     pub fn new(num: u32) -> Self {
+///         Example { num }
+///     }
+/// }
+///
+/// impl Writeable for Example {
+///     fn write<W: Writer>(&self, writer: &mut W) -> Result<(), Error> {
+///         writer.write_u32(self.num)?;
+///         Ok(())
+///     }
+/// }
+///
+/// impl Readable for Example {
+///     fn read<R: Reader>(reader: &mut R) -> Result<Self, Error> {
+///         let num = reader.read_u32()?;
+///         Ok(Example { num })
+///     }
+/// }
+///
+/// fn test() -> Result<(), Error> {
+///
+///     // this rustlet gets the value stored in session variable "abc". If it has not been set
+///     // (i.e. by the set_session rustlet, 'none' is displayed.
+///     rustlet!("get_session", {
+///         let value: Option<Example> = session!("abc"); // the type 'Example' is coerced here
+///         match value {
+///             Some(value) => {
+///                 response!("abc={:?}", value); // print out it's value
+///             }
+///             None => {
+///                 response!("none"); // print out none
+///             }
+///         }
+///     });
+///
+///     rustlet!("set_session", {
+///         // get the value of 'abc' in the query string and try to parse as u32
+///         let val: u32 = query!("abc").parse()?;
+///         // create an Example with this value and insert it into the session under var 'abc'
+///         session!("abc", Example::new(val));
+///     });
+///
+///     // delete the entire session
+///     rustlet!("delete_session", {
+///         session_delete!();
+///     });
+///
+///     // delete only the 'abc' value from the session
+///     rustlet!("delete_abc", {
+///         session_delete!("abc");
+///     });
+///
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! session_delete {
 	($a:expr) => {
@@ -62,6 +136,85 @@ macro_rules! session_delete {
 	};
 }
 
+/// Sets or gets a value in the session. The session is an in-memory key/value store that can be used
+/// by rustlets to store data that can be accessed by other rustlets. A session cookie is set called
+/// rustletsessionid that lets the rustlet container know which user is which. The session is automatically
+/// invalidated after a certain period of time where no calls to session! or session_delete! are made. By
+/// default, this amount of time is 30 minutes, but it is configurable in
+/// [`crate::RustletConfig::session_timeout`]. If only one parameter is specified, the value is retrieved
+/// from the session data store, if two parameters are specified, the value is set, see the examples below
+/// for more details.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// // implement a simple `Writeable` and `Readable` struct to demonstrate how the session works.
+/// #[derive(Debug)]
+/// struct Example {
+///    num: u32,
+/// }
+///
+/// impl Example {
+///     pub fn new(num: u32) -> Self {
+///         Example { num }
+///     }
+/// }
+///
+/// impl Writeable for Example {
+///     fn write<W: Writer>(&self, writer: &mut W) -> Result<(), Error> {
+///         writer.write_u32(self.num)?;
+///         Ok(())
+///     }
+/// }
+///
+/// impl Readable for Example {
+///     fn read<R: Reader>(reader: &mut R) -> Result<Self, Error> {
+///         let num = reader.read_u32()?;
+///         Ok(Example { num })
+///     }  
+/// }
+///
+/// fn test() -> Result<(), Error> {
+///
+///     // this rustlet gets the value stored in session variable "abc". If it has not been set
+///     // (i.e. by the set_session rustlet, 'none' is displayed.
+///     rustlet!("get_session", {
+///         let value: Option<Example> = session!("abc"); // the type 'Example' is coerced here
+///         match value {
+///             Some(value) => {
+///                 response!("abc={:?}", value); // print out it's value
+///             }
+///             None => {
+///                 response!("none"); // print out none
+///             }
+///         }
+///     });
+///     
+///     rustlet!("set_session", {
+///         // get the value of 'abc' in the query string and try to parse as u32
+///         let val: u32 = query!("abc").parse()?;
+///         // create an Example with this value and insert it into the session under var 'abc'
+///         session!("abc", Example::new(val));
+///     });
+///     
+///     // delete the entire session
+///     rustlet!("delete_session", {
+///         session_delete!();
+///     });
+///     
+///     // delete only the 'abc' value from the session
+///     rustlet!("delete_abc", {
+///         session_delete!("abc");
+///     });
+///     
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! session {
 	($a:expr) => {
@@ -94,6 +247,27 @@ macro_rules! session {
 	};
 }
 
+/// Flushes any buffered data previously sent via the [`response`] macro.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("set_content_type", {
+///         set_content_type!("text/html");
+///         response!("<html><body><strong>Some Content Here");
+///         flush!(); // the first part of the response will be written immidiately.
+///         response!("</strong></body></html>");
+///         // flush called automatically by the container after control is returned.
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! flush {
 	() => {
@@ -111,6 +285,35 @@ macro_rules! flush {
 	};
 }
 
+/// Completes a rustlet execution that is executing in an async_context.
+/// This macro must be called so that the rustlet container knows that
+/// a particular async rustlet is complete. Also see [`async_context`] and the
+/// example below.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("async", {
+///         response!("first message\n");
+///         let ac = async_context!();
+///
+///         std::thread::spawn(move || {
+///             async_context!(ac);
+///             // simulate long running task:
+///             std::thread::sleep(std::time::Duration::from_millis(1000));
+///             response!("second message\n");
+///             async_complete!();
+///         });            
+///     });        
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! async_complete {
 	() => {
@@ -128,6 +331,36 @@ macro_rules! async_complete {
 	};
 }
 
+/// Creates an async context which may be used to pass execution of the rustlet into
+/// another thread thus allowing the rustlet thread pool to continue processing other
+/// rustlets. The first call to [`async_context`] should not specify any parameters
+/// and the second call should specify the returned parameter of the first call and be
+/// in another thread. See the example below for details.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("async", {
+///         response!("first message\n");
+///         let ac = async_context!();
+///
+///         std::thread::spawn(move || {
+///             async_context!(ac);
+///             // simulate long running task:
+///             std::thread::sleep(std::time::Duration::from_millis(1000));
+///             response!("second message\n");
+///             async_complete!();
+///         });
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! async_context {
 	() => {{
@@ -173,6 +406,68 @@ macro_rules! async_context {
 	};
 }
 
+/// Specifies a rustlet. Rustlets are closures, so variables can be moved into them and shared
+/// among other rustlets. See the other macros for detailed examples on how to use all of the
+/// functionality of rustlets.
+/// # Also see
+///
+/// * [`add_header`]
+/// * [`async_complete`]
+/// * [`async_context`]
+/// * [`cookie`]
+/// * [`flush`]
+/// * [`header_len`]
+/// * [`header_name`]
+/// * [`header_value`]
+/// * [`query`]
+/// * [`request`]
+/// * [`request_content`]
+/// * [`response`]
+/// * [`rustlet_init`]
+/// * [`rustlet_mapping`]
+/// * [`session`]
+/// * [`session_delete`]
+/// * [`set_content_type`]
+/// * [`set_cookie`]
+/// * [`set_redirect`]
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use std::sync::{Mutex, Arc};
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     let count = Arc::new(Mutex::new(0));
+///     let count_clone = count.clone();
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
+///     // define our first rustlet
+///     rustlet!("myrustlet", {
+///         let mut count = count.lock().unwrap();
+///         *count += 1;
+///         response!("count in myrustlet={}", count);
+///     });
+///
+///     // define our second rustlet
+///     rustlet!("myrustlet2", {
+///         let mut count = count_clone.lock().unwrap();
+///         *count += 1;
+///         response!("count in myrustlet2={}", count);
+///     });
+///
+///     // define mappings to our rustlets
+///     rustlet_mapping!("/myrustlet", "myrustlet");
+///     rustlet_mapping!("/myrustlet2", "myrustlet2");
+///
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! rustlet {
 	($a:expr,$b:expr) => {
@@ -219,6 +514,50 @@ macro_rules! rustlet {
 	};
 }
 
+/// Initialize the rustlet container based on the specified configuration. The default
+/// configuration may be used by calling `RustletConfig::default()`. See [`crate::RustletConfig`]
+/// for details on configuring the Rustlet and Http containers.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet_init!(RustletConfig::default()); // use default config
+///     rustlet!("hello_world", {
+///         response!("Hello World\n");
+///     });
+///     Ok(())
+/// }
+/// ```
+///
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet_init!(
+///         RustletConfig {
+///             http_config: HttpConfig {
+///                 port: 80,
+///                 ..HttpConfig::default()
+///             },
+///             ..RustletConfig::default()
+///         }
+///     );
+///     rustlet!("hello_world", {
+///         response!("Hello World\n");
+///     });
+///     Ok(())
+/// }           
+/// ```
 #[macro_export]
 macro_rules! rustlet_init {
 	($config:expr) => {{
@@ -267,6 +606,35 @@ macro_rules! rustlet_init {
 	}};
 }
 
+/// Maps the specified uri to a rustlet. All requests to the container for this uri
+/// will be processed by the specified rustlet.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet_init!(
+///         RustletConfig {
+///             http_config: HttpConfig {
+///                 port: 80,
+///                 ..HttpConfig::default()
+///             },
+///             ..RustletConfig::default()
+///         }
+///     );
+///     rustlet!("hello_world", {
+///         response!("Hello World\n");
+///     });
+///     // maps the uri /hello to the rustlet "hello_world"
+///     rustlet_mapping!("/hello", "hello_world");
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! rustlet_mapping {
 	($a:expr, $b:expr) => {{
@@ -298,6 +666,23 @@ macro_rules! rustlet_mapping {
 	}};
 }
 
+/// Sets the content-type header of this request.
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("set_content_type", {
+///         set_content_type!("text/html");
+///         response!("<html><body><strong>Some Content Here</strong></body></html>");
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! set_content_type {
 	($a:expr) => {
@@ -305,6 +690,24 @@ macro_rules! set_content_type {
 	};
 }
 
+/// Adds a header to the response for this rustlet. The first parameter is the name of the header
+/// to set and the second parameter is the value of the header. See examples below.
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("set_content_type", {
+///         add_header!("Cache-Control", "no-cache");
+///         response!("<html><body><strong>Some Content Here</strong></body></html>");
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! add_header {
 	($a:expr, $b:expr) => {{
@@ -336,6 +739,24 @@ macro_rules! add_header {
 	}};
 }
 
+/// Sets a redirect to another URL. The 301 HTTP Response is used for the redirect.
+/// See example below.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("set_redirect", {
+///         set_redirect!("http://www.example.com");
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! set_redirect {
 	($a:expr) => {{
@@ -367,6 +788,26 @@ macro_rules! set_redirect {
 	}};
 }
 
+/// Writes a formated response to the client. The formatting is the same formatting as
+/// the format! macro, as that is used internally to format the response. Note that
+/// data written via response is buffered and is not necessarily sent immidiately.
+/// To ensure all data is written, the user must call the [`flush`] macro.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("hello_world", {
+///         response!("hello world {}", "any formatted value can go here");
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! response {
 	($a:expr)=>{
@@ -426,6 +867,25 @@ macro_rules! response {
 	};
 }
 
+/// Returns the content of the message body of the HTTP request.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("show_content_as_utf8", {
+///         let content = request_content!();
+///         let content_as_ut8 = std::str::from_utf8(&content)?;
+///         response!("content='{}'\n", content_as_ut8);
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! request_content {
 	() => {{
@@ -445,6 +905,25 @@ macro_rules! request_content {
 	}};
 }
 
+/// Get the value of the specified cookie. To set cookies, see [`set_cookie`].
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("cookies", {
+///         let cookie = cookie!("abc");
+///         set_cookie!("abc", "def");
+///         response!("cookie={:?}\n", cookie);
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! cookie {
 	($a:expr) => {{
@@ -464,6 +943,25 @@ macro_rules! cookie {
 	}};
 }
 
+/// Set the value of the specified cookie. To get cookies, see [`cookie`].
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///             
+/// fn test() -> Result<(), Error> {
+///     rustlet!("cookies", {
+///         let cookie = cookie!("abc");
+///         set_cookie!("abc", "def");
+///         response!("cookie={:?}\n", cookie);
+///     });        
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! set_cookie {
 	($a:expr,$b:expr) => {{
@@ -494,6 +992,27 @@ macro_rules! set_cookie {
 	}};
 }
 
+/// Returns the number of headers sent in this HTTP request.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("header_len", {
+///         for i in 0..header_len!() {
+///             let header_name = header_name!(i);
+///             let header_value = header_value!(i);
+///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
+///         }
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! header_len {
 	() => {{
@@ -502,6 +1021,27 @@ macro_rules! header_len {
 	}};
 }
 
+/// Returns the header name for the specified index.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("header_name", {
+///         for i in 0..header_len!() {
+///             let header_name = header_name!(i);
+///             let header_value = header_value!(i);
+///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
+///         }
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! header_name {
 	($a:expr) => {{
@@ -509,6 +1049,27 @@ macro_rules! header_name {
 	}};
 }
 
+/// Returns the header value for the specified index.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("header_value", {
+///         for i in 0..header_len!() {
+///             let header_name = header_name!(i);
+///             let header_value = header_value!(i);
+///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
+///         }
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! header_value {
 	($a:expr) => {{
@@ -516,6 +1077,28 @@ macro_rules! header_value {
 	}};
 }
 
+/// Get the value of the specified query parameter. Parsing is done with
+/// the [`querystring`](https://docs.rs/querystring/1.1.0/querystring/) library.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("header_value", {
+///         for i in 0..header_len!() {
+///             let header_name = header_name!(i);
+///             let header_value = header_value!(i);
+///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
+///         }
+///     });
+///     Ok(())
+/// }           
+/// ```
 #[macro_export]
 macro_rules! query {
 	($a:expr) => {{
@@ -523,6 +1106,33 @@ macro_rules! query {
 	}};
 }
 
+/// Get data from the request for this rustlet.
+/// See the example below for possible values of the request parameter.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///     rustlet!("request", {
+///         let method = request!("method"); // the HTTP request method (GET or POST).
+///         response!("method='{}'\n", method);
+///         let version = request!("version"); // the HTTP version 0.9, 1.0, 1.1, or 2.0
+///         response!("http version='{}'\n", version);
+///         let uri = request!("uri"); // the request URI.
+///         response!("uri='{}'\n", uri);
+///         let unknown = request!("blah"); // this shows that calling an invalid value returns ''
+///         response!("blah (should be empty)='{}'\n", unknown);
+///         let query = request!("query"); // the full query for the request
+///         response!("query='{}'\n", query);
+///     });
+///     Ok(())
+/// }
+/// ```
 #[macro_export]
 macro_rules! request {
 	($a:expr) => {{
@@ -622,6 +1232,8 @@ macro_rules! request {
 	}};
 }
 
+/// Internal macro used to log to the main log. Applications should use the default logger (or another
+/// user specified logger). See [`nioruntime_log`] for details on logging.
 #[macro_export]
 macro_rules! mainlogerror {
 	($a:expr) => {{

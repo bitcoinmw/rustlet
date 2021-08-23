@@ -395,6 +395,12 @@ fn main() {
 			response!("content={:?}\n", content);
 		});
 
+		rustlet!("content", {
+			let content = request_content!();
+			let content_as_ut8 = std::str::from_utf8(&content)?;
+			response!("content='{}'\n", content_as_ut8);
+		});
+
 		let _ = fun();
 		let _ = fun2();
 
@@ -411,6 +417,7 @@ fn main() {
 		rustlet_mapping!("/get_session", "get_session");
 		rustlet_mapping!("/delete_session", "delete_session");
 		rustlet_mapping!("/delete_abc", "delete_abc");
+		rustlet_mapping!("/content", "content");
 
 		std::thread::park();
 	}
