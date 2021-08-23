@@ -14,9 +14,9 @@
 
 use crate::{Readable, Writeable};
 use lazy_static::lazy_static;
-use log::*;
 pub use nioruntime_http::{ConnData, HttpConfig, HttpServer};
 use nioruntime_http::{HttpMethod, HttpVersion, WriteHandle};
+use nioruntime_log::*;
 use nioruntime_util::ser::BinReader;
 use nioruntime_util::ser::BinWriter;
 use nioruntime_util::{Error, ErrorKind};

@@ -197,8 +197,8 @@ macro_rules! rustlet {
 					Ok(_) => {}
 					Err(e) => {
 						const MAIN_LOG: &str = "mainlog";
-						log::log_multi!(
-							log::ERROR,
+						nioruntime_log::log_multi!(
+							nioruntime_log::ERROR,
 							MAIN_LOG,
 							"Error adding rustlet to container: {}",
 							e.to_string()
@@ -208,8 +208,8 @@ macro_rules! rustlet {
 			}
 			Err(e) => {
 				const MAIN_LOG: &str = "mainlog";
-				log::log_multi!(
-					log::ERROR,
+				nioruntime_log::log_multi!(
+					nioruntime_log::ERROR,
 					MAIN_LOG,
 					"Couldn't start rustlet: couldn't get lock: {}",
 					e.to_string()
@@ -234,8 +234,8 @@ macro_rules! rustlet_init {
 							Ok(_) => {}
 							Err(e) => {
 								const MAIN_LOG: &str = "mainlog";
-								log::log_multi!(
-									log::ERROR,
+								nioruntime_log::log_multi!(
+									nioruntime_log::ERROR,
 									MAIN_LOG,
 									"Couldn't start rustlet: start: {}",
 									e.to_string()
@@ -245,8 +245,8 @@ macro_rules! rustlet_init {
 					}
 					Err(e) => {
 						const MAIN_LOG: &str = "mainlog";
-						log::log_multi!(
-							log::ERROR,
+						nioruntime_log::log_multi!(
+							nioruntime_log::ERROR,
 							MAIN_LOG,
 							"Couldn't start rustlet: set_config: {}",
 							e.to_string()
@@ -256,8 +256,8 @@ macro_rules! rustlet_init {
 			}
 			Err(e) => {
 				const MAIN_LOG: &str = "mainlog";
-				log::log_multi!(
-					log::ERROR,
+				nioruntime_log::log_multi!(
+					nioruntime_log::ERROR,
 					MAIN_LOG,
 					"Couldn't start rustlet: couldn't get lock: {}",
 					e.to_string()
@@ -277,8 +277,8 @@ macro_rules! rustlet_mapping {
 				Ok(_) => {}
 				Err(e) => {
 					const MAIN_LOG: &str = "mainlog";
-					log::log_multi!(
-						log::ERROR,
+					nioruntime_log::log_multi!(
+						nioruntime_log::ERROR,
 						MAIN_LOG,
 						"Couldn't start rustlet: add_mapping: {}",
 						e.to_string()
@@ -287,8 +287,8 @@ macro_rules! rustlet_mapping {
 			},
 			Err(e) => {
 				const MAIN_LOG: &str = "mainlog";
-				log::log_multi!(
-					log::ERROR,
+				nioruntime_log::log_multi!(
+					nioruntime_log::ERROR,
 					MAIN_LOG,
 					"Couldn't start rustlet: couldn't get lock: {}",
 					e.to_string()
@@ -315,8 +315,8 @@ macro_rules! add_header {
 					Ok(_) => {}
 					Err(e) => {
 						const MAIN_LOG: &str = "mainlog";
-						log::log_multi!(
-							log::ERROR,
+						nioruntime_log::log_multi!(
+							nioruntime_log::ERROR,
 							MAIN_LOG,
 							"Couldn't call response.write: {}",
 							e.to_string()
@@ -326,7 +326,11 @@ macro_rules! add_header {
 			}
 			None => {
 				const MAIN_LOG: &str = "mainlog";
-				log::log_multi!(log::ERROR, MAIN_LOG, "Couldn't find response struct",);
+				nioruntime_log::log_multi!(
+					nioruntime_log::ERROR,
+					MAIN_LOG,
+					"Couldn't find response struct",
+				);
 			}
 		});
 	}};
@@ -342,8 +346,8 @@ macro_rules! set_redirect {
 					Ok(_) => {}
 					Err(e) => {
 						const MAIN_LOG: &str = "mainlog";
-						log::log_multi!(
-							log::ERROR,
+						nioruntime_log::log_multi!(
+							nioruntime_log::ERROR,
 							MAIN_LOG,
 							"Couldn't call response.write: {}",
 							e.to_string()
@@ -353,7 +357,11 @@ macro_rules! set_redirect {
 			}
 			None => {
 				const MAIN_LOG: &str = "mainlog";
-				log::log_multi!(log::ERROR, MAIN_LOG, "Couldn't find response struct",);
+				nioruntime_log::log_multi!(
+					nioruntime_log::ERROR,
+					MAIN_LOG,
+					"Couldn't find response struct",
+				);
 			}
 		});
 	}};
@@ -371,8 +379,8 @@ macro_rules! response {
 							Ok(_) => {},
 							Err(e) => {
 								const MAIN_LOG: &str = "mainlog";
-								log::log_multi!(
-									log::ERROR,
+								nioruntime_log::log_multi!(
+									nioruntime_log::ERROR,
 									MAIN_LOG,
 									"Couldn't call response.write: {}",
 									e.to_string()
@@ -382,8 +390,8 @@ macro_rules! response {
 					},
 					None => {
 						const MAIN_LOG: &str = "mainlog";
-                                        	log::log_multi!(
-                                                	log::ERROR,
+                                        	nioruntime_log::log_multi!(
+                                                	nioruntime_log::ERROR,
                                                 	MAIN_LOG,
                                                 	"Couldn't find response struct",
                                         	);
@@ -618,16 +626,16 @@ macro_rules! request {
 macro_rules! mainlogerror {
 	($a:expr) => {{
 		const MAIN_LOG: &str = "mainlog";
-		log::log_multi!(
-			log::ERROR,
+		nioruntime_log::log_multi!(
+			nioruntime_log::ERROR,
 			MAIN_LOG,
 			$a,
 		);
 	}};
 	($a:expr,$($b:tt)*)=>{{
                 const MAIN_LOG: &str = "mainlog";
-                log::log_multi!(
-                        log::ERROR,
+                nioruntime_log::log_multi!(
+                        nioruntime_log::ERROR,
                         MAIN_LOG,
                         $a,
 			$($b)*

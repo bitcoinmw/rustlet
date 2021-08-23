@@ -25,7 +25,7 @@ use clap::load_yaml;
 use clap::App;
 use errno::errno;
 use librustlet::*;
-use log::*;
+use nioruntime_log::*;
 use nioruntime_util::{Error, ErrorKind};
 use std::convert::TryInto;
 use std::io::Read;
@@ -35,7 +35,7 @@ use std::sync::{Arc, Mutex};
 
 const MAX_BUF: usize = 100_000;
 
-log::debug!();
+nioruntime_log::debug!();
 
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
