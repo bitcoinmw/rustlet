@@ -406,8 +406,10 @@ macro_rules! async_context {
 	};
 }
 
-/// Specifies a rustlet. Rustlets are closures, so variables can be moved into them and shared
-/// among other rustlets. See the other macros for detailed examples on how to use all of the
+/// Specifies a rustlet. Rustlets are closures that process HTTP requests and generate a response,
+/// so variables can be moved into them and shared among other rustlets or any other closure.
+/// Rustlets are processed in the [nioruntime](https://github.com/bitcoinmw/nioruntime). So, the
+/// exectuion is performant. See the other macros for detailed examples on how to use all of the
 /// functionality of rustlets.
 /// # Also see
 ///
