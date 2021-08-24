@@ -1,10 +1,11 @@
 steps:
 - script: |
-   git clone https://anything:$(github_pat)@github.com/bitcoinmw/rustlet.git .
-   cd rustlet
+   git clone https://anything:$(github_pat)@github.com/bitcoinmw/rustlet.git rustlet_new
+   cd rustlet_new
    git config user.name bitcoinmw
    git checkout master
    cargo doc
+   mkdir -p docs
    cp -pr target/doc/* docs
    git add --all
    git commit -m"Pipelines-Bot: Updated site via $(Build.SourceVersion)";
