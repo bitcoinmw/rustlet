@@ -31,5 +31,5 @@ In this example '<@=header>', '<@=middlecontent>', and '<@=footer>' are each rus
 
 # Samples
 
-The Rustlet [macro library](https://bitcoinmw.github.io/rustlet/librustlet/index.html)  documentation provides numerous working examples. Also, the [rustlet-simple](https://github.com/bitcoinmw/rustlet-simple) project shows how to write and deploy a hello world rustlet in 3 easy steps. More example to come...
+The Rustlet [macro library](https://bitcoinmw.github.io/rustlet/librustlet/index.html)  documentation provides numerous working examples. Also, the [rustlet-simple](https://github.com/bitcoinmw/rustlet-simple) project shows how to write and deploy a hello world rustlet in 3 easy steps. More examples to come...
 
