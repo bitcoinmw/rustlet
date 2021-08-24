@@ -27,7 +27,7 @@ RSPs are rust server pages. A RSP page is a text document that contains two type
 </html>
 ```
 
-In this example '<@=header>', '<@=middlecontent>', and '<@=footer>' are each rustlets that share the same parameters as the RSP page when executed. RSPs can be placed anywhere in the HTTP server's webroot and the rustlet container will interpret them to their dynamic form.
+In this example '<@=header>', '<@=middlecontent>', and '<@=footer>' are each rustlets that share the same parameters as the RSP page when executed. RSPs can be placed anywhere in the HTTP server's webroot and the rustlet container will interpret them to their dynamic form. RSP files must end with the .rsp extension so that the rustlet container knows to execute them as RSPs.
 
 # Samples
 
