@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DEBUG",""],["ERROR",""],["FATAL",""],["INFO",""],["TRACE",""],["WARN",""]],"enum":[["RotationStatus",""]],"struct":[["LOG","This is the static holder of all log objects. Generally this should not be called directly. See [`log`] instead."],["Log","The main logging object"],["LogConfig","Log Config object."]]});

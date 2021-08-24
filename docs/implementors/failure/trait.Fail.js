@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["failure"] = [];
+implementors["nioruntime_util"] = [{"text":"impl <a class=\"trait\" href=\"failure/trait.Fail.html\" title=\"trait failure::Fail\">Fail</a> for <a class=\"struct\" href=\"nioruntime_util/struct.Error.html\" title=\"struct nioruntime_util::Error\">Error</a>","synthetic":false,"types":["nioruntime_util::error::Error"]},{"text":"impl <a class=\"trait\" href=\"failure/trait.Fail.html\" title=\"trait failure::Fail\">Fail</a> for <a class=\"enum\" href=\"nioruntime_util/enum.ErrorKind.html\" title=\"enum nioruntime_util::ErrorKind\">ErrorKind</a>","synthetic":false,"types":["nioruntime_util::error::ErrorKind"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

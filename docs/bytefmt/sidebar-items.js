@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["B",""],["GB",""],["GIB",""],["KB",""],["KIB",""],["MB",""],["MIB",""],["PB",""],["PIB",""],["TB",""],["TIB",""]],"enum":[["Unit",""]],"fn":[["format","Format bytes to byte string"],["format_to","Format bytes to specific unit byte string"],["parse","Parse given string to bytes count"],["parse_to","Parse given string to specific byte unit"]]});
