@@ -10,7 +10,22 @@ Rustlets are executed in the [nioruntime](https://github.com/bitcoinmw/nioruntim
 
 # RSPs
 
-RSPs are rust server pages. A RSP page is a text document that contains two types of text: static data, which can be expressed in any text-based format (but most commonly HTML), and rustlet tags which execute a specified rustlet as part of the page that is loading. More details on RSPs to come...
+RSPs are rust server pages. A RSP page is a text document that contains two types of text: static data, which can be expressed in any text-based format (but most commonly HTML), and rustlet tags which execute a specified rustlet as part of the page that is loading. A sample RSP may look like this:
+
+```
+<html>
+    <head>
+        <title>Sample RSP</title>
+    </head>
+    <body>
+        <@=myrustlet>
+        static content
+        <@=printheaders>
+        static content
+        <@=myrustlet2>
+    </body>
+</html>
+```
 
 # Samples
 
