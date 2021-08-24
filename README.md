@@ -18,14 +18,16 @@ RSPs are rust server pages. A RSP page is a text document that contains two type
         <title>Sample RSP</title>
     </head>
     <body>
-        <@=myrustlet>
+        <@=header>
         static content
-        <@=printheaders>
+        <@=middlecontent>
         static content
-        <@=myrustlet2>
+        <@=footer>
     </body>
 </html>
 ```
+
+In this example '<@=header>', '<@=middlecontent>', and '<@=footer>' are each rustlets that share the same parameters as the RSP page when executed. RSPs can be placed anywhere in the HTTP server's webroot and the rustlet container will interpret them to their dynamic form.
 
 # Samples
 
