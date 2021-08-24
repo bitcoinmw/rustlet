@@ -1,0 +1,14 @@
+steps:
+- script: |
+   git clone https://anything:$(github_pat)@github.com/bitcoinmw/rustlet.git .
+   cd rustlet
+   git config user.name bitcoinmw
+   git checkout master
+   cargo doc
+   docs
+   cp -pr target/doc/* docs
+   git add --all
+   git commit -m"Pipelines-Bot: Updated site via $(Build.SourceVersion)";
+   git push https://$(github_pat)@github.com/bitcoinmw/rustlet.git
+  displayName: 'Create and Push Docs'
+  condition: succeeded()

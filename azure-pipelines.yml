@@ -108,3 +108,14 @@ jobs:
         sshpass -p "$(upload_pw)" scp -o StrictHostKeyChecking=no tarpaulin.*.txt uploader@bitcoinmw.com:/var/www/html/ci_uploads/rustlet/`date +"%Y_%m_%d"`
         sshpass -p "$(upload_pw)" scp -o StrictHostKeyChecking=no doc.tar.gz uploader@bitcoinmw.com:/var/www/html/ci_uploads/rustlet/`date +"%Y_%m_%d"`
       displayName: Code Coverage
+- job: Docs
+  timeoutInMinutes: 60
+  pool:
+    vmImage: ubuntu-latest
+  strategy:
+    matrix:
+      release:
+        CI_JOB: release
+        PLATFORM: linux-amd64
+  steps:
+    - template: '.ci/pushdocs.yml
