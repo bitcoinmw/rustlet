@@ -5,7 +5,6 @@ steps:
    git config user.name bitcoinmw
    git checkout master
    cargo doc
-   docs
    cp -pr target/doc/* docs
    git add --all
    git commit -m"Pipelines-Bot: Updated site via $(Build.SourceVersion)";
