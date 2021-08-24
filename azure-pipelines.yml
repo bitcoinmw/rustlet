@@ -118,4 +118,4 @@ jobs:
         CI_JOB: release
         PLATFORM: linux-amd64
   steps:
-    - template: '.ci/pushdocs.yml
+    - template: '.ci/pushdocs.yml'
