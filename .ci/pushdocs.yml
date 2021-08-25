@@ -7,8 +7,16 @@ steps:
    cargo doc
    mkdir -p docs
    cp -pr target/doc/* docs
-   #git add --all
-   #git commit -m"Pipelines-Bot: Updated site via $(Build.SourceVersion)";
-   #git push https://$(github_pat)@github.com/bitcoinmw/rustlet.git
+   changes=`git diff HEAD^^ HEAD --name-only | grep "^rustlet" | wc -l`
+
+   if [ $changes -eq 0 ]
+   then
+      echo "no changes to rustlet directory, not pushing"
+   else
+      git add --all
+      git commit -m"Pipelines-Bot: Updated site via $(Build.SourceVersion)";
+      git push https://$(github_pat)@github.com/bitcoinmw/rustlet.git
+   fi
+
   displayName: 'Create and Push Docs'
   condition: succeeded()
