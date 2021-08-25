@@ -29,7 +29,7 @@ use std::pin::Pin;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-info!();
+warn!();
 const MAIN_LOG: &str = "mainlog";
 const MAX_CHUNK_SIZE: usize = 1024 * 1024 * 10;
 const MAX_ESCAPE_SEQUENCE: usize = 100;
