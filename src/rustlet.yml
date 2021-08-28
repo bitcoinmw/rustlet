@@ -25,3 +25,8 @@ args:
         long: itt
         value_name: itt
         takes_value: true
+    - nginx:
+        help: Run test against nginx instead of rustlet
+        short: n
+        long: nginx
+        takes_value: false

@@ -25,6 +25,7 @@ use clap::load_yaml;
 use clap::App;
 use errno::errno;
 use librustlet::*;
+use nioruntime_evh::EventHandlerConfig;
 use nioruntime_log::*;
 use nioruntime_util::{Error, ErrorKind};
 use std::convert::TryInto;
@@ -67,12 +68,17 @@ fn client_thread(
 	id: usize,
 	tlat_sum: Arc<Mutex<f64>>,
 	tlat_max: Arc<Mutex<u128>>,
+	nginx: bool,
 ) -> Result<(), Error> {
 	let mut lat_sum = 0.0;
 	let mut lat_max = 0;
 	let (mut stream, fd) = {
 		let _lock = tlat_sum.lock();
-		let stream = TcpStream::connect("127.0.0.1:8080")?;
+		let stream = if nginx {
+			TcpStream::connect("127.0.0.1:80")?
+		} else {
+			TcpStream::connect("127.0.0.1:8080")?
+		};
 		#[cfg(unix)]
 		let fd = stream.as_raw_fd();
 		#[cfg(target_os = "windows")]
@@ -81,11 +87,18 @@ fn client_thread(
 	};
 	let buf2 = &mut [0u8; MAX_BUF];
 	let start_itt = std::time::SystemTime::now();
-	let uri = "/empty";
-	let request_string = format!(
-		"GET {} HTTP/1.1\r\nHost: localhost:8080\r\nConnection: keep-alive\r\n\r\n",
-		uri
-	);
+	let uri = if nginx { "/" } else { "/empty" };
+	let request_string = if nginx {
+		format!(
+			"GET {} HTTP/1.1\r\nHost: localhost:80\r\nConnection: keep-alive\r\n\r\n",
+			uri
+		)
+	} else {
+		format!(
+			"GET {} HTTP/1.1\r\nHost: localhost:8080\r\nConnection: keep-alive\r\n\r\n",
+			uri
+		)
+	};
 	let request_bytes = request_string.as_bytes();
 	for i in 0..count {
 		if i != 0 && i % 10000 == 0 {
@@ -114,16 +127,30 @@ fn client_thread(
 					assert!(false);
 				}
 			}
+
 			let len = res.unwrap();
+
 			len_sum += len;
-			if len_sum >= 5
-				&& buf2[len_sum - 1] == '\n' as u8
-				&& buf2[len_sum - 2] == '\r' as u8
-				&& buf2[len_sum - 3] == '\n' as u8
-				&& buf2[len_sum - 4] == '\r' as u8
-				&& buf2[len_sum - 5] == '0' as u8
-			{
-				break;
+			if nginx {
+				if len_sum >= 5
+					&& buf2[len_sum - 1] == 10
+					&& buf2[len_sum - 2] == 62
+					&& buf2[len_sum - 3] == 108
+					&& buf2[len_sum - 4] == 109
+					&& buf2[len_sum - 5] == 116
+				{
+					break;
+				}
+			} else {
+				if len_sum >= 5
+					&& buf2[len_sum - 1] == '\n' as u8
+					&& buf2[len_sum - 2] == '\r' as u8
+					&& buf2[len_sum - 3] == '\n' as u8
+					&& buf2[len_sum - 4] == '\r' as u8
+					&& buf2[len_sum - 5] == '0' as u8
+				{
+					break;
+				}
 			}
 		}
 
@@ -224,6 +251,7 @@ fn main() {
 		.get_matches();
 
 	let client = args.is_present("client");
+	let nginx = args.is_present("nginx");
 
 	if client {
 		let threads = args.is_present("threads");
@@ -245,7 +273,10 @@ fn main() {
 			false => 1,
 		};
 
-		info!("Running client");
+		info!(
+			"Running client {}",
+			if nginx { "against nginx" } else { "" }
+		);
 		info!("Threads={}", threads);
 		info!("Iterations={}", itt);
 		info!("Requests per thread per iteration={}", count);
@@ -264,7 +295,7 @@ fn main() {
 				let tlat_sum = tlat_sum.clone();
 				let tlat_max = tlat_max.clone();
 				jhs.push(std::thread::spawn(move || {
-					let res = client_thread(count, id, tlat_sum.clone(), tlat_max.clone());
+					let res = client_thread(count, id, tlat_sum.clone(), tlat_max.clone(), nginx);
 					match res {
 						Ok(_) => {}
 						Err(e) => {
@@ -298,6 +329,7 @@ fn main() {
 		rustlet_init!(RustletConfig {
 			session_timeout: 60,
 			http_config: HttpConfig {
+				evh_config: EventHandlerConfig { thread_count: 8 },
 				debug: false,
 				..Default::default()
 			},
