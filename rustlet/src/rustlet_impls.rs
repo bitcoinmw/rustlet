@@ -536,7 +536,7 @@ impl RustletResponse {
 		}
 
 		let data = &buffer[..];
-		self.wh.write(&data, 0, data.len(), false)?;
+		self.wh.write(&data[0..data.len()])?;
 		self.set_headers_written(true);
 		buffer.clear();
 
@@ -718,7 +718,8 @@ fn on_panic() -> Result<(), Error> {
 							format!("Internal Server error. See logs for details.")
 						};
 						let bytes_to_write = msg.as_bytes();
-						wh.write(bytes_to_write, 0, bytes_to_write.len(), true)?;
+						wh.write(&bytes_to_write[0..bytes_to_write.len()])?;
+						wh.close()?;
 					} else {
 						let wh = &response.wh;
 						let msg_str = if headers_written {
@@ -733,9 +734,10 @@ fn on_panic() -> Result<(), Error> {
 						};
 						let msg = msg_str.as_bytes();
 						let msg_len_bytes = format!("{:X}\r\n", msg.len());
-						wh.write(msg_len_bytes.as_bytes(), 0, msg_len_bytes.len(), false)?;
-						wh.write(msg, 0, msg.len(), false)?;
-						wh.write("\r\n0\r\n\r\n".as_bytes(), 0, 7, true)?;
+						wh.write(&msg_len_bytes.as_bytes()[0..msg_len_bytes.len()])?;
+						wh.write(&msg[0..msg.len()])?;
+						wh.write(&("\r\n0\r\n\r\n".as_bytes())[0..7])?;
+						wh.close()?;
 					}
 				}
 			}
@@ -828,9 +830,10 @@ fn api_callback(
 					);
 					let msg = msg_str.as_bytes();
 					let msg_len_bytes = format!("{:X}\r\n", msg.len());
-					wh.write(msg_len_bytes.as_bytes(), 0, msg_len_bytes.len(), false)?;
-					wh.write(msg, 0, msg.len(), false)?;
-					wh.write("\r\n0\r\n\r\n".as_bytes(), 0, 7, true)?;
+					wh.write(&msg_len_bytes.as_bytes()[0..msg_len_bytes.len()])?;
+					wh.write(&msg[0..msg.len()])?;
+					wh.write(&("\r\n0\r\n\r\n".as_bytes())[0..7])?;
+					wh.close()?;
 				}
 			} else {
 				let mut response = RustletResponse::new(wh.clone(), config, false, false);
@@ -951,7 +954,7 @@ fn execute_rustlet(
 			let mut response = RustletResponse::new(wh.clone(), config, keep_alive, chained);
 			response.write(format!("Rustlet '{}' does not exist.", rustlet_name).as_bytes())?;
 			if keep_alive {
-				wh.write("0\r\n\r\n".as_bytes(), 0, 5, false)?;
+				wh.write(&("0\r\n\r\n".as_bytes())[0..5])?;
 			} else {
 				wh.close()?;
 			}
@@ -1079,18 +1082,24 @@ fn process_rsp(
 			if keep_alive {
 				let msg_len_bytes = format!("{:X}\r\n", wlen);
 				let msg_len_bytes = msg_len_bytes.as_bytes();
-				wh.write(msg_len_bytes, 0, msg_len_bytes.len(), false)?;
-				wh.write(&buf, start, end - start, false)?;
+				wh.write(&msg_len_bytes[0..msg_len_bytes.len()])?;
+				wh.write(&buf[start..end])?;
 				if flen <= end.try_into().unwrap_or(0) {
-					wh.write("\r\n0\r\n\r\n".as_bytes(), 0, 7, !keep_alive)?;
+					wh.write(&("\r\n0\r\n\r\n".as_bytes())[0..7])?;
+					if !keep_alive {
+						wh.close()?;
+					}
 				} else {
-					wh.write("\r\n".as_bytes(), 0, 2, false)?;
+					wh.write(&("\r\n".as_bytes())[0..2])?;
 				}
 			} else {
 				if flen <= end.try_into().unwrap_or(0) {
-					wh.write(&buf, start, end - start, !keep_alive)?;
+					wh.write(&buf[start..end])?;
+					if !keep_alive {
+						wh.close()?;
+					}
 				} else {
-					wh.write(&buf, start, end - start, false)?;
+					wh.write(&buf[start..end])?;
 				}
 			}
 
