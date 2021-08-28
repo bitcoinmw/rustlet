@@ -298,7 +298,7 @@ fn main() {
 		rustlet_init!(RustletConfig {
 			session_timeout: 60,
 			http_config: HttpConfig {
-				debug: true,
+				debug: false,
 				..Default::default()
 			},
 		});
