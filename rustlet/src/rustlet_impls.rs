@@ -668,119 +668,25 @@ fn housekeeper() -> Result<(), Error> {
 }
 
 fn on_panic() -> Result<(), Error> {
-	/*
-		let mut del_list = vec![];
-		let mut con_ids = vec![];
-
-		{
-			let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
-			log_multi!(
-				ERROR,
-				MAIN_LOG,
-				"panic occurred. on_panic checking {} connection(s)",
-				inprog.len(),
-			);
-			for (k, v) in &mut *inprog {
-				let res = v.2.write();
-				match res {
-					Ok(_) => {}
-					Err(_e) => {
-						log_multi!(
-							ERROR,
-							MAIN_LOG,
-							"Request [{}?{}] panicked. Disconnecting connection.",
-							v.0.uri,
-							v.0.query,
-						);
-						del_list.push(k.clone());
-						let response = &mut v.1;
-						con_ids.push(response.wh.get_connection_id());
-						let keep_alive = response.keep_alive;
-						let headers_written = response.get_headers_written();
-						if !response.get_headers_written() {
-							HttpServer::write_headers(
-								&response.wh,
-								&response.config,
-								true,
-								response.keep_alive,
-								response.additional_headers.clone(),
-								response.get_redirect(),
-							)?;
-						}
-						if !keep_alive {
-							let wh = &mut response.wh;
-							let msg = if headers_written {
-								format!(
-									"{}{}{}",
-									"\n</br>",
-									SEPARATOR_LINE,
-									"\n</br>Internal Server error. See logs for details.</body></html>"
-								)
-							} else {
-								format!("Internal Server error. See logs for details.")
-							};
-							let bytes_to_write = msg.as_bytes();
-							wh.write(&bytes_to_write[0..bytes_to_write.len()])?;
-							wh.close()?;
-						} else {
-							let wh = &response.wh;
-							let msg_str = if headers_written {
-								format!(
-									"{}{}{}",
-									"\n</br>",
-									SEPARATOR_LINE,
-									"\n</br>Internal Server error. See logs for details.</body></html>"
-								)
-							} else {
-								format!("Internal Server error. See logs for details.")
-							};
-							let msg = msg_str.as_bytes();
-							let msg_len_bytes = format!("{:X}\r\n", msg.len());
-							wh.write(&msg_len_bytes.as_bytes()[0..msg_len_bytes.len()])?;
-							wh.write(&msg[0..msg.len()])?;
-							wh.write(&("\r\n0\r\n\r\n".as_bytes())[0..7])?;
-							wh.close()?;
-						}
-					}
-				}
-			}
-		}
-
-		{
-			let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
-			let mut i = 0;
-			for id in del_list {
-				log_multi!(
-					ERROR,
-					MAIN_LOG,
-					"on panic handler removed connection id = {}",
-					con_ids[i],
-				);
-				inprog.remove(&id);
-				i += 1;
-			}
-		}
-	*/
 	Ok(())
 }
 
 fn api_callback(
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
-	has_content: bool,
-	start_content: usize,
-	end_content: usize,
-	method: HttpMethod,               // GET or POST
-	config: HttpConfig,               // HttpServer's configuration
-	wh: WriteHandle,                  // WriteHandle to write back data
-	version: HttpVersion,             // HttpVersion
-	uri: &str,                        // uri
-	query: &str,                      // query
-	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
-	keep_alive: bool,                 // keep-alive
+	has_content: bool,                          // does this request have content?
+	start_content: usize,                       // start content in ConnData buffer
+	end_content: usize,                         // end content in ConnData buffer
+	method: HttpMethod,                         // GET or POST
+	config: HttpConfig,                         // HttpServer's configuration
+	wh: WriteHandle,                            // WriteHandle to write back data
+	version: HttpVersion,                       // HttpVersion
+	uri: &str,                                  // uri
+	query: &str,                                // query
+	headers: Vec<(Vec<u8>, Vec<u8>)>,           // headers
+	keep_alive: bool,                           // keep-alive
 ) -> Result<(), Error> {
 	let res = do_api_callback(
 		conn_data,
-		//content,
 		has_content,
 		start_content,
 		end_content,
@@ -855,21 +761,19 @@ fn api_callback(
 
 fn execute_rustlet(
 	rustlet_name: &str,
-	//conn_data: Arc<RwLock<ConnData>>, // connection_data
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
-	//content: &[u8],                   // content of the request. len == 0 if none.
-	has_content: bool,
-	start_content: usize,
-	end_content: usize,
-	method: HttpMethod,               // GET or POST
-	config: HttpConfig,               // HttpServer's configuration
-	wh: WriteHandle,                  // WriteHandle to write back data
-	version: HttpVersion,             // HttpVersion
-	uri: &str,                        // uri
-	query: &str,                      // query
-	headers: Vec<(Vec<u8>, Vec<u8>)>, // headers
-	keep_alive: bool,                 // keep-alive
-	chained: bool,                    // is this a chained rustlet call?
+	has_content: bool,                          // whether this request has content
+	start_content: usize,                       // start content
+	end_content: usize,                         // end content
+	method: HttpMethod,                         // GET or POST
+	config: HttpConfig,                         // HttpServer's configuration
+	wh: WriteHandle,                            // WriteHandle to write back data
+	version: HttpVersion,                       // HttpVersion
+	uri: &str,                                  // uri
+	query: &str,                                // query
+	headers: Vec<(Vec<u8>, Vec<u8>)>,           // headers
+	keep_alive: bool,                           // keep-alive
+	chained: bool,                              // is this a chained rustlet call?
 	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
 	let rustlets = RUSTLETS.read().map_err(|e| {
@@ -979,9 +883,7 @@ fn execute_rustlet(
 }
 
 fn do_api_callback(
-	//conn_data: Arc<RwLock<ConnData>>, // connection_data
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
-	//content: &[u8],                   // content of the request. len == 0 if none.
 	has_content: bool,
 	start_content: usize,
 	end_content: usize,
@@ -1058,9 +960,7 @@ fn do_api_callback(
 }
 
 fn process_rsp(
-	//conn_data: Arc<RwLock<ConnData>>, // connection_data
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
-	//content: &[u8],                   // content of the request. len == 0 if none.
 	has_content: bool,
 	start_content: usize,
 	end_content: usize,
