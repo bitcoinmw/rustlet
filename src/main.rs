@@ -95,7 +95,7 @@ fn client_thread(
 		)
 	} else {
 		format!(
-			"GET {} HTTP/1.1\r\nHost: localhost:8080\r\nConnection: keep-alive\r\n\r\n",
+			"GET {} HTTP/1.1\r\nHost: localhost:8080\r\nCookie: rustletsessionid=179034848365240461385689167936203491398;\r\nConnection: keep-alive\r\n\r\n",
 			uri
 		)
 	};
