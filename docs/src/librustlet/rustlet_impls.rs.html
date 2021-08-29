@@ -1146,34 +1146,6 @@
 <span id="1144">1144</span>
 <span id="1145">1145</span>
 <span id="1146">1146</span>
-<span id="1147">1147</span>
-<span id="1148">1148</span>
-<span id="1149">1149</span>
-<span id="1150">1150</span>
-<span id="1151">1151</span>
-<span id="1152">1152</span>
-<span id="1153">1153</span>
-<span id="1154">1154</span>
-<span id="1155">1155</span>
-<span id="1156">1156</span>
-<span id="1157">1157</span>
-<span id="1158">1158</span>
-<span id="1159">1159</span>
-<span id="1160">1160</span>
-<span id="1161">1161</span>
-<span id="1162">1162</span>
-<span id="1163">1163</span>
-<span id="1164">1164</span>
-<span id="1165">1165</span>
-<span id="1166">1166</span>
-<span id="1167">1167</span>
-<span id="1168">1168</span>
-<span id="1169">1169</span>
-<span id="1170">1170</span>
-<span id="1171">1171</span>
-<span id="1172">1172</span>
-<span id="1173">1173</span>
-<span id="1174">1174</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -1781,8 +1753,6 @@
 <span class="macro">lazy_static!</span> {
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RUSTLETS</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">RustletContainerHolder</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
 		<span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">RustletContainerHolder::new</span>()));
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">IN_PROGRESS</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, (<span class="ident">RustletRequest</span>, <span class="ident">RustletResponse</span>)<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-		<span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">HashMap::new</span>()));
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">SESSION_MAP</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">SessionData</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
 		<span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">HashMap::new</span>()));
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">RUSTLET_CONFIG</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RustletConfig</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
@@ -2009,11 +1979,6 @@
 			}
 
 			<span class="ident">request</span>.<span class="ident">set_session_id</span>(<span class="ident">rsessionid</span>)<span class="question-mark">?</span>;
-
-			{
-				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inprog</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">IN_PROGRESS</span>);
-				<span class="ident">inprog</span>.<span class="ident">insert</span>(<span class="ident">id</span>, (<span class="ident">request</span>.<span class="ident">clone</span>(), <span class="ident">response</span>.<span class="ident">clone</span>()));
-			}
 			(<span class="ident">rustlet</span>)(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">request</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">response</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 				<span class="kw">match</span> <span class="ident">response</span>.<span class="ident">flush</span>() {
 					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
@@ -2021,29 +1986,8 @@
 						<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;error flushing: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>());
 					}
 				}
-
-				{
-					<span class="kw">let</span> <span class="ident">inprog</span> <span class="op">=</span> <span class="ident">IN_PROGRESS</span>.<span class="ident">write</span>();
-					<span class="kw">match</span> <span class="ident">inprog</span> {
-						<span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">inprog</span>) <span class="op">=</span><span class="op">&gt;</span> {
-							<span class="ident">inprog</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
-						}
-						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
-							<span class="macro">log_multi!</span>(
-								<span class="ident">ERROR</span>,
-								<span class="ident">MAIN_LOG</span>,
-								<span class="string">&quot;error getting IN_PROG lock: {}&quot;</span>,
-								<span class="ident">e</span>.<span class="ident">to_string</span>()
-							);
-						}
-					}
-				}
 				<span class="kw">return</span> <span class="ident">e</span>;
 			})<span class="question-mark">?</span>;
-			{
-				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inprog</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">IN_PROGRESS</span>);
-				<span class="ident">inprog</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
-			}
 			<span class="ident">response</span>.<span class="ident">complete</span>()<span class="question-mark">?</span>;
 		}
 		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
