@@ -604,8 +604,6 @@ impl RustletContainerHolder {
 lazy_static! {
 	pub(crate) static ref RUSTLETS: Arc<RwLock<RustletContainerHolder>> =
 		Arc::new(RwLock::new(RustletContainerHolder::new()));
-	pub(crate) static ref IN_PROGRESS: Arc<RwLock<HashMap<u128, (RustletRequest, RustletResponse)>>> =
-		Arc::new(RwLock::new(HashMap::new()));
 	pub(crate) static ref SESSION_MAP: Arc<RwLock<HashMap<u128, SessionData>>> =
 		Arc::new(RwLock::new(HashMap::new()));
 	pub(crate) static ref RUSTLET_CONFIG: Arc<RwLock<Option<RustletConfig>>> =
@@ -832,11 +830,6 @@ fn execute_rustlet(
 			}
 
 			request.set_session_id(rsessionid)?;
-
-			{
-				let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
-				inprog.insert(id, (request.clone(), response.clone()));
-			}
 			(rustlet)(&mut request, &mut response).map_err(|e| {
 				match response.flush() {
 					Ok(_) => {}
@@ -844,29 +837,8 @@ fn execute_rustlet(
 						log_multi!(ERROR, MAIN_LOG, "error flushing: {}", e.to_string());
 					}
 				}
-
-				{
-					let inprog = IN_PROGRESS.write();
-					match inprog {
-						Ok(mut inprog) => {
-							inprog.remove(&id);
-						}
-						Err(e) => {
-							log_multi!(
-								ERROR,
-								MAIN_LOG,
-								"error getting IN_PROG lock: {}",
-								e.to_string()
-							);
-						}
-					}
-				}
 				return e;
 			})?;
-			{
-				let mut inprog = nioruntime_util::lockw!(IN_PROGRESS);
-				inprog.remove(&id);
-			}
 			response.complete()?;
 		}
 		None => {
