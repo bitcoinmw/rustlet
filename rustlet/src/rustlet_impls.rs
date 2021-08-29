@@ -491,11 +491,7 @@ impl RustletResponse {
 	}
 
 	pub fn flush(&mut self) -> Result<(), Error> {
-		let mut buffer = self.buffer.write().map_err(|_e| {
-			let error: Error =
-				ErrorKind::PoisonError("flush buffer poison lock error".to_string()).into();
-			error
-		})?;
+		let mut buffer = nioruntime_util::lockw!(self.buffer);
 		let headers = if !self.get_headers_written() && !self.chained {
 			self.set_headers_written(true);
 			HttpServer::build_headers(
@@ -545,11 +541,7 @@ impl RustletResponse {
 	}
 
 	pub fn write(&mut self, data: &[u8]) -> Result<(), Error> {
-		let mut buffer = self.buffer.write().map_err(|_e| {
-			let error: Error =
-				ErrorKind::PoisonError("flush buffer poison lock error".to_string()).into();
-			error
-		})?;
+		let mut buffer = nioruntime_util::lockw!(self.buffer);
 		buffer.append(&mut data.to_vec());
 		Ok(())
 	}
@@ -774,14 +766,7 @@ fn execute_rustlet(
 	chained: bool,                              // is this a chained rustlet call?
 	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
-	let rustlets = RUSTLETS.read().map_err(|e| {
-		let error: Error = ErrorKind::InternalError(format!(
-			"unexpected error: couldn't obtain RUSTLETS lock: {}",
-			e.to_string(),
-		))
-		.into();
-		error
-	})?;
+	let rustlets = nioruntime_util::lockr!(RUSTLETS);
 
 	let rustlet = rustlets.rustlets.get(rustlet_name);
 	match rustlet {
@@ -869,14 +854,7 @@ fn do_api_callback(
 	keep_alive: bool,                 // keep-alive
 	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
-	let rustlets = RUSTLETS.read().map_err(|e| {
-		let error: Error = ErrorKind::InternalError(format!(
-			"unexpected error: couldn't obtain RUSTLETS lock: {}",
-			e.to_string(),
-		))
-		.into();
-		error
-	})?;
+	let rustlets = nioruntime_util::lockr!(RUSTLETS);
 
 	let rustlet = rustlets.mappings.get(uri);
 	match rustlet {
@@ -1102,14 +1080,7 @@ impl RustletContainer {
 	}
 
 	pub fn add_rustlet(&mut self, name: &str, rustlet: Rustlet) -> Result<(), Error> {
-		let mut rustlets = RUSTLETS.write().map_err(|e| {
-			let error: Error = ErrorKind::InternalError(format!(
-				"unexpected error: couldn't obtain RUSTLETS lock: {}",
-				e.to_string(),
-			))
-			.into();
-			error
-		})?;
+		let mut rustlets = nioruntime_util::lockw!(RUSTLETS);
 		rustlets
 			.rustlets
 			.insert(name.to_string(), Box::pin(rustlet));
@@ -1118,14 +1089,7 @@ impl RustletContainer {
 	}
 
 	pub fn add_rustlet_mapping(&mut self, path: &str, name: &str) -> Result<(), Error> {
-		let mut rustlets = RUSTLETS.write().map_err(|e| {
-			let error: Error = ErrorKind::InternalError(format!(
-				"unexpected error: couldn't obtain RUSTLETS lock: {}",
-				e.to_string(),
-			))
-			.into();
-			error
-		})?;
+		let mut rustlets = nioruntime_util::lockw!(RUSTLETS);
 
 		match self.http.as_ref() {
 			Some(http) => {
