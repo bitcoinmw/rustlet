@@ -252,6 +252,7 @@ fn main() {
 
 	let client = args.is_present("client");
 	let nginx = args.is_present("nginx");
+	let debug = args.is_present("debug");
 
 	if client {
 		let threads = args.is_present("threads");
@@ -330,7 +331,7 @@ fn main() {
 			session_timeout: 60,
 			http_config: HttpConfig {
 				evh_config: EventHandlerConfig { thread_count: 8 },
-				debug: false,
+				debug,
 				..Default::default()
 			},
 		});

@@ -30,3 +30,8 @@ args:
         short: n
         long: nginx
         takes_value: false
+    - debug:
+        help: print debug information
+        short: d
+        long: debug
+        takes_value: false
