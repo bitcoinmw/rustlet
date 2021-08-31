@@ -50,8 +50,8 @@ fn fun() -> Result<(), Error> {
 
 fn fun2() -> Result<(), Error> {
 	rustlet!("panic", {
-		response!("<html><body>test of panic");
-		flush!();
+		//response!("<html><body>test of panic");
+		//flush!();
 		let x: Option<bool> = None;
 		x.unwrap();
 	});

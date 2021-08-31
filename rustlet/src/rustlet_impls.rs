@@ -658,6 +658,15 @@ fn housekeeper() -> Result<(), Error> {
 }
 
 fn on_panic() -> Result<(), Error> {
+	let container = nioruntime_util::lockw!(crate::macros::RUSTLET_CONTAINER);
+	match &container.http {
+		Some(http) => {
+			if http.http_context.is_some() {
+				HttpServer::do_house_keeping(http.http_context.as_ref().unwrap(), &http.config)?;
+			}
+		}
+		None => {}
+	}
 	Ok(())
 }
 
@@ -710,7 +719,6 @@ fn api_callback(
 					}
 					None => (false, None),
 				});
-
 			if headers_written {
 				if !keep_alive {
 					let mut response = RustletResponse::new(wh.clone(), config, false, true);
@@ -822,6 +830,7 @@ fn execute_rustlet(
 						log_multi!(ERROR, MAIN_LOG, "error flushing: {}", e.to_string());
 					}
 				}
+
 				return e;
 			})?;
 			response.complete()?;
@@ -862,7 +871,6 @@ fn do_api_callback(
 			execute_rustlet(
 				rustlet_name,
 				conn_data,
-				//content,
 				has_content,
 				start_content,
 				end_content,
