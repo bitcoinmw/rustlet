@@ -15,7 +15,7 @@
 use crate::{Readable, Writeable};
 use lazy_static::lazy_static;
 pub use nioruntime_http::{ConnData, HttpConfig, HttpServer};
-use nioruntime_http::{HttpMethod, HttpVersion, WriteHandle};
+use nioruntime_http::{HttpMethod, HttpVersion, State, WriteHandle};
 use nioruntime_log::*;
 use nioruntime_util::ser::BinReader;
 use nioruntime_util::ser::BinWriter;
@@ -535,6 +535,11 @@ impl RustletResponse {
 		let data = &buffer[..];
 		self.wh.write(&data[0..data.len()])?;
 		self.set_headers_written(true);
+		let mut callback_state = nioruntime_util::lockw!(self.wh.callback_state);
+		match self.keep_alive {
+			true => *callback_state = State::HeadersChunked,
+			false => *callback_state = State::HeadersClose,
+		}
 		buffer.clear();
 
 		Ok(())
@@ -952,6 +957,11 @@ fn process_rsp(
 		let amt = file.read(&mut buf[0..buflen])?;
 		if first_loop {
 			HttpServer::write_headers(&wh, &config, true, keep_alive, vec![], None)?;
+			let mut callback_state = nioruntime_util::lockw!(wh.callback_state);
+			match keep_alive {
+				true => *callback_state = State::HeadersChunked,
+				false => *callback_state = State::HeadersClose,
+			}
 		}
 
 		let mut start = 0;
