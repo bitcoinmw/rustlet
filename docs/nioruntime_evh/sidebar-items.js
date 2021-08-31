@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["EventHandler","EventHandler struct."],["EventHandlerConfig",""],["WriteHandle","A handle that is associated with a particular connection and may be used for writing to the socket."]]});
+initSidebarItems({"enum":[["State",""]],"struct":[["EventHandler","EventHandler struct."],["EventHandlerConfig",""],["WriteHandle","A handle that is associated with a particular connection and may be used for writing to the socket."]]});
