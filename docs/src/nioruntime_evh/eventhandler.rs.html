@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/cdf47aa/eventhandler/src/eventhandler.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eventhandler.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/a66b37c/eventhandler/src/eventhandler.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eventhandler.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../nioruntime_evh/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
@@ -2405,6 +2405,18 @@
 <span id="2403">2403</span>
 <span id="2404">2404</span>
 <span id="2405">2405</span>
+<span id="2406">2406</span>
+<span id="2407">2407</span>
+<span id="2408">2408</span>
+<span id="2409">2409</span>
+<span id="2410">2410</span>
+<span id="2411">2411</span>
+<span id="2412">2412</span>
+<span id="2413">2413</span>
+<span id="2414">2414</span>
+<span id="2415">2415</span>
+<span id="2416">2416</span>
+<span id="2417">2417</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -2472,6 +2484,12 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
 <span class="kw">type</span> <span class="ident">ConnectionHandle</span> <span class="op">=</span> <span class="ident">u64</span>;
 
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">State</span> {
+	<span class="ident">Init</span>,
+	<span class="ident">HeadersChunked</span>,
+	<span class="ident">HeadersClose</span>,
+}
+
 <span class="doccomment">/// A handle that is associated with a particular connection and may be used for writing</span>
 <span class="doccomment">/// to the socket.</span>
 <span class="doccomment">///</span>
@@ -2486,6 +2504,7 @@
 	<span class="ident">connection_id</span>: <span class="ident">u128</span>,
 	<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="kw">pub</span> <span class="ident">callback_state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">WriteHandle</span> {
@@ -2495,11 +2514,13 @@
 		<span class="ident">connection_id</span>: <span class="ident">u128</span>,
 		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">let</span> <span class="ident">callback_state</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">State::Init</span>));
 		<span class="ident">WriteHandle</span> {
 			<span class="ident">fd</span>,
 			<span class="ident">guarded_data</span>,
 			<span class="ident">connection_id</span>,
 			<span class="ident">global_lock</span>,
+			<span class="ident">callback_state</span>,
 		}
 	}
 
@@ -2756,11 +2777,14 @@
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
 		<span class="kw">let</span> (<span class="ident">fd</span>, <span class="ident">connection_id</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">add</span>(<span class="ident">stream</span>.<span class="ident">as_raw_socket</span>(), <span class="ident">ActionType::AddStream</span>)<span class="question-mark">?</span>;
 
+		<span class="kw">let</span> <span class="ident">callback_state</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">State::Init</span>));
+
 		<span class="prelude-val">Ok</span>(<span class="ident">WriteHandle</span> {
 			<span class="ident">fd</span>,
 			<span class="ident">connection_id</span>,
 			<span class="ident">guarded_data</span>: <span class="self">self</span>.<span class="ident">guarded_data</span>[<span class="number">1</span>].<span class="ident">clone</span>(), <span class="comment">// TODO: not always 1.</span>
 			<span class="ident">global_lock</span>: <span class="self">self</span>.<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+			<span class="ident">callback_state</span>,
 		})
 	}
 
