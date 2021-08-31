@@ -57,7 +57,9 @@ is invalidated.</p>
 </td></tr><tr class="module-item"><td><a class="macro" href="macro.set_redirect.html" title="librustlet::set_redirect macro">set_redirect</a></td><td class="docblock-short"><p>Sets a redirect to another URL. The 301 HTTP Response is used for the redirect.
 See example below.</p>
 </td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
-<table><tr class="module-item"><td><a class="struct" href="struct.Error.html" title="librustlet::Error struct">Error</a></td><td class="docblock-short"><p>Base Error struct which is used throught this crate and other crates</p>
+<table><tr class="module-item"><td><a class="struct" href="struct.Error.html" title="librustlet::Error struct">Error</a></td><td class="docblock-short"><p>A macro that is used to lock a rwlock in write mode ignoring poison locks
+This code was used in many places, and this macro simplifies it.
+Base Error struct which is used throught this crate and other crates</p>
 </td></tr><tr class="module-item"><td><a class="struct" href="struct.HttpConfig.html" title="librustlet::HttpConfig struct">HttpConfig</a></td><td class="docblock-short"><p>The configuration struct for an <a href="rustlet_impls/struct.HttpServer.html" title="HttpServer"><code>HttpServer</code></a>. The <a href="https://doc.rust-lang.org/1.54.0/core/default/trait.Default.html" title="Default"><code>Default</code></a> trait
 is implemented for this struct so default can be used like below.</p>
 </td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>

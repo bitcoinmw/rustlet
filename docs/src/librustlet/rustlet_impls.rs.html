@@ -1110,6 +1110,14 @@
 <span id="1108">1108</span>
 <span id="1109">1109</span>
 <span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
+<span id="1115">1115</span>
+<span id="1116">1116</span>
+<span id="1117">1117</span>
+<span id="1118">1118</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -1771,6 +1779,15 @@
 }
 
 <span class="kw">fn</span> <span class="ident">on_panic</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">let</span> <span class="ident">container</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="kw">crate</span><span class="ident">::macros::RUSTLET_CONTAINER</span>);
+	<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">container</span>.<span class="ident">http</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">http</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">if</span> <span class="ident">http</span>.<span class="ident">http_context</span>.<span class="ident">is_some</span>() {
+				<span class="ident">HttpServer::do_house_keeping</span>(<span class="ident">http</span>.<span class="ident">http_context</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="ident">http</span>.<span class="ident">config</span>)<span class="question-mark">?</span>;
+			}
+		}
+		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}
+	}
 	<span class="prelude-val">Ok</span>(())
 }
 
@@ -1823,7 +1840,6 @@
 					}
 					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="bool-val">false</span>, <span class="prelude-val">None</span>),
 				});
-
 			<span class="kw">if</span> <span class="ident">headers_written</span> {
 				<span class="kw">if</span> <span class="op">!</span><span class="ident">keep_alive</span> {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">RustletResponse::new</span>(<span class="ident">wh</span>.<span class="ident">clone</span>(), <span class="ident">config</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>);
@@ -1935,6 +1951,7 @@
 						<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;error flushing: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>());
 					}
 				}
+
 				<span class="kw">return</span> <span class="ident">e</span>;
 			})<span class="question-mark">?</span>;
 			<span class="ident">response</span>.<span class="ident">complete</span>()<span class="question-mark">?</span>;
@@ -1975,7 +1992,6 @@
 			<span class="ident">execute_rustlet</span>(
 				<span class="ident">rustlet_name</span>,
 				<span class="ident">conn_data</span>,
-				<span class="comment">//content,</span>
 				<span class="ident">has_content</span>,
 				<span class="ident">start_content</span>,
 				<span class="ident">end_content</span>,

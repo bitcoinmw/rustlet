@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/280148e/http/src/http.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/cdf47aa/http/src/http.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../nioruntime_http/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
@@ -1995,6 +1995,63 @@
 <span id="1993">1993</span>
 <span id="1994">1994</span>
 <span id="1995">1995</span>
+<span id="1996">1996</span>
+<span id="1997">1997</span>
+<span id="1998">1998</span>
+<span id="1999">1999</span>
+<span id="2000">2000</span>
+<span id="2001">2001</span>
+<span id="2002">2002</span>
+<span id="2003">2003</span>
+<span id="2004">2004</span>
+<span id="2005">2005</span>
+<span id="2006">2006</span>
+<span id="2007">2007</span>
+<span id="2008">2008</span>
+<span id="2009">2009</span>
+<span id="2010">2010</span>
+<span id="2011">2011</span>
+<span id="2012">2012</span>
+<span id="2013">2013</span>
+<span id="2014">2014</span>
+<span id="2015">2015</span>
+<span id="2016">2016</span>
+<span id="2017">2017</span>
+<span id="2018">2018</span>
+<span id="2019">2019</span>
+<span id="2020">2020</span>
+<span id="2021">2021</span>
+<span id="2022">2022</span>
+<span id="2023">2023</span>
+<span id="2024">2024</span>
+<span id="2025">2025</span>
+<span id="2026">2026</span>
+<span id="2027">2027</span>
+<span id="2028">2028</span>
+<span id="2029">2029</span>
+<span id="2030">2030</span>
+<span id="2031">2031</span>
+<span id="2032">2032</span>
+<span id="2033">2033</span>
+<span id="2034">2034</span>
+<span id="2035">2035</span>
+<span id="2036">2036</span>
+<span id="2037">2037</span>
+<span id="2038">2038</span>
+<span id="2039">2039</span>
+<span id="2040">2040</span>
+<span id="2041">2041</span>
+<span id="2042">2042</span>
+<span id="2043">2043</span>
+<span id="2044">2044</span>
+<span id="2045">2045</span>
+<span id="2046">2046</span>
+<span id="2047">2047</span>
+<span id="2048">2048</span>
+<span id="2049">2049</span>
+<span id="2050">2050</span>
+<span id="2051">2051</span>
+<span id="2052">2052</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -2229,19 +2286,21 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConnData</span> {
 	<span class="ident">buffer</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 	<span class="ident">wh</span>: <span class="ident">WriteHandle</span>,
+	<span class="ident">config</span>: <span class="ident">HttpConfig</span>,
 	<span class="ident">create_time</span>: <span class="ident">u128</span>,
 	<span class="ident">last_request_time</span>: <span class="ident">u128</span>,
 	<span class="ident">needed_len</span>: <span class="ident">usize</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">ConnData</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">wh</span>: <span class="ident">WriteHandle</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">wh</span>: <span class="ident">WriteHandle</span>, <span class="ident">config</span>: <span class="ident">HttpConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">SystemTime::now</span>();
 		<span class="kw">let</span> <span class="ident">since_the_epoch</span> <span class="op">=</span> <span class="ident">start</span>
 			.<span class="ident">duration_since</span>(<span class="ident">UNIX_EPOCH</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Time went backwards&quot;</span>);
 		<span class="ident">ConnData</span> {
 			<span class="ident">buffer</span>: <span class="macro">vec!</span>[],
+			<span class="ident">config</span>,
 			<span class="ident">wh</span>,
 			<span class="ident">create_time</span>: <span class="ident">since_the_epoch</span>.<span class="ident">as_millis</span>(),
 			<span class="ident">last_request_time</span>: <span class="number">0</span>,
@@ -2274,7 +2333,7 @@
 	}
 }
 
-<span class="kw">struct</span> <span class="ident">HttpContext</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HttpContext</span> {
 	<span class="ident">stop</span>: <span class="ident">bool</span>,
 	<span class="ident">map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ConnData</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">stats</span>: <span class="ident">HttpStats</span>,
@@ -2316,7 +2375,7 @@
 	<span class="doccomment">/// The config of this [`HttpServer`].</span>
 	<span class="kw">pub</span> <span class="ident">config</span>: <span class="ident">HttpConfig</span>,
 	<span class="ident">listener</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TcpListener</span><span class="op">&gt;</span>,
-	<span class="ident">http_context</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HttpContext</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="kw">pub</span> <span class="ident">http_context</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HttpContext</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">log_queue</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RequestLogItem</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">thread_pool</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">StaticThreadPool</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
@@ -2545,6 +2604,7 @@
 		<span class="kw">let</span> <span class="ident">http_context_clone7</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">clone</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">eh</span> <span class="op">=</span> <span class="ident">EventHandler::new</span>(<span class="ident">EventHandlerConfig::default</span>());
+		<span class="ident">eh</span>.<span class="ident">set_on_panic</span>(<span class="ident">http_config</span>.<span class="ident">on_panic</span>)<span class="question-mark">?</span>;
 
 		<span class="ident">eh</span>.<span class="ident">set_on_read</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">buf</span>, <span class="ident">len</span>, <span class="ident">wh</span><span class="op">|</span> {
 			<span class="self">Self</span><span class="ident">::process_read</span>(
@@ -2628,7 +2688,7 @@
 			<span class="self">Self</span><span class="ident">::stats_log</span>(<span class="ident">http_context_clone6</span>, <span class="ident">http_config_clone4</span>.<span class="ident">clone</span>())
 		});
 
-		<span class="ident">std::thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="self">Self</span><span class="ident">::house_keeper</span>(<span class="ident">http_context_clone7</span>, <span class="kw-2">&amp;</span><span class="ident">http_config_clone5</span>));
+		<span class="ident">std::thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="self">Self</span><span class="ident">::house_keeper</span>(<span class="kw-2">&amp;</span><span class="ident">http_context_clone7</span>, <span class="kw-2">&amp;</span><span class="ident">http_config_clone5</span>));
 
 		<span class="macro">log_multi!</span>(<span class="ident">INFO</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;Server Started&quot;</span>);
 
@@ -2698,7 +2758,6 @@
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span>
 			<span class="self">Self</span><span class="ident">::build_headers</span>(<span class="ident">config</span>, <span class="ident">found</span>, <span class="ident">keep_alive</span>, <span class="ident">additional_headers</span>, <span class="ident">redirect</span>)<span class="question-mark">?</span>;
-
 		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">response</span>.<span class="ident">as_bytes</span>();
 		<span class="ident">wh</span>.<span class="ident">write</span>(<span class="ident">response</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">found</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">keep_alive</span> {
@@ -3191,25 +3250,24 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">house_keeper</span>(
-		<span class="ident">http_context</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HttpContext</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">do_house_keeping</span>(
+		<span class="ident">http_context</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HttpContext</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">http_config</span>: <span class="kw-2">&amp;</span><span class="ident">HttpConfig</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">loop</span> {
-			<span class="ident">std::thread::sleep</span>(<span class="ident">std::time::Duration::from_millis</span>(<span class="number">1000</span>));
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idledisc_incr</span> <span class="op">=</span> <span class="number">0</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rtimeout_incr</span> <span class="op">=</span> <span class="number">0</span>;
 
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idledisc_incr</span> <span class="op">=</span> <span class="number">0</span>;
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rtimeout_incr</span> <span class="op">=</span> <span class="number">0</span>;
+		{
+			<span class="kw">let</span> <span class="ident">http_context</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+				<span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span>
+					<span class="ident">ErrorKind::PoisonError</span>(<span class="macro">format!</span>(<span class="string">&quot;unexpected error: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>())).<span class="ident">into</span>();
+				<span class="ident">error</span>
+			})<span class="question-mark">?</span>;
+
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">del_list</span> <span class="op">=</span> <span class="macro">vec!</span>[];
 
 			{
-				<span class="kw">let</span> <span class="ident">http_context</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-					<span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span>
-						<span class="ident">ErrorKind::PoisonError</span>(<span class="macro">format!</span>(<span class="string">&quot;unexpected error: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>()))
-							.<span class="ident">into</span>();
-					<span class="ident">error</span>
-				})<span class="question-mark">?</span>;
-
-				<span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">map</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+				<span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">map</span>.<span class="ident">read</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 					<span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span>
 						<span class="ident">ErrorKind::PoisonError</span>(<span class="macro">format!</span>(<span class="string">&quot;unexpected error: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>()))
 							.<span class="ident">into</span>();
@@ -3223,20 +3281,25 @@
 				<span class="kw">let</span> <span class="ident">read_timeout</span> <span class="op">=</span> <span class="ident">http_config</span>.<span class="ident">read_timeout</span>;
 
 				<span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">map</span> {
-					<span class="kw">let</span> (<span class="ident">idledisc</span>, <span class="ident">rtimeout</span>) <span class="op">=</span>
-						<span class="kw">match</span> <span class="self">Self</span><span class="ident">::check_idle</span>(<span class="ident">time_now</span>, <span class="ident">v</span>, <span class="ident">last_request_timeout</span>, <span class="ident">read_timeout</span>) {
-							<span class="prelude-val">Ok</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-							<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
-								<span class="macro">log_multi!</span>(
-									<span class="ident">ERROR</span>,
-									<span class="ident">MAIN_LOG</span>,
-									<span class="string">&quot;error in check_idle (possible thread panic) ConnData for {}, err={}&quot;</span>,
-									<span class="ident">k</span>,
-									<span class="ident">e</span>.<span class="ident">to_string</span>(),
-								);
-								(<span class="bool-val">false</span>, <span class="bool-val">false</span>)
-							}
-						};
+					<span class="kw">let</span> (<span class="ident">idledisc</span>, <span class="ident">rtimeout</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">Self</span><span class="ident">::check_idle</span>(
+						<span class="ident">time_now</span>,
+						<span class="ident">v</span>,
+						<span class="ident">last_request_timeout</span>,
+						<span class="ident">read_timeout</span>,
+					) {
+						<span class="prelude-val">Ok</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
+						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">del_list</span>.<span class="ident">push</span>(<span class="ident">k</span>.<span class="ident">clone</span>());
+							<span class="macro">log_multi!</span>(
+                                                                        <span class="ident">ERROR</span>,
+                                                                        <span class="ident">MAIN_LOG</span>,
+                                                                        <span class="string">&quot;error in check_idle (possible thread panic) ConnData for {}, err={}&quot;</span>,
+                                                                        <span class="ident">k</span>,
+                                                                        <span class="ident">e</span>.<span class="ident">to_string</span>(),
+                                                                );
+							(<span class="bool-val">false</span>, <span class="bool-val">false</span>)
+						}
+					};
 
 					<span class="kw">if</span> <span class="ident">idledisc</span> {
 						<span class="ident">idledisc_incr</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -3245,33 +3308,57 @@
 						<span class="ident">rtimeout_incr</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 					}
 				}
-
-				<span class="kw">if</span> <span class="ident">http_context</span>.<span class="ident">stop</span> {
-					<span class="kw">break</span>;
-				}
 			}
 
-			<span class="kw">if</span> <span class="ident">idledisc_incr</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">rtimeout_incr</span> <span class="op">&gt;</span> <span class="number">0</span> {
-				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">http_context</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+			{
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">map</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 					<span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span>
 						<span class="ident">ErrorKind::PoisonError</span>(<span class="macro">format!</span>(<span class="string">&quot;unexpected error: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>()))
 							.<span class="ident">into</span>();
 					<span class="ident">error</span>
 				})<span class="question-mark">?</span>;
-				<span class="ident">http_context</span>.<span class="ident">stats</span>.<span class="ident">idledisc</span> <span class="op">+</span><span class="op">=</span> <span class="ident">idledisc_incr</span>;
-				<span class="ident">http_context</span>.<span class="ident">stats</span>.<span class="ident">rtimeout</span> <span class="op">+</span><span class="op">=</span> <span class="ident">rtimeout_incr</span>;
+				<span class="kw">for</span> <span class="ident">d</span> <span class="kw">in</span> <span class="ident">del_list</span> {
+					<span class="ident">map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">d</span>);
+				}
 			}
 
-			<span class="kw">match</span> (<span class="ident">http_config</span>.<span class="ident">on_housekeeper</span>)() {
-				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
-					<span class="macro">log_multi!</span>(
-						<span class="ident">ERROR</span>,
-						<span class="ident">MAIN_LOG</span>,
-						<span class="string">&quot;error in on_housekeeper, err={}&quot;</span>,
-						<span class="ident">e</span>.<span class="ident">to_string</span>(),
-					);
-				}
+			<span class="kw">if</span> <span class="ident">http_context</span>.<span class="ident">stop</span> {
+				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>);
+			}
+		}
+
+		<span class="kw">if</span> <span class="ident">idledisc_incr</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">rtimeout_incr</span> <span class="op">&gt;</span> <span class="number">0</span> {
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">http_context</span> <span class="op">=</span> <span class="ident">http_context</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+				<span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span>
+					<span class="ident">ErrorKind::PoisonError</span>(<span class="macro">format!</span>(<span class="string">&quot;unexpected error: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>())).<span class="ident">into</span>();
+				<span class="ident">error</span>
+			})<span class="question-mark">?</span>;
+			<span class="ident">http_context</span>.<span class="ident">stats</span>.<span class="ident">idledisc</span> <span class="op">+</span><span class="op">=</span> <span class="ident">idledisc_incr</span>;
+			<span class="ident">http_context</span>.<span class="ident">stats</span>.<span class="ident">rtimeout</span> <span class="op">+</span><span class="op">=</span> <span class="ident">rtimeout_incr</span>;
+		}
+
+		<span class="kw">match</span> (<span class="ident">http_config</span>.<span class="ident">on_housekeeper</span>)() {
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="macro">log_multi!</span>(
+					<span class="ident">ERROR</span>,
+					<span class="ident">MAIN_LOG</span>,
+					<span class="string">&quot;error in on_housekeeper, err={}&quot;</span>,
+					<span class="ident">e</span>.<span class="ident">to_string</span>(),
+				);
+			}
+		}
+		<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)
+	}
+
+	<span class="kw">fn</span> <span class="ident">house_keeper</span>(
+		<span class="ident">http_context</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HttpContext</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">http_config</span>: <span class="kw-2">&amp;</span><span class="ident">HttpConfig</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">loop</span> {
+			<span class="ident">std::thread::sleep</span>(<span class="ident">std::time::Duration::from_millis</span>(<span class="number">1000</span>));
+			<span class="kw">if</span> <span class="self">Self</span><span class="ident">::do_house_keeping</span>(<span class="ident">http_context</span>, <span class="ident">http_config</span>)<span class="question-mark">?</span> {
+				<span class="kw">break</span>;
 			}
 		}
 		<span class="prelude-val">Ok</span>(())
@@ -3284,12 +3371,40 @@
 		<span class="ident">read_timeout</span>: <span class="ident">u128</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">bool</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">conn_data</span> <span class="op">=</span> <span class="ident">conn_data</span>.<span class="ident">write</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-			<span class="macro">log_multi!</span>(
-				<span class="ident">ERROR</span>,
-				<span class="ident">MAIN_LOG</span>,
-				<span class="string">&quot;error closing conn_data from poison error: {}&quot;</span>,
-				<span class="ident">e</span>.<span class="ident">to_string</span>(),
-			);
+			<span class="kw">let</span> <span class="ident">conn_data</span> <span class="op">=</span> <span class="ident">e</span>.<span class="ident">into_inner</span>();
+			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span>
+				<span class="self">Self</span><span class="ident">::write_headers</span>(<span class="kw-2">&amp;</span><span class="ident">conn_data</span>.<span class="ident">wh</span>, <span class="kw-2">&amp;</span><span class="ident">conn_data</span>.<span class="ident">config</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="macro">vec!</span>[], <span class="prelude-val">None</span>);
+			<span class="kw">match</span> <span class="ident">res</span> {
+				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;error writing headers: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>(),);
+				}
+			}
+			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">conn_data</span>
+				.<span class="ident">wh</span>
+				.<span class="ident">write</span>(<span class="string">&quot;Internal Server error. See logs for details.&quot;</span>.<span class="ident">as_bytes</span>());
+			<span class="kw">match</span> <span class="ident">res</span> {
+				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="macro">log_multi!</span>(
+						<span class="ident">ERROR</span>,
+						<span class="ident">MAIN_LOG</span>,
+						<span class="string">&quot;error writing panic message: {}&quot;</span>,
+						<span class="ident">e</span>.<span class="ident">to_string</span>(),
+					);
+				}
+			}
+			<span class="kw">match</span> <span class="ident">conn_data</span>.<span class="ident">wh</span>.<span class="ident">close</span>() {
+				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="macro">log_multi!</span>(
+						<span class="ident">ERROR</span>,
+						<span class="ident">MAIN_LOG</span>,
+						<span class="string">&quot;error closing conn_data from poison error: {}&quot;</span>,
+						<span class="ident">e</span>.<span class="ident">to_string</span>(),
+					);
+				}
+			}
 			<span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span>
 				<span class="ident">ErrorKind::PoisonError</span>(<span class="macro">format!</span>(<span class="string">&quot;poison error getting conn_data&quot;</span>)).<span class="ident">into</span>();
 			<span class="ident">error</span>
@@ -3314,7 +3429,7 @@
 	<span class="kw">fn</span> <span class="ident">process_accept</span>(
 		<span class="ident">_thread_pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">StaticThreadPool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">http_context</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HttpContext</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		<span class="ident">_http_config</span>: <span class="ident">HttpConfig</span>,
+		<span class="ident">http_config</span>: <span class="ident">HttpConfig</span>,
 		<span class="ident">id</span>: <span class="ident">u128</span>,
 		<span class="ident">wh</span>: <span class="ident">WriteHandle</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
@@ -3333,7 +3448,7 @@
 			<span class="ident">error</span>
 		})<span class="question-mark">?</span>;
 
-		<span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">ConnData::new</span>(<span class="ident">wh</span>))));
+		<span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">ConnData::new</span>(<span class="ident">wh</span>, <span class="ident">http_config</span>))));
 		<span class="prelude-val">Ok</span>(())
 	}
 
@@ -3443,7 +3558,6 @@
 		<span class="comment">// iterate through and try to find a double line break. If we find it,</span>
 		<span class="comment">// send to next function for processing and delete the data that we send.</span>
 		<span class="kw">loop</span> {
-			<span class="comment">//let buffer = &amp;mut conn_data.buffer;</span>
 			<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">conn_data</span>.<span class="ident">buffer</span>.<span class="ident">len</span>();
 
 			<span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">3</span> {
