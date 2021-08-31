@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/280148e/eventhandler/src/eventhandler.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eventhandler.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/cdf47aa/eventhandler/src/eventhandler.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eventhandler.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../nioruntime_evh/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
@@ -2259,6 +2259,152 @@
 <span id="2257">2257</span>
 <span id="2258">2258</span>
 <span id="2259">2259</span>
+<span id="2260">2260</span>
+<span id="2261">2261</span>
+<span id="2262">2262</span>
+<span id="2263">2263</span>
+<span id="2264">2264</span>
+<span id="2265">2265</span>
+<span id="2266">2266</span>
+<span id="2267">2267</span>
+<span id="2268">2268</span>
+<span id="2269">2269</span>
+<span id="2270">2270</span>
+<span id="2271">2271</span>
+<span id="2272">2272</span>
+<span id="2273">2273</span>
+<span id="2274">2274</span>
+<span id="2275">2275</span>
+<span id="2276">2276</span>
+<span id="2277">2277</span>
+<span id="2278">2278</span>
+<span id="2279">2279</span>
+<span id="2280">2280</span>
+<span id="2281">2281</span>
+<span id="2282">2282</span>
+<span id="2283">2283</span>
+<span id="2284">2284</span>
+<span id="2285">2285</span>
+<span id="2286">2286</span>
+<span id="2287">2287</span>
+<span id="2288">2288</span>
+<span id="2289">2289</span>
+<span id="2290">2290</span>
+<span id="2291">2291</span>
+<span id="2292">2292</span>
+<span id="2293">2293</span>
+<span id="2294">2294</span>
+<span id="2295">2295</span>
+<span id="2296">2296</span>
+<span id="2297">2297</span>
+<span id="2298">2298</span>
+<span id="2299">2299</span>
+<span id="2300">2300</span>
+<span id="2301">2301</span>
+<span id="2302">2302</span>
+<span id="2303">2303</span>
+<span id="2304">2304</span>
+<span id="2305">2305</span>
+<span id="2306">2306</span>
+<span id="2307">2307</span>
+<span id="2308">2308</span>
+<span id="2309">2309</span>
+<span id="2310">2310</span>
+<span id="2311">2311</span>
+<span id="2312">2312</span>
+<span id="2313">2313</span>
+<span id="2314">2314</span>
+<span id="2315">2315</span>
+<span id="2316">2316</span>
+<span id="2317">2317</span>
+<span id="2318">2318</span>
+<span id="2319">2319</span>
+<span id="2320">2320</span>
+<span id="2321">2321</span>
+<span id="2322">2322</span>
+<span id="2323">2323</span>
+<span id="2324">2324</span>
+<span id="2325">2325</span>
+<span id="2326">2326</span>
+<span id="2327">2327</span>
+<span id="2328">2328</span>
+<span id="2329">2329</span>
+<span id="2330">2330</span>
+<span id="2331">2331</span>
+<span id="2332">2332</span>
+<span id="2333">2333</span>
+<span id="2334">2334</span>
+<span id="2335">2335</span>
+<span id="2336">2336</span>
+<span id="2337">2337</span>
+<span id="2338">2338</span>
+<span id="2339">2339</span>
+<span id="2340">2340</span>
+<span id="2341">2341</span>
+<span id="2342">2342</span>
+<span id="2343">2343</span>
+<span id="2344">2344</span>
+<span id="2345">2345</span>
+<span id="2346">2346</span>
+<span id="2347">2347</span>
+<span id="2348">2348</span>
+<span id="2349">2349</span>
+<span id="2350">2350</span>
+<span id="2351">2351</span>
+<span id="2352">2352</span>
+<span id="2353">2353</span>
+<span id="2354">2354</span>
+<span id="2355">2355</span>
+<span id="2356">2356</span>
+<span id="2357">2357</span>
+<span id="2358">2358</span>
+<span id="2359">2359</span>
+<span id="2360">2360</span>
+<span id="2361">2361</span>
+<span id="2362">2362</span>
+<span id="2363">2363</span>
+<span id="2364">2364</span>
+<span id="2365">2365</span>
+<span id="2366">2366</span>
+<span id="2367">2367</span>
+<span id="2368">2368</span>
+<span id="2369">2369</span>
+<span id="2370">2370</span>
+<span id="2371">2371</span>
+<span id="2372">2372</span>
+<span id="2373">2373</span>
+<span id="2374">2374</span>
+<span id="2375">2375</span>
+<span id="2376">2376</span>
+<span id="2377">2377</span>
+<span id="2378">2378</span>
+<span id="2379">2379</span>
+<span id="2380">2380</span>
+<span id="2381">2381</span>
+<span id="2382">2382</span>
+<span id="2383">2383</span>
+<span id="2384">2384</span>
+<span id="2385">2385</span>
+<span id="2386">2386</span>
+<span id="2387">2387</span>
+<span id="2388">2388</span>
+<span id="2389">2389</span>
+<span id="2390">2390</span>
+<span id="2391">2391</span>
+<span id="2392">2392</span>
+<span id="2393">2393</span>
+<span id="2394">2394</span>
+<span id="2395">2395</span>
+<span id="2396">2396</span>
+<span id="2397">2397</span>
+<span id="2398">2398</span>
+<span id="2399">2399</span>
+<span id="2400">2400</span>
+<span id="2401">2401</span>
+<span id="2402">2402</span>
+<span id="2403">2403</span>
+<span id="2404">2404</span>
+<span id="2405">2405</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -2287,8 +2433,11 @@
 <span class="kw">use</span> <span class="ident">std::pin::Pin</span>;
 <span class="kw">use</span> <span class="ident">std::sync::mpsc::sync_channel</span>;
 <span class="kw">use</span> <span class="ident">std::sync::mpsc::SyncSender</span>;
+<span class="kw">use</span> <span class="ident">std::sync::RwLockWriteGuard</span>;
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">RwLock</span>};
 <span class="kw">use</span> <span class="ident">std::thread::spawn</span>;
+
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">OnPanic</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>;
 
 <span class="comment">// linux deps</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>)]</span>
@@ -2522,6 +2671,7 @@
 	<span class="ident">guarded_data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">callbacks</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">Callbacks</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">on_panic</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OnPanic</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span> <span class="ident">EventHandler</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span>
@@ -2676,6 +2826,11 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_on_panic</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">on_panic</span>: <span class="ident">OnPanic</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="self">self</span>.<span class="ident">on_panic</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">on_panic</span>);
+		<span class="prelude-val">Ok</span>(())
+	}
+
 	<span class="doccomment">/// This sets the on_accept callback for this [`EventHandler`].</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// As described in [`EventHandler::add_tcp_listener`], this callback is executed when a new connection is</span>
@@ -2818,6 +2973,7 @@
 			<span class="ident">guarded_data</span>,
 			<span class="ident">callbacks</span>,
 			<span class="ident">global_lock</span>,
+			<span class="ident">on_panic</span>: <span class="prelude-val">None</span>,
 		}
 	}
 
@@ -2983,6 +3139,7 @@
 	<span class="kw">fn</span> <span class="ident">start_generic</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">selectors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SelectorHandle</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">ensure_handlers</span>()<span class="question-mark">?</span>;
 
+		<span class="kw">let</span> <span class="ident">on_panic</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">on_panic</span>.<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">global_lock</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">global_lock</span>;
 		<span class="kw">let</span> <span class="ident">global_lock_clone</span> <span class="op">=</span> <span class="ident">global_lock</span>.<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">selectors_clone</span> <span class="op">=</span> <span class="ident">selectors</span>.<span class="ident">clone</span>();
@@ -3024,24 +3181,100 @@
 			<span class="kw">let</span> <span class="ident">on_read</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">on_read</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>();
 			<span class="kw">let</span> <span class="ident">on_client_read</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">on_client_read</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>();
 			<span class="kw">let</span> <span class="ident">global_lock</span> <span class="op">=</span> <span class="ident">global_lock</span>.<span class="ident">clone</span>();
-			<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-				<span class="kw">match</span> <span class="self">Self</span><span class="ident">::rwthread</span>(
-					<span class="ident">selectors</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>],
-					<span class="ident">listener_guarded_data</span>,
-					<span class="ident">guarded_data</span>,
-					<span class="ident">on_read</span>,
-					<span class="ident">on_client_read</span>,
-					<span class="ident">global_lock</span>,
-				) {
-					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
-						<span class="macro">log_multi!</span>(
-							<span class="ident">ERROR</span>,
-							<span class="ident">MAIN_LOG</span>,
-							<span class="string">&quot;rwthread generated error: {}&quot;</span>,
-							<span class="ident">e</span>.<span class="ident">to_string</span>()
-						);
+			<span class="kw">let</span> <span class="ident">connection_id_map</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">HashMap::new</span>()));
+			<span class="kw">let</span> <span class="ident">connection_info_map</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">HashMap::new</span>()));
+			<span class="kw">let</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">HashSet::new</span>()));
+			<span class="kw">let</span> <span class="ident">write_buffers</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">HashMap::new</span>()));
+			<span class="kw">let</span> <span class="ident">input_events</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">Vec::new</span>()));
+			<span class="kw">let</span> <span class="ident">output_events</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">Vec::new</span>()));
+			<span class="kw">let</span> <span class="ident">on_panic</span> <span class="op">=</span> <span class="ident">on_panic</span>.<span class="ident">clone</span>();
+			<span class="kw">let</span> <span class="ident">counter</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="number">0</span>));
+			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="number">0</span>));
+
+			<span class="kw">let</span> <span class="ident">wakeup_fd</span>;
+
+			<span class="comment">// add wakeup fd</span>
+			{
+				<span class="kw">let</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data</span>);
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input_events</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">input_events</span>);
+
+				<span class="ident">input_events</span>.<span class="ident">push</span>(<span class="ident">GenericEvent</span> {
+					<span class="ident">fd</span>: <span class="ident">guarded_data</span>.<span class="ident">wakeup_rx</span>,
+					<span class="ident">etype</span>: <span class="ident">GenericEventType::AddReadLT</span>,
+				});
+
+				<span class="ident">wakeup_fd</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">wakeup_rx</span>;
+			}
+
+			<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="kw">loop</span> {
+				<span class="kw">let</span> <span class="ident">selectors</span> <span class="op">=</span> <span class="ident">selectors</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">listener_guarded_data</span> <span class="op">=</span> <span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">guarded_data_clone</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">on_read</span> <span class="op">=</span> <span class="ident">on_read</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">on_client_read</span> <span class="op">=</span> <span class="ident">on_client_read</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">on_panic</span> <span class="op">=</span> <span class="ident">on_panic</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">global_lock</span> <span class="op">=</span> <span class="ident">global_lock</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">connection_id_map</span> <span class="op">=</span> <span class="ident">connection_id_map</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">connection_info_map</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">write_buffers</span> <span class="op">=</span> <span class="ident">write_buffers</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="ident">hash_set</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">input_events</span> <span class="op">=</span> <span class="ident">input_events</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">output_events</span> <span class="op">=</span> <span class="ident">output_events</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">counter</span> <span class="op">=</span> <span class="ident">counter</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">jh</span> <span class="op">=</span> <span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+					<span class="kw">match</span> <span class="self">Self</span><span class="ident">::rwthread</span>(
+						<span class="ident">selectors</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>],
+						<span class="ident">listener_guarded_data</span>,
+						<span class="ident">guarded_data_clone</span>,
+						<span class="ident">on_read</span>,
+						<span class="ident">on_client_read</span>,
+						<span class="ident">global_lock</span>,
+						<span class="ident">connection_info_map</span>,
+						<span class="ident">connection_id_map</span>,
+						<span class="ident">hash_set</span>,
+						<span class="ident">write_buffers</span>,
+						<span class="ident">wakeup_fd</span>,
+						<span class="ident">input_events</span>,
+						<span class="ident">output_events</span>,
+						<span class="ident">counter</span>,
+						<span class="ident">res</span>,
+					) {
+						<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="macro">log_multi!</span>(
+								<span class="ident">ERROR</span>,
+								<span class="ident">MAIN_LOG</span>,
+								<span class="string">&quot;rwthread generated error: {}&quot;</span>,
+								<span class="ident">e</span>.<span class="ident">to_string</span>()
+							);
+						}
 					}
+				});
+
+				{
+					<span class="kw">let</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>();
+					<span class="kw">if</span> <span class="ident">guarded_data</span>.<span class="ident">stop</span> {
+						<span class="kw">break</span>;
+					}
+				}
+
+				<span class="kw">match</span> <span class="ident">jh</span>.<span class="ident">join</span>() {
+					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+					<span class="prelude-val">Err</span>(<span class="ident">_e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;thread panic!&quot;</span>);
+					}
+				}
+
+				<span class="kw">match</span> <span class="ident">on_panic</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">on_panic</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> (<span class="ident">on_panic</span>)() {
+						<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="macro">println!</span>(<span class="string">&quot;on_panic generated error: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>());
+						}
+					},
+					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}
 				}
 			});
 		}
@@ -3426,6 +3659,7 @@
 				<span class="ident">ctype</span>: <span class="ident">ConnectionType::Inbound</span>,
 				<span class="ident">sender</span>: <span class="prelude-val">None</span>,
 			});
+			<span class="ident">listener_guarded_data</span>.<span class="ident">wakeup</span>()<span class="question-mark">?</span>;
 		}
 
 		<span class="prelude-val">Ok</span>(())
@@ -3527,6 +3761,7 @@
 						<span class="ident">ctype</span>: <span class="ident">ConnectionType::Inbound</span>,
 						<span class="ident">sender</span>: <span class="prelude-val">None</span>,
 					});
+					<span class="ident">listener_guarded_data</span>.<span class="ident">wakeup</span>()<span class="question-mark">?</span>;
 				}
 				<span class="prelude-val">Ok</span>(<span class="ident">do_close</span>)
 			}
@@ -3577,6 +3812,8 @@
 			<span class="ident">ret</span>
 		};
 
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+
 		<span class="kw">for</span> <span class="ident">write_buffer</span> <span class="kw">in</span> <span class="ident">write_queue</span> {
 			<span class="kw">let</span> <span class="ident">list</span> <span class="op">=</span> <span class="ident">write_buffers</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">write_buffer</span>.<span class="ident">connection_id</span>);
 			<span class="kw">let</span> <span class="ident">connection_info</span> <span class="op">=</span> <span class="ident">connection_id_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">write_buffer</span>.<span class="ident">connection_id</span>);
@@ -3597,11 +3834,20 @@
 						<span class="ident">fd</span>: <span class="ident">connection_info</span>.<span class="ident">handle</span>,
 						<span class="ident">etype</span>: <span class="ident">GenericEventType::AddWriteET</span>,
 					};
-					<span class="ident">input_events</span>.<span class="ident">push</span>(<span class="ident">ge</span>);
+					<span class="kw">if</span> <span class="ident">hash_set</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">connection_info</span>.<span class="ident">handle</span>).<span class="ident">is_none</span>() {
+						<span class="ident">hash_set</span>.<span class="ident">insert</span>(<span class="ident">connection_info</span>.<span class="ident">handle</span>);
+						<span class="ident">input_events</span>.<span class="ident">push</span>(<span class="ident">ge</span>);
+					}
 				}
 				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="comment">// the connection already closed</span>
-					<span class="macro">log_multi!</span>(<span class="ident">DEBUG</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;connection not found write_buffer&quot;</span>);
+					<span class="macro">log_multi!</span>(
+						<span class="ident">INFO</span>,
+						<span class="ident">MAIN_LOG</span>,
+						<span class="string">&quot;connection not found write_buffer: &#39;{}&#39;, map=&#39;{:?}&#39;&quot;</span>,
+						<span class="ident">write_buffer</span>.<span class="ident">connection_id</span>,
+						<span class="ident">connection_id_map</span>
+					);
 				}
 			}
 		}
@@ -3616,24 +3862,41 @@
 		<span class="ident">on_read</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">on_client_read</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">connection_info_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ConnectionHandle</span>, <span class="ident">ConnectionInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">connection_id_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">ConnectionInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">hash_set</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ConnectionHandle</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">write_buffers</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">LinkedList</span><span class="op">&lt;</span><span class="ident">WriteBuffer</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">wakeup_fd</span>: <span class="ident">ConnectionHandle</span>,
+		<span class="ident">input_events</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenericEvent</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">output_events</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenericEvent</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">counter</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">res</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">connection_info_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">connection_id_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input_events</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output_events</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_buffers</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-		<span class="kw">let</span> <span class="ident">wakeup_fd</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">connection_info_map</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">connection_info_map</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">connection_id_map</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">connection_id_map</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">hash_set</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">write_buffers</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">write_buffers</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input_events</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">input_events</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output_events</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">output_events</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">counter</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockwp!</span>(<span class="ident">res</span>);
 
-		<span class="comment">// add wakeup fd</span>
-		{
-			<span class="kw">let</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data</span>);
-			<span class="ident">input_events</span>.<span class="ident">push</span>(<span class="ident">GenericEvent</span> {
-				<span class="ident">fd</span>: <span class="ident">guarded_data</span>.<span class="ident">wakeup_rx</span>,
-				<span class="ident">etype</span>: <span class="ident">GenericEventType::AddReadLT</span>,
-			});
-			<span class="ident">wakeup_fd</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">wakeup_rx</span>;
-		}
+		<span class="comment">// handle panic in progress events here</span>
+		<span class="kw-2">*</span><span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		<span class="self">Self</span><span class="ident">::process_events</span>(
+			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">counter</span>,
+			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">res</span>,
+			<span class="kw-2">&amp;</span><span class="ident">output_events</span>,
+			<span class="ident">wakeup_fd</span>,
+			<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
+			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_info_map</span>,
+			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_id_map</span>,
+			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write_buffers</span>,
+			<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+			<span class="ident">on_read</span>.<span class="ident">clone</span>(),
+			<span class="ident">on_client_read</span>.<span class="ident">clone</span>(),
+			<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+		)<span class="question-mark">?</span>;
 
 		<span class="kw">loop</span> {
 			<span class="comment">// see if there&#39;s any new write buffers to process</span>
@@ -3660,84 +3923,118 @@
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ws2_32::closesocket</span>(<span class="ident">selector</span>) };
 				<span class="kw">break</span>;
 			}
-
-			<span class="ident">output_events</span>.<span class="ident">clear</span>();
-			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::get_events</span>(
+			<span class="kw-2">*</span><span class="ident">res</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::get_events</span>(
 				<span class="ident">selector</span>,
 				<span class="ident">input_events</span>.<span class="ident">clone</span>(),
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">output_events</span>,
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hash_set</span>,
 				<span class="ident">wakeup</span>,
 			)<span class="question-mark">?</span>;
-			<span class="ident">input_events</span>.<span class="ident">clear</span>();
 
-			<span class="kw">if</span> <span class="ident">res</span> <span class="op">&gt;</span> <span class="number">0</span> {
-				<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">res</span> {
-					<span class="kw">match</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">etype</span> {
-						<span class="ident">GenericEventType::AddReadET</span> <span class="op">|</span> <span class="ident">GenericEventType::AddReadLT</span> <span class="op">=</span><span class="op">&gt;</span> {
-							<span class="kw">if</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span> <span class="op">=</span><span class="op">=</span> <span class="ident">wakeup_fd</span> {
-								<span class="comment">// read one byte for wakeup</span>
-								<span class="kw">let</span> <span class="ident">cbuf</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="number">0u8</span>; <span class="number">1</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>;
-								<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">read</span>(<span class="ident">wakeup_fd</span>, <span class="ident">cbuf</span>, <span class="number">1</span>) };
-								<span class="kw">if</span> <span class="ident">res</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
-									<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;read error on wakeupfd&quot;</span>);
-								}
-								<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data</span>);
-								<span class="ident">guarded_data</span>.<span class="ident">wakeup_scheduled</span> <span class="op">=</span> <span class="bool-val">false</span>;
-							} <span class="kw">else</span> {
-								<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
-								<span class="kw">match</span> <span class="ident">conn_info</span> {
-									<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::process_read_event</span>(
-										<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>],
-										<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
-										<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
-										<span class="ident">conn_info</span>.<span class="ident">connection_id</span>,
-										<span class="ident">on_read</span>.<span class="ident">clone</span>(),
-										<span class="ident">on_client_read</span>.<span class="ident">clone</span>(),
-										<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_id_map</span>,
-										<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_info_map</span>,
-										<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write_buffers</span>,
-										<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-									)<span class="question-mark">?</span>,
-									<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
-										<span class="comment">// looks to be spurious. connection already disconnected</span>
-										<span class="macro">log_multi!</span>(
-											<span class="ident">DEBUG</span>,
-											<span class="ident">MAIN_LOG</span>,
-											<span class="string">&quot;connection not found (add read): {}&quot;</span>,
-											<span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>
-										);
-									}
-								}
+			<span class="kw-2">*</span><span class="ident">counter</span> <span class="op">=</span> <span class="number">0</span>;
+			<span class="self">Self</span><span class="ident">::process_events</span>(
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">counter</span>,
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">res</span>,
+				<span class="kw-2">&amp;</span><span class="ident">output_events</span>,
+				<span class="ident">wakeup_fd</span>,
+				<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_info_map</span>,
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_id_map</span>,
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write_buffers</span>,
+				<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+				<span class="ident">on_read</span>.<span class="ident">clone</span>(),
+				<span class="ident">on_client_read</span>.<span class="ident">clone</span>(),
+				<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+			)<span class="question-mark">?</span>;
+
+			<span class="ident">output_events</span>.<span class="ident">clear</span>();
+			<span class="ident">input_events</span>.<span class="ident">clear</span>();
+		}
+		<span class="prelude-val">Ok</span>(())
+	}
+
+	<span class="kw">fn</span> <span class="ident">process_events</span>(
+		<span class="ident">counter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RwLockWriteGuard</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+		<span class="ident">res</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RwLockWriteGuard</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+		<span class="ident">output_events</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenericEvent</span><span class="op">&gt;</span>,
+		<span class="ident">wakeup_fd</span>: <span class="ident">ConnectionHandle</span>,
+		<span class="ident">listener_guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">connection_info_map</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ConnectionHandle</span>, <span class="ident">ConnectionInfo</span><span class="op">&gt;</span>,
+		<span class="ident">connection_id_map</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">ConnectionInfo</span><span class="op">&gt;</span>,
+		<span class="ident">write_buffers</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">LinkedList</span><span class="op">&lt;</span><span class="ident">WriteBuffer</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">on_read</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">on_client_read</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">res</span> <span class="op">&gt;</span> <span class="number">0</span> {
+			<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">counter</span>..<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">res</span> {
+				<span class="kw">match</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">etype</span> {
+					<span class="ident">GenericEventType::AddReadET</span> <span class="op">|</span> <span class="ident">GenericEventType::AddReadLT</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="kw">if</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span> <span class="op">=</span><span class="op">=</span> <span class="ident">wakeup_fd</span> {
+							<span class="comment">// read one byte for wakeup</span>
+							<span class="kw">let</span> <span class="ident">cbuf</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="number">0u8</span>; <span class="number">1</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>;
+							<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">read</span>(<span class="ident">wakeup_fd</span>, <span class="ident">cbuf</span>, <span class="number">1</span>) };
+							<span class="kw">if</span> <span class="ident">res</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
+								<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;read error on wakeupfd&quot;</span>);
 							}
-						}
-						<span class="ident">GenericEventType::AddWriteET</span> <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data</span>);
+							<span class="ident">guarded_data</span>.<span class="ident">wakeup_scheduled</span> <span class="op">=</span> <span class="bool-val">false</span>;
+						} <span class="kw">else</span> {
 							<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
 							<span class="kw">match</span> <span class="ident">conn_info</span> {
-								<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::process_write_event</span>(
+								<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::process_read_event</span>(
 									<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>],
-									<span class="ident">conn_info</span>.<span class="ident">connection_id</span>,
-									<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write_buffers</span>,
-									<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-									<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_id_map</span>,
-									<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_info_map</span>,
 									<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
+									<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+									<span class="ident">conn_info</span>.<span class="ident">connection_id</span>,
+									<span class="ident">on_read</span>.<span class="ident">clone</span>(),
+									<span class="ident">on_client_read</span>.<span class="ident">clone</span>(),
+									<span class="ident">connection_id_map</span>,
+									<span class="ident">connection_info_map</span>,
+									<span class="ident">write_buffers</span>,
+									<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
 								)<span class="question-mark">?</span>,
 								<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
 									<span class="comment">// looks to be spurious. connection already disconnected</span>
 									<span class="macro">log_multi!</span>(
 										<span class="ident">DEBUG</span>,
 										<span class="ident">MAIN_LOG</span>,
-										<span class="string">&quot;connection not found (add write): {}&quot;</span>,
+										<span class="string">&quot;connection not found (add read): {}&quot;</span>,
 										<span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>
 									);
 								}
 							}
-						} <span class="comment">//_ =&gt; {}</span>
+						}
 					}
+					<span class="ident">GenericEventType::AddWriteET</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
+						<span class="kw">match</span> <span class="ident">conn_info</span> {
+							<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::process_write_event</span>(
+								<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>],
+								<span class="ident">conn_info</span>.<span class="ident">connection_id</span>,
+								<span class="ident">write_buffers</span>,
+								<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+								<span class="ident">connection_id_map</span>,
+								<span class="ident">connection_info_map</span>,
+								<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
+							)<span class="question-mark">?</span>,
+							<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+								<span class="comment">// looks to be spurious. connection already disconnected</span>
+								<span class="macro">log_multi!</span>(
+									<span class="ident">DEBUG</span>,
+									<span class="ident">MAIN_LOG</span>,
+									<span class="string">&quot;connection not found (add write): {}&quot;</span>,
+									<span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>
+								);
+							}
+						}
+					} <span class="comment">//_ =&gt; {}</span>
 				}
+				<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 			}
 		}
+
 		<span class="prelude-val">Ok</span>(())
 	}
 
@@ -4058,16 +4355,11 @@
 			)
 		};
 
-		<span class="comment">// This error appears to happen occasionally when thousands of</span>
-		<span class="comment">// connections per second are connecting/disconnecting.</span>
-		<span class="comment">// it appears harmless as all connections are processed correctly.</span>
-		<span class="comment">// So for the time being, we will comment this out so it doesn&#39;t</span>
-		<span class="comment">// pollute the logs.</span>
 		<span class="kw">if</span> <span class="ident">ret_count</span> <span class="op">&lt;</span> <span class="number">0</span> {
 			<span class="macro">info!</span>(<span class="string">&quot;Error in kevent: kevs={:?}, error={}&quot;</span>, <span class="ident">kevs</span>, <span class="ident">errno</span>());
 		}
 
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret_count_adjusted</span> <span class="op">=</span> <span class="number">0</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret_count_adjusted</span> <span class="op">=</span> <span class="ident">output_events</span>.<span class="ident">len</span>();
 		<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">ret_count</span> {
 			<span class="kw">let</span> <span class="ident">kev</span> <span class="op">=</span> <span class="ident">ret_kevs</span>[<span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span>];
 			<span class="kw">if</span> <span class="op">!</span><span class="ident">kev</span>.<span class="ident">flags</span>.<span class="ident">contains</span>(<span class="ident">EventFlag::EV_DELETE</span>) {
@@ -4099,7 +4391,7 @@
 	<span class="ident">Listener</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">ConnectionInfo</span> {
 	<span class="ident">handle</span>: <span class="ident">ConnectionHandle</span>,
 	<span class="ident">connection_id</span>: <span class="ident">u128</span>,
@@ -4159,7 +4451,7 @@
 	<span class="ident">AddListener</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">enum</span> <span class="ident">GenericEventType</span> {
 	<span class="ident">AddReadET</span>,
 	<span class="ident">AddReadLT</span>,
@@ -4168,7 +4460,7 @@
 	<span class="comment">//	DelWrite,</span>
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">struct</span> <span class="ident">GenericEvent</span> {
 	<span class="ident">fd</span>: <span class="ident">ConnectionHandle</span>,
 	<span class="ident">etype</span>: <span class="ident">GenericEventType</span>,
