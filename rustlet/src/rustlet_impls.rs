@@ -540,7 +540,6 @@ impl RustletResponse {
 			true => *callback_state = State::HeadersChunked,
 			false => *callback_state = State::HeadersClose,
 		}
-		info!("setting callback state to {:?}", *callback_state);
 		buffer.clear();
 
 		Ok(())
