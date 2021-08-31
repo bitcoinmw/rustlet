@@ -133,9 +133,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.69"
+version = "1.0.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e70cc2f62c6ce1868963827bd677764c62d07c3d9a3e1fb1177ee1a9ab199eb2"
+checksum = "d26a6ce4b6a484fa3edb70f7efa6fc430fd2b87285fe8b84304fd0936faa0dc0"
 dependencies = [
  "jobserver",
 ]
@@ -546,7 +546,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_evh"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#763516ca2dbd3fbc5ee48e4971ff7c27e682b60c"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#dc459173ad8ac436a09b1eafe5a7fb298a382744"
 dependencies = [
  "errno",
  "futures",
@@ -565,7 +565,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_http"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#763516ca2dbd3fbc5ee48e4971ff7c27e682b60c"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#dc459173ad8ac436a09b1eafe5a7fb298a382744"
 dependencies = [
  "bytefmt",
  "chrono",
@@ -581,7 +581,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_log"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#763516ca2dbd3fbc5ee48e4971ff7c27e682b60c"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#dc459173ad8ac436a09b1eafe5a7fb298a382744"
 dependencies = [
  "chrono",
  "failure",
@@ -596,7 +596,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_util"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#763516ca2dbd3fbc5ee48e4971ff7c27e682b60c"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#dc459173ad8ac436a09b1eafe5a7fb298a382744"
 dependencies = [
  "byteorder",
  "bytes",

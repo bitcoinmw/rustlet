@@ -372,12 +372,23 @@ fn main() {
 		rustlet!("async", {
 			let ac = async_context!();
 			response!("first message\n");
+			flush!();
 
 			std::thread::spawn(move || {
 				async_context!(ac);
 				// simulate long running task:
 				std::thread::sleep(std::time::Duration::from_millis(1000));
 				response!("second message\n");
+				flush!();
+				std::thread::sleep(std::time::Duration::from_millis(1000));
+				response!("third message\n");
+				flush!();
+				std::thread::sleep(std::time::Duration::from_millis(1000));
+				response!("fourth message\n");
+				flush!();
+				std::thread::sleep(std::time::Duration::from_millis(1000));
+				response!("fifth message\n");
+				flush!();
 				async_complete!();
 			});
 		});
