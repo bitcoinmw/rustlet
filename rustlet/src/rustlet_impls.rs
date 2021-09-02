@@ -31,6 +31,7 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 info!();
+
 const MAIN_LOG: &str = "mainlog";
 const MAX_CHUNK_SIZE: usize = 1024 * 1024 * 10;
 const MAX_ESCAPE_SEQUENCE: usize = 100;
@@ -397,7 +398,13 @@ pub struct RustletResponse {
 }
 
 impl RustletResponse {
-	pub fn new(wh: WriteHandle, config: HttpConfig, keep_alive: bool, chained: bool) -> Self {
+	pub fn new(
+		is_async: Arc<RwLock<bool>>,
+		wh: WriteHandle,
+		config: HttpConfig,
+		keep_alive: bool,
+		chained: bool,
+	) -> Self {
 		RustletResponse {
 			wh,
 			config,
@@ -406,9 +413,9 @@ impl RustletResponse {
 			additional_headers: vec![],
 			redirect: Arc::new(Mutex::new(None)),
 			chained,
-			is_async: Arc::new(RwLock::new(false)),
 			buffer: Arc::new(RwLock::new(vec![])),
 			is_complete: false,
+			is_async: is_async.clone(),
 		}
 	}
 
@@ -559,6 +566,7 @@ impl RustletResponse {
 	pub fn async_complete(&mut self) -> Result<(), Error> {
 		self.set_is_async(false)?;
 		self.complete()?;
+		self.wh.async_recheck()?;
 		Ok(())
 	}
 
@@ -676,20 +684,22 @@ fn on_panic() -> Result<(), Error> {
 }
 
 fn api_callback(
+	conn_data_is_async: Arc<RwLock<bool>>, // ConnData arc rwlock
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
-	has_content: bool,                          // does this request have content?
-	start_content: usize,                       // start content in ConnData buffer
-	end_content: usize,                         // end content in ConnData buffer
-	method: HttpMethod,                         // GET or POST
-	config: HttpConfig,                         // HttpServer's configuration
-	wh: WriteHandle,                            // WriteHandle to write back data
-	version: HttpVersion,                       // HttpVersion
-	uri: &str,                                  // uri
-	query: &str,                                // query
-	headers: Vec<(Vec<u8>, Vec<u8>)>,           // headers
-	keep_alive: bool,                           // keep-alive
+	has_content: bool,                     // does this request have content?
+	start_content: usize,                  // start content in ConnData buffer
+	end_content: usize,                    // end content in ConnData buffer
+	method: HttpMethod,                    // GET or POST
+	config: HttpConfig,                    // HttpServer's configuration
+	wh: WriteHandle,                       // WriteHandle to write back data
+	version: HttpVersion,                  // HttpVersion
+	uri: &str,                             // uri
+	query: &str,                           // query
+	headers: Vec<(Vec<u8>, Vec<u8>)>,      // headers
+	keep_alive: bool,                      // keep-alive
 ) -> Result<(), Error> {
 	let res = do_api_callback(
+		conn_data_is_async.clone(),
 		conn_data,
 		has_content,
 		start_content,
@@ -726,7 +736,8 @@ fn api_callback(
 				});
 			if headers_written {
 				if !keep_alive {
-					let mut response = RustletResponse::new(wh.clone(), config, false, true);
+					let mut response =
+						RustletResponse::new(conn_data_is_async, wh.clone(), config, false, true);
 					response.write(
 						format!(
 							"{}{}{}",
@@ -752,7 +763,8 @@ fn api_callback(
 					wh.close()?;
 				}
 			} else {
-				let mut response = RustletResponse::new(wh.clone(), config, false, false);
+				let mut response =
+					RustletResponse::new(conn_data_is_async, wh.clone(), config, false, false);
 				response.write("Internal Server error. See logs for details.".as_bytes())?;
 				wh.close()?;
 			}
@@ -763,6 +775,7 @@ fn api_callback(
 }
 
 fn execute_rustlet(
+	conn_data_is_async: Arc<RwLock<bool>>,
 	rustlet_name: &str,
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
 	has_content: bool,                          // whether this request has content
@@ -780,11 +793,12 @@ fn execute_rustlet(
 	session_map: Arc<RwLock<HashMap<u128, SessionData>>>,
 ) -> Result<(), Error> {
 	let rustlets = nioruntime_util::lockr!(RUSTLETS);
-
 	let rustlet = rustlets.rustlets.get(rustlet_name);
+
 	match rustlet {
 		Some(rustlet) => {
-			let mut response = RustletResponse::new(wh, config.clone(), keep_alive, chained);
+			let mut response =
+				RustletResponse::new(conn_data_is_async, wh, config.clone(), keep_alive, chained);
 			let content = match has_content {
 				true => (*conn_data).get_buffer()[start_content..end_content].to_vec(),
 				false => vec![],
@@ -841,7 +855,8 @@ fn execute_rustlet(
 			response.complete()?;
 		}
 		None => {
-			let mut response = RustletResponse::new(wh.clone(), config, keep_alive, chained);
+			let mut response =
+				RustletResponse::new(conn_data_is_async, wh.clone(), config, keep_alive, chained);
 			response.write(format!("Rustlet '{}' does not exist.", rustlet_name).as_bytes())?;
 			if keep_alive {
 				wh.write(&("0\r\n\r\n".as_bytes())[0..5])?;
@@ -854,6 +869,7 @@ fn execute_rustlet(
 }
 
 fn do_api_callback(
+	conn_data_is_async: Arc<RwLock<bool>>,
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
 	has_content: bool,
 	start_content: usize,
@@ -874,6 +890,7 @@ fn do_api_callback(
 	match rustlet {
 		Some(rustlet_name) => {
 			execute_rustlet(
+				conn_data_is_async,
 				rustlet_name,
 				conn_data,
 				has_content,
@@ -895,8 +912,8 @@ fn do_api_callback(
 			// see if it's an RSP.
 			if uri.to_lowercase().ends_with(".rsp") {
 				process_rsp(
+					conn_data_is_async,
 					conn_data,
-					//content,
 					has_content,
 					start_content,
 					end_content,
@@ -912,7 +929,8 @@ fn do_api_callback(
 				)?;
 			} else {
 				log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
-				let mut response = RustletResponse::new(wh.clone(), config, false, false);
+				let mut response =
+					RustletResponse::new(conn_data_is_async, wh.clone(), config, false, false);
 				response.write("Internal Server error. See logs for details.".as_bytes())?;
 				wh.close()?;
 			}
@@ -923,6 +941,7 @@ fn do_api_callback(
 }
 
 fn process_rsp(
+	conn_data_is_async: Arc<RwLock<bool>>,
 	conn_data: &mut RwLockWriteGuard<ConnData>, // connection_data
 	has_content: bool,
 	start_content: usize,
@@ -1008,9 +1027,9 @@ fn process_rsp(
 					if buf[i] == '>' as u8 {
 						let rustlet_name = std::str::from_utf8(&buf[(end + 3)..i])?;
 						execute_rustlet(
+							conn_data_is_async.clone(),
 							rustlet_name,
 							conn_data,
-							//content,
 							has_content,
 							start_content,
 							end_content,
