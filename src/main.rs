@@ -28,7 +28,11 @@ use librustlet::*;
 use nioruntime_evh::EventHandlerConfig;
 use nioruntime_log::*;
 use nioruntime_util::{Error, ErrorKind};
+use rustls::ServerConfig;
+use rustls_pemfile;
 use std::convert::TryInto;
+use std::fs::File;
+use std::io::BufReader;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
@@ -37,6 +41,35 @@ use std::sync::{Arc, Mutex};
 const MAX_BUF: usize = 100_000;
 
 nioruntime_log::debug!();
+
+fn load_certs(filename: &str) -> Vec<rustls::Certificate> {
+	let certfile = File::open(filename).expect("cannot open certificate file");
+	let mut reader = BufReader::new(certfile);
+	rustls_pemfile::certs(&mut reader)
+		.unwrap()
+		.iter()
+		.map(|v| rustls::Certificate(v.clone()))
+		.collect()
+}
+
+fn load_private_key(filename: &str) -> rustls::PrivateKey {
+	let keyfile = File::open(filename).expect("cannot open private key file");
+	let mut reader = BufReader::new(keyfile);
+
+	loop {
+		match rustls_pemfile::read_one(&mut reader).expect("cannot parse private key .pem file") {
+			Some(rustls_pemfile::Item::RSAKey(key)) => return rustls::PrivateKey(key),
+			Some(rustls_pemfile::Item::PKCS8Key(key)) => return rustls::PrivateKey(key),
+			None => break,
+			_ => {}
+		}
+	}
+
+	panic!(
+		"no keys found in {:?} (encrypted keys not supported)",
+		filename
+	);
+}
 
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
@@ -254,6 +287,28 @@ fn main() {
 	let nginx = args.is_present("nginx");
 	let debug = args.is_present("debug");
 
+	let certs = args.is_present("certs");
+	let private_key = args.is_present("private_key");
+
+	if certs && !private_key || !certs && private_key {
+		error!("Either both cert and private_key or neither must be specified");
+		return;
+	}
+
+	let tls_config = match args.value_of("certs") {
+		Some(certs) => Some(
+			ServerConfig::builder()
+				.with_safe_defaults()
+				.with_no_client_auth()
+				.with_single_cert(
+					load_certs(certs),
+					load_private_key(args.value_of("private_key").unwrap()),
+				)
+				.unwrap(),
+		),
+		None => None,
+	};
+
 	if client {
 		let threads = args.is_present("threads");
 		let count = args.is_present("count");
@@ -330,7 +385,10 @@ fn main() {
 		rustlet_init!(RustletConfig {
 			session_timeout: 60,
 			http_config: HttpConfig {
-				evh_config: EventHandlerConfig { thread_count: 8 },
+				evh_config: EventHandlerConfig {
+					thread_count: 8,
+					tls_config,
+				},
 				debug,
 				..Default::default()
 			},
