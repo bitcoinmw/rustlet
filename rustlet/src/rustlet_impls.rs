@@ -68,7 +68,8 @@ pub struct SessionData {
 
 impl SessionData {
 	fn new() -> Self {
-		let now = Instant::now().duration_since(*START_TIME).as_millis();
+		let start_time = *START_TIME;
+		let now = Instant::now().duration_since(start_time).as_millis();
 
 		SessionData {
 			mod_time: now,
@@ -134,7 +135,8 @@ impl RustletRequest {
 			match session_map.get_mut(&self.session_id) {
 				Some(mut data) => {
 					let value = data.data.get(&name.to_string());
-					let now = Instant::now().duration_since(*START_TIME).as_millis();
+					let start_time = *START_TIME;
+					let now = Instant::now().duration_since(start_time).as_millis();
 					data.mod_time = now;
 					match value {
 						Some(value) => {
@@ -165,7 +167,8 @@ impl RustletRequest {
 				let mut writer = BinWriter::new(&mut sink);
 				value.write(&mut writer)?;
 				session_data.data.insert(name.to_string(), sink);
-				let now = Instant::now().duration_since(*START_TIME).as_millis();
+				let start_time = *START_TIME;
+				let now = Instant::now().duration_since(start_time).as_millis();
 				session_data.mod_time = now;
 			}
 			None => {
@@ -174,7 +177,8 @@ impl RustletRequest {
 				let mut writer = BinWriter::new(&mut sink);
 				value.write(&mut writer)?;
 				session_data.data.insert(name.to_string(), sink);
-				let now = Instant::now().duration_since(*START_TIME).as_millis();
+				let start_time = *START_TIME;
+				let now = Instant::now().duration_since(start_time).as_millis();
 				session_data.mod_time = now;
 				session_map.insert(self.session_id, session_data);
 			}
@@ -189,7 +193,8 @@ impl RustletRequest {
 		match session_map.get_mut(&self.session_id) {
 			Some(session_data) => {
 				session_data.data.remove(&name.to_string());
-				let now = Instant::now().duration_since(*START_TIME).as_millis();
+				let start_time = *START_TIME;
+				let now = Instant::now().duration_since(start_time).as_millis();
 				session_data.mod_time = now;
 			}
 			None => {}
@@ -614,7 +619,8 @@ fn housekeeper() -> Result<(), Error> {
 	if session_timeout > 0 {
 		let mut session_map = nioruntime_util::lockw!(SESSION_MAP);
 
-		let now = Instant::now().duration_since(*START_TIME).as_millis();
+		let start_time = *START_TIME;
+		let now = Instant::now().duration_since(start_time).as_millis();
 
 		let mut rem_list = vec![];
 		for (k, v) in &*session_map {
