@@ -1112,9 +1112,6 @@
 <span id="1110">1110</span>
 <span id="1111">1111</span>
 <span id="1112">1112</span>
-<span id="1113">1113</span>
-<span id="1114">1114</span>
-<span id="1115">1115</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -1155,9 +1152,6 @@
 <span class="kw">const</span> <span class="ident">MAX_ESCAPE_SEQUENCE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">100</span>;
 <span class="kw">const</span> <span class="ident">SEPARATOR_LINE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span>
 	<span class="string">&quot;------------------------------------------------------------------------------------------------------------------------------------&quot;</span>;
-
-<span class="comment">// note: AsyncContext currently does not support HTTP pipelining. No major browsers appear to support HTTP pipelining.</span>
-<span class="comment">// but this should technically be supported as part of the HTTP standard.</span>
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RustletAsyncContext</span> {
