@@ -35,6 +35,11 @@ args:
         short: d
         long: debug
         takes_value: false
+    - delete_request_rotation:
+        help: delete the request log when rotated (for long running tests)
+        short: r
+        long: norotate
+        takes_value: false
     - certs:
         help: TLS certificate file location
         short: e

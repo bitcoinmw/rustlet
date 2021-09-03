@@ -567,7 +567,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_evh"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0886ba34b3705615713d4cc6986a958107049372"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#fd3bfd554f53adeef3aeca3c097a4789c827c725"
 dependencies = [
  "errno",
  "futures",
@@ -587,7 +587,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_http"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0886ba34b3705615713d4cc6986a958107049372"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#fd3bfd554f53adeef3aeca3c097a4789c827c725"
 dependencies = [
  "bytefmt",
  "chrono",
@@ -604,7 +604,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_log"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0886ba34b3705615713d4cc6986a958107049372"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#fd3bfd554f53adeef3aeca3c097a4789c827c725"
 dependencies = [
  "chrono",
  "failure",
@@ -619,7 +619,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_util"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0886ba34b3705615713d4cc6986a958107049372"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#fd3bfd554f53adeef3aeca3c097a4789c827c725"
 dependencies = [
  "byteorder",
  "bytes",

@@ -286,6 +286,7 @@ fn main() {
 	let client = args.is_present("client");
 	let nginx = args.is_present("nginx");
 	let debug = args.is_present("debug");
+	let delete_request_rotation = args.is_present("delete_request_rotation");
 
 	let certs = args.is_present("certs");
 	let private_key = args.is_present("private_key");
@@ -389,6 +390,7 @@ fn main() {
 					thread_count: 8,
 					tls_config,
 				},
+				delete_request_rotation,
 				debug,
 				..Default::default()
 			},
