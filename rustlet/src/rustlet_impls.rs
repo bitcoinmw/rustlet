@@ -38,9 +38,6 @@ const MAX_ESCAPE_SEQUENCE: usize = 100;
 const SEPARATOR_LINE: &str =
 	"------------------------------------------------------------------------------------------------------------------------------------";
 
-// note: AsyncContext currently does not support HTTP pipelining. No major browsers appear to support HTTP pipelining.
-// but this should technically be supported as part of the HTTP standard.
-
 #[derive(Clone)]
 pub struct RustletAsyncContext {
 	pub request: Option<RustletRequest>,
