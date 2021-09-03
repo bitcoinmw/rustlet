@@ -468,6 +468,64 @@
 <span id="466">466</span>
 <span id="467">467</span>
 <span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -499,7 +557,11 @@
 <span class="kw">use</span> <span class="ident">nioruntime_evh::EventHandlerConfig</span>;
 <span class="kw">use</span> <span class="ident">nioruntime_log</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">nioruntime_util</span>::{<span class="ident">Error</span>, <span class="ident">ErrorKind</span>};
+<span class="kw">use</span> <span class="ident">rustls::ServerConfig</span>;
+<span class="kw">use</span> <span class="ident">rustls_pemfile</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+<span class="kw">use</span> <span class="ident">std::fs::File</span>;
+<span class="kw">use</span> <span class="ident">std::io::BufReader</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::io::Write</span>;
 <span class="kw">use</span> <span class="ident">std::net::TcpStream</span>;
@@ -508,6 +570,35 @@
 <span class="kw">const</span> <span class="ident">MAX_BUF</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">100_000</span>;
 
 <span class="macro">nioruntime_log::debug!</span>();
+
+<span class="kw">fn</span> <span class="ident">load_certs</span>(<span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">rustls::Certificate</span><span class="op">&gt;</span> {
+	<span class="kw">let</span> <span class="ident">certfile</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="ident">filename</span>).<span class="ident">expect</span>(<span class="string">&quot;cannot open certificate file&quot;</span>);
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">BufReader::new</span>(<span class="ident">certfile</span>);
+	<span class="ident">rustls_pemfile::certs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">reader</span>)
+		.<span class="ident">unwrap</span>()
+		.<span class="ident">iter</span>()
+		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">rustls::Certificate</span>(<span class="ident">v</span>.<span class="ident">clone</span>()))
+		.<span class="ident">collect</span>()
+}
+
+<span class="kw">fn</span> <span class="ident">load_private_key</span>(<span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">rustls::PrivateKey</span> {
+	<span class="kw">let</span> <span class="ident">keyfile</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="ident">filename</span>).<span class="ident">expect</span>(<span class="string">&quot;cannot open private key file&quot;</span>);
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">BufReader::new</span>(<span class="ident">keyfile</span>);
+
+	<span class="kw">loop</span> {
+		<span class="kw">match</span> <span class="ident">rustls_pemfile::read_one</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">reader</span>).<span class="ident">expect</span>(<span class="string">&quot;cannot parse private key .pem file&quot;</span>) {
+			<span class="prelude-val">Some</span>(<span class="ident">rustls_pemfile::Item::RSAKey</span>(<span class="ident">key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">rustls::PrivateKey</span>(<span class="ident">key</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">rustls_pemfile::Item::PKCS8Key</span>(<span class="ident">key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">rustls::PrivateKey</span>(<span class="ident">key</span>),
+			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+		}
+	}
+
+	<span class="macro">panic!</span>(
+		<span class="string">&quot;no keys found in {:?} (encrypted keys not supported)&quot;</span>,
+		<span class="ident">filename</span>
+	);
+}
 
 <span class="kw">fn</span> <span class="ident">fun</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="macro">rustlet!</span>(<span class="string">&quot;error&quot;</span>, {
@@ -725,6 +816,28 @@
 	<span class="kw">let</span> <span class="ident">nginx</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;nginx&quot;</span>);
 	<span class="kw">let</span> <span class="ident">debug</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;debug&quot;</span>);
 
+	<span class="kw">let</span> <span class="ident">certs</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;certs&quot;</span>);
+	<span class="kw">let</span> <span class="ident">private_key</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;private_key&quot;</span>);
+
+	<span class="kw">if</span> <span class="ident">certs</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">private_key</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">certs</span> <span class="op">&amp;&amp;</span> <span class="ident">private_key</span> {
+		<span class="macro">error!</span>(<span class="string">&quot;Either both cert and private_key or neither must be specified&quot;</span>);
+		<span class="kw">return</span>;
+	}
+
+	<span class="kw">let</span> <span class="ident">tls_config</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">args</span>.<span class="ident">value_of</span>(<span class="string">&quot;certs&quot;</span>) {
+		<span class="prelude-val">Some</span>(<span class="ident">certs</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(
+			<span class="ident">ServerConfig::builder</span>()
+				.<span class="ident">with_safe_defaults</span>()
+				.<span class="ident">with_no_client_auth</span>()
+				.<span class="ident">with_single_cert</span>(
+					<span class="ident">load_certs</span>(<span class="ident">certs</span>),
+					<span class="ident">load_private_key</span>(<span class="ident">args</span>.<span class="ident">value_of</span>(<span class="string">&quot;private_key&quot;</span>).<span class="ident">unwrap</span>()),
+				)
+				.<span class="ident">unwrap</span>(),
+		),
+		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+	};
+
 	<span class="kw">if</span> <span class="ident">client</span> {
 		<span class="kw">let</span> <span class="ident">threads</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;threads&quot;</span>);
 		<span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;count&quot;</span>);
@@ -801,7 +914,10 @@
 		<span class="macro">rustlet_init!</span>(<span class="ident">RustletConfig</span> {
 			<span class="ident">session_timeout</span>: <span class="number">60</span>,
 			<span class="ident">http_config</span>: <span class="ident">HttpConfig</span> {
-				<span class="ident">evh_config</span>: <span class="ident">EventHandlerConfig</span> { <span class="ident">thread_count</span>: <span class="number">8</span> },
+				<span class="ident">evh_config</span>: <span class="ident">EventHandlerConfig</span> {
+					<span class="ident">thread_count</span>: <span class="number">8</span>,
+					<span class="ident">tls_config</span>,
+				},
 				<span class="ident">debug</span>,
 				..<span class="ident">Default::default</span>()
 			},
