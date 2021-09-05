@@ -39,6 +39,7 @@ use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
 
 const MAX_BUF: usize = 100_000;
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 nioruntime_log::debug!();
 
@@ -392,6 +393,7 @@ fn main() {
 				},
 				delete_request_rotation,
 				debug,
+				server_name: format!("Rustlet Httpd {}", VERSION),
 				..Default::default()
 			},
 		});

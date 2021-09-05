@@ -32,6 +32,7 @@ use std::time::Instant;
 
 info!();
 
+const HEADER_SIZE_LESS_SERVER_NAME: usize = 94;
 const MAIN_LOG: &str = "mainlog";
 const MAX_CHUNK_SIZE: usize = 1024 * 1024 * 10;
 const MAX_ESCAPE_SEQUENCE: usize = 100;
@@ -467,51 +468,82 @@ impl RustletResponse {
 		}
 	}
 
+	fn calculate_buffer_size(&self, buffer_len: usize) -> Result<usize, Error> {
+		if self.get_headers_written() {
+			Ok(buffer_len)
+		} else if self.get_redirect().is_some() {
+			let redir_len = self
+				.get_redirect()
+				.as_ref()
+				.unwrap_or(&"".to_string())
+				.len();
+			Ok(redir_len + HEADER_SIZE_LESS_SERVER_NAME + self.config.server_name.len())
+		} else {
+			let mut additional_header_buffer_len = 0;
+			let additional_headers_len = self.additional_headers.len();
+			for i in 0..additional_headers_len {
+				additional_header_buffer_len +=
+					self.additional_headers[i].0.len() + self.additional_headers[i].1.len() + 4;
+			}
+			Ok(buffer_len
+				+ additional_header_buffer_len
+				+ HEADER_SIZE_LESS_SERVER_NAME
+				+ self.config.server_name.len())
+		}
+	}
+
 	pub fn flush(&mut self) -> Result<(), Error> {
 		let mut buffer = nioruntime_util::lockw!(self.buffer);
-		let headers = if !self.get_headers_written() && !self.chained {
+		let mut to_write: Vec<u8> = vec![];
+
+		if !self.get_headers_written() && !self.chained {
+			let buffer_size = self.calculate_buffer_size(buffer.len())?;
+			let term_len = if self.is_complete && self.keep_alive {
+				7
+			} else if self.keep_alive {
+				2
+			} else {
+				0
+			};
+			to_write.reserve(buffer_size + term_len);
+			to_write.resize(buffer_size, 'q' as u8);
+
 			self.set_headers_written(true);
-			HttpServer::build_headers(
+			let len = HttpServer::build_headers(
 				&self.config,
 				true,
+				false,
 				self.keep_alive,
 				self.additional_headers.clone(),
 				self.get_redirect(),
-			)?
-		} else {
-			"".to_string()
-		};
+				&mut to_write,
+			)?;
+			to_write.resize(len, 'q' as u8);
+		}
+
+		let buffer_len = buffer.len();
+		if buffer_len > 0 {
+			if self.keep_alive {
+				to_write.extend_from_slice(format!("{:X}\r\n", buffer_len).as_bytes());
+			}
+			to_write.extend_from_slice(&buffer);
+		}
 
 		if self.keep_alive {
-			let buffer_len = buffer.len();
 			if buffer_len > 0 {
-				let msg_len_bytes = format!("{:X}\r\n", buffer_len);
-				let msg_len_bytes = msg_len_bytes.as_bytes();
-				let len = msg_len_bytes.len();
-				for i in 0..len {
-					buffer.insert(i, msg_len_bytes[i]);
-				}
-				buffer.push('\r' as u8);
-				buffer.push('\n' as u8);
+				to_write.push('\r' as u8);
+				to_write.push('\n' as u8);
 			}
 			if self.is_complete {
-				buffer.push('0' as u8);
-				buffer.push('\r' as u8);
-				buffer.push('\n' as u8);
-				buffer.push('\r' as u8);
-				buffer.push('\n' as u8);
+				to_write.push('0' as u8);
+				to_write.push('\r' as u8);
+				to_write.push('\n' as u8);
+				to_write.push('\r' as u8);
+				to_write.push('\n' as u8);
 			}
 		}
 
-		let headers = headers.as_bytes();
-		// TODO: optimize this?
-		for i in 0..headers.len() {
-			buffer.insert(i, headers[i]);
-		}
-
-		let data = &buffer[..];
-		self.wh.write(&data[0..data.len()])?;
-		self.set_headers_written(true);
+		self.wh.write(&to_write)?;
 		let mut callback_state = nioruntime_util::lockw!(self.wh.callback_state);
 		match self.keep_alive {
 			true => *callback_state = State::HeadersChunked,
@@ -584,6 +616,10 @@ lazy_static! {
 	pub(crate) static ref RUSTLET_CONFIG: Arc<RwLock<Option<RustletConfig>>> =
 		Arc::new(RwLock::new(None));
 	static ref START_TIME: Instant = Instant::now();
+	static ref KEEP_ALIVE: Vec<u8> = ['\r' as u8, '\n' as u8].to_vec();
+	static ref KEEP_ALIVE_COMPLETE: Vec<u8> =
+		['\r' as u8, '\n' as u8, '0' as u8, '\r' as u8, '\n' as u8, '\r' as u8, '\n' as u8,]
+			.to_vec();
 }
 
 /// The configuration of the rustlet container.
@@ -940,7 +976,7 @@ fn process_rsp(
 	loop {
 		let amt = file.read(&mut buf[0..buflen])?;
 		if first_loop {
-			HttpServer::write_headers(&wh, &config, true, keep_alive, vec![], None)?;
+			HttpServer::write_headers(&wh, &config, true, false, keep_alive, vec![], None)?;
 			let mut callback_state = nioruntime_util::lockw!(wh.callback_state);
 			match keep_alive {
 				true => *callback_state = State::HeadersChunked,
