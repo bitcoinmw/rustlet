@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/0886ba3/http/src/http.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/df320fd/http/src/http.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../nioruntime_http/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
@@ -2219,6 +2219,233 @@
 <span id="2217">2217</span>
 <span id="2218">2218</span>
 <span id="2219">2219</span>
+<span id="2220">2220</span>
+<span id="2221">2221</span>
+<span id="2222">2222</span>
+<span id="2223">2223</span>
+<span id="2224">2224</span>
+<span id="2225">2225</span>
+<span id="2226">2226</span>
+<span id="2227">2227</span>
+<span id="2228">2228</span>
+<span id="2229">2229</span>
+<span id="2230">2230</span>
+<span id="2231">2231</span>
+<span id="2232">2232</span>
+<span id="2233">2233</span>
+<span id="2234">2234</span>
+<span id="2235">2235</span>
+<span id="2236">2236</span>
+<span id="2237">2237</span>
+<span id="2238">2238</span>
+<span id="2239">2239</span>
+<span id="2240">2240</span>
+<span id="2241">2241</span>
+<span id="2242">2242</span>
+<span id="2243">2243</span>
+<span id="2244">2244</span>
+<span id="2245">2245</span>
+<span id="2246">2246</span>
+<span id="2247">2247</span>
+<span id="2248">2248</span>
+<span id="2249">2249</span>
+<span id="2250">2250</span>
+<span id="2251">2251</span>
+<span id="2252">2252</span>
+<span id="2253">2253</span>
+<span id="2254">2254</span>
+<span id="2255">2255</span>
+<span id="2256">2256</span>
+<span id="2257">2257</span>
+<span id="2258">2258</span>
+<span id="2259">2259</span>
+<span id="2260">2260</span>
+<span id="2261">2261</span>
+<span id="2262">2262</span>
+<span id="2263">2263</span>
+<span id="2264">2264</span>
+<span id="2265">2265</span>
+<span id="2266">2266</span>
+<span id="2267">2267</span>
+<span id="2268">2268</span>
+<span id="2269">2269</span>
+<span id="2270">2270</span>
+<span id="2271">2271</span>
+<span id="2272">2272</span>
+<span id="2273">2273</span>
+<span id="2274">2274</span>
+<span id="2275">2275</span>
+<span id="2276">2276</span>
+<span id="2277">2277</span>
+<span id="2278">2278</span>
+<span id="2279">2279</span>
+<span id="2280">2280</span>
+<span id="2281">2281</span>
+<span id="2282">2282</span>
+<span id="2283">2283</span>
+<span id="2284">2284</span>
+<span id="2285">2285</span>
+<span id="2286">2286</span>
+<span id="2287">2287</span>
+<span id="2288">2288</span>
+<span id="2289">2289</span>
+<span id="2290">2290</span>
+<span id="2291">2291</span>
+<span id="2292">2292</span>
+<span id="2293">2293</span>
+<span id="2294">2294</span>
+<span id="2295">2295</span>
+<span id="2296">2296</span>
+<span id="2297">2297</span>
+<span id="2298">2298</span>
+<span id="2299">2299</span>
+<span id="2300">2300</span>
+<span id="2301">2301</span>
+<span id="2302">2302</span>
+<span id="2303">2303</span>
+<span id="2304">2304</span>
+<span id="2305">2305</span>
+<span id="2306">2306</span>
+<span id="2307">2307</span>
+<span id="2308">2308</span>
+<span id="2309">2309</span>
+<span id="2310">2310</span>
+<span id="2311">2311</span>
+<span id="2312">2312</span>
+<span id="2313">2313</span>
+<span id="2314">2314</span>
+<span id="2315">2315</span>
+<span id="2316">2316</span>
+<span id="2317">2317</span>
+<span id="2318">2318</span>
+<span id="2319">2319</span>
+<span id="2320">2320</span>
+<span id="2321">2321</span>
+<span id="2322">2322</span>
+<span id="2323">2323</span>
+<span id="2324">2324</span>
+<span id="2325">2325</span>
+<span id="2326">2326</span>
+<span id="2327">2327</span>
+<span id="2328">2328</span>
+<span id="2329">2329</span>
+<span id="2330">2330</span>
+<span id="2331">2331</span>
+<span id="2332">2332</span>
+<span id="2333">2333</span>
+<span id="2334">2334</span>
+<span id="2335">2335</span>
+<span id="2336">2336</span>
+<span id="2337">2337</span>
+<span id="2338">2338</span>
+<span id="2339">2339</span>
+<span id="2340">2340</span>
+<span id="2341">2341</span>
+<span id="2342">2342</span>
+<span id="2343">2343</span>
+<span id="2344">2344</span>
+<span id="2345">2345</span>
+<span id="2346">2346</span>
+<span id="2347">2347</span>
+<span id="2348">2348</span>
+<span id="2349">2349</span>
+<span id="2350">2350</span>
+<span id="2351">2351</span>
+<span id="2352">2352</span>
+<span id="2353">2353</span>
+<span id="2354">2354</span>
+<span id="2355">2355</span>
+<span id="2356">2356</span>
+<span id="2357">2357</span>
+<span id="2358">2358</span>
+<span id="2359">2359</span>
+<span id="2360">2360</span>
+<span id="2361">2361</span>
+<span id="2362">2362</span>
+<span id="2363">2363</span>
+<span id="2364">2364</span>
+<span id="2365">2365</span>
+<span id="2366">2366</span>
+<span id="2367">2367</span>
+<span id="2368">2368</span>
+<span id="2369">2369</span>
+<span id="2370">2370</span>
+<span id="2371">2371</span>
+<span id="2372">2372</span>
+<span id="2373">2373</span>
+<span id="2374">2374</span>
+<span id="2375">2375</span>
+<span id="2376">2376</span>
+<span id="2377">2377</span>
+<span id="2378">2378</span>
+<span id="2379">2379</span>
+<span id="2380">2380</span>
+<span id="2381">2381</span>
+<span id="2382">2382</span>
+<span id="2383">2383</span>
+<span id="2384">2384</span>
+<span id="2385">2385</span>
+<span id="2386">2386</span>
+<span id="2387">2387</span>
+<span id="2388">2388</span>
+<span id="2389">2389</span>
+<span id="2390">2390</span>
+<span id="2391">2391</span>
+<span id="2392">2392</span>
+<span id="2393">2393</span>
+<span id="2394">2394</span>
+<span id="2395">2395</span>
+<span id="2396">2396</span>
+<span id="2397">2397</span>
+<span id="2398">2398</span>
+<span id="2399">2399</span>
+<span id="2400">2400</span>
+<span id="2401">2401</span>
+<span id="2402">2402</span>
+<span id="2403">2403</span>
+<span id="2404">2404</span>
+<span id="2405">2405</span>
+<span id="2406">2406</span>
+<span id="2407">2407</span>
+<span id="2408">2408</span>
+<span id="2409">2409</span>
+<span id="2410">2410</span>
+<span id="2411">2411</span>
+<span id="2412">2412</span>
+<span id="2413">2413</span>
+<span id="2414">2414</span>
+<span id="2415">2415</span>
+<span id="2416">2416</span>
+<span id="2417">2417</span>
+<span id="2418">2418</span>
+<span id="2419">2419</span>
+<span id="2420">2420</span>
+<span id="2421">2421</span>
+<span id="2422">2422</span>
+<span id="2423">2423</span>
+<span id="2424">2424</span>
+<span id="2425">2425</span>
+<span id="2426">2426</span>
+<span id="2427">2427</span>
+<span id="2428">2428</span>
+<span id="2429">2429</span>
+<span id="2430">2430</span>
+<span id="2431">2431</span>
+<span id="2432">2432</span>
+<span id="2433">2433</span>
+<span id="2434">2434</span>
+<span id="2435">2435</span>
+<span id="2436">2436</span>
+<span id="2437">2437</span>
+<span id="2438">2438</span>
+<span id="2439">2439</span>
+<span id="2440">2440</span>
+<span id="2441">2441</span>
+<span id="2442">2442</span>
+<span id="2443">2443</span>
+<span id="2444">2444</span>
+<span id="2445">2445</span>
+<span id="2446">2446</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -2235,6 +2462,7 @@
 <span class="comment">// limitations under the License.</span>
 
 <span class="kw">use</span> <span class="ident">bytefmt</span>;
+<span class="kw">use</span> <span class="ident">chrono::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">dirs</span>;
 <span class="kw">use</span> <span class="ident">lazy_static::lazy_static</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">nioruntime_evh</span>::{<span class="ident">EventHandler</span>, <span class="ident">EventHandlerConfig</span>, <span class="ident">State</span>, <span class="ident">WriteHandle</span>};
@@ -2262,6 +2490,35 @@
 	<span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">START_TIME</span>: <span class="ident">Instant</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
 }
 
+<span class="kw">const</span> <span class="ident">SUN_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Sun, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">MON_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Mon, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">TUE_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Tue, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">WED_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Wed, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">THU_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Thu, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">FRI_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Fri, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">SAT_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Sat, &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">JAN_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Jan &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">FEB_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Feb &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">MAR_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Mar &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">APR_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Apr &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">MAY_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;May &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">JUN_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Jun &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">JUL_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Jul &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">AUG_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Aug &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">SEP_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Sep &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">OCT_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Oct &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">NOV_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Nov &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">DEC_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Dec &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">DATE_PRE</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Date: &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">DATE_POST</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;GMT\r\n&quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">SERVER_PRE</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Server: &quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">RESPONSE_404</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;&lt;html&gt;&lt;body&gt;404 Page not found!&lt;/body&gt;&lt;/html&gt;&quot;</span>;
+<span class="kw">const</span> <span class="ident">CHUNKED_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Transfer-Encoding: chunked\r\n&quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">NOT_FOUND_NO_CONTENT</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;Content-Length: 45\r\n&quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">FOUND_NO_KEEP_ALIVE</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;&quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">SEPARATOR_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;\r\n&quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">FOUND_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;HTTP/1.1 200 OK\r\n&quot;</span>.<span class="ident">as_bytes</span>();
+<span class="kw">const</span> <span class="ident">NOT_FOUND_BYTES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">&quot;HTTP/1.1 404 Not Found\r\n&quot;</span>.<span class="ident">as_bytes</span>();
 <span class="kw">const</span> <span class="ident">MAIN_LOG</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;mainlog&quot;</span>;
 <span class="kw">const</span> <span class="ident">STATS_LOG</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;statslog&quot;</span>;
 <span class="kw">const</span> <span class="ident">HEADER</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span>
@@ -2394,6 +2651,8 @@
 	<span class="kw">pub</span> <span class="ident">request_log_max_size</span>: <span class="ident">u64</span>,
 	<span class="doccomment">/// The maximum age in milliseconds of the request log.</span>
 	<span class="kw">pub</span> <span class="ident">request_log_max_age_millis</span>: <span class="ident">u128</span>,
+	<span class="doccomment">/// Whether to delete the request log on every rotation. (Only used for testing)</span>
+	<span class="kw">pub</span> <span class="ident">delete_request_rotation</span>: <span class="ident">bool</span>,
 	<span class="doccomment">/// The maximum size in bytes of the main log.</span>
 	<span class="kw">pub</span> <span class="ident">main_log_max_size</span>: <span class="ident">u64</span>,
 	<span class="doccomment">/// The maximum age in milliseconds of the main log.</span>
@@ -2433,7 +2692,7 @@
 			<span class="ident">host</span>: <span class="string">&quot;0.0.0.0&quot;</span>.<span class="ident">to_string</span>(),
 			<span class="ident">port</span>: <span class="number">8080</span>,
 			<span class="ident">root_dir</span>: <span class="string">&quot;~/.niohttpd&quot;</span>.<span class="ident">to_string</span>(),
-			<span class="ident">server_name</span>: <span class="string">&quot;NIORuntime Httpd&quot;</span>.<span class="ident">to_string</span>(),
+			<span class="ident">server_name</span>: <span class="macro">format!</span>(<span class="string">&quot;NIORuntime Httpd {}&quot;</span>, <span class="ident">VERSION</span>),
 			<span class="ident">request_log_params</span>: <span class="macro">vec!</span>[
 				<span class="string">&quot;method&quot;</span>.<span class="ident">to_string</span>(),
 				<span class="string">&quot;uri&quot;</span>.<span class="ident">to_string</span>(),
@@ -2444,6 +2703,7 @@
 			<span class="ident">request_log_separator_char</span>: <span class="string">&#39;|&#39;</span>,
 			<span class="ident">request_log_max_size</span>: <span class="number">10</span> <span class="op">*</span> <span class="number">1024</span> <span class="op">*</span> <span class="number">1024</span>,       <span class="comment">// 10 mb</span>
 			<span class="ident">request_log_max_age_millis</span>: <span class="number">1000</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span>,   <span class="comment">// 1 hr</span>
+			<span class="ident">delete_request_rotation</span>: <span class="bool-val">false</span>,               <span class="comment">// do not delete</span>
 			<span class="ident">main_log_max_size</span>: <span class="number">10</span> <span class="op">*</span> <span class="number">1024</span> <span class="op">*</span> <span class="number">1024</span>,          <span class="comment">// 10 mb</span>
 			<span class="ident">main_log_max_age_millis</span>: <span class="number">6</span> <span class="op">*</span> <span class="number">1000</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span>,  <span class="comment">// 6 hr</span>
 			<span class="ident">stats_frequency</span>: <span class="number">5000</span>,                        <span class="comment">// 5 seconds</span>
@@ -2677,7 +2937,7 @@
 			}
 		)<span class="question-mark">?</span>;
 
-		<span class="macro">log_multi!</span>(<span class="ident">INFO</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;{} {}&quot;</span>, <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">server_name</span>, <span class="ident">VERSION</span>);
+		<span class="macro">log_multi!</span>(<span class="ident">INFO</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">server_name</span>);
 		<span class="macro">log_no_ts_multi!</span>(<span class="ident">INFO</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">HEADER</span>);
 		<span class="macro">log_multi!</span>(
 			<span class="ident">INFO</span>,
@@ -2758,12 +3018,17 @@
 			<span class="string">&quot;stats_frequency:      &#39;{}&#39;&quot;</span>,
 			<span class="self">Self</span><span class="ident">::format_time</span>(<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">stats_frequency</span>.<span class="ident">into</span>())
 		);
-		<span class="macro">log_multi!</span>(
-			<span class="ident">INFO</span>,
-			<span class="ident">MAIN_LOG</span>,
-			<span class="string">&quot;debug:                &#39;{}&#39;&quot;</span>,
-			<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">debug</span>
-		);
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">debug</span> {
+			<span class="macro">log_multi!</span>(<span class="ident">WARN</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;WARNING! flag set:    &#39;debug&#39;&quot;</span>);
+		}
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">delete_request_rotation</span> {
+			<span class="macro">log_multi!</span>(
+				<span class="ident">WARN</span>,
+				<span class="ident">MAIN_LOG</span>,
+				<span class="string">&quot;WARNING! flag set:    &#39;delete_request_rotation&#39;&quot;</span>
+			);
+		}
+
 		<span class="macro">log_no_ts_multi!</span>(<span class="ident">INFO</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">HEADER</span>);
 
 		<span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">TcpListener::bind</span>(<span class="ident">addr</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
@@ -2927,19 +3192,129 @@
 		<span class="ident">wh</span>: <span class="kw-2">&amp;</span><span class="ident">WriteHandle</span>,
 		<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">HttpConfig</span>,
 		<span class="ident">found</span>: <span class="ident">bool</span>,
+		<span class="ident">found_404_content</span>: <span class="ident">bool</span>,
 		<span class="ident">keep_alive</span>: <span class="ident">bool</span>,
 		<span class="ident">additional_headers</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">String</span>)<span class="op">&gt;</span>,
 		<span class="ident">redirect</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span>
-			<span class="self">Self</span><span class="ident">::build_headers</span>(<span class="ident">config</span>, <span class="ident">found</span>, <span class="ident">keep_alive</span>, <span class="ident">additional_headers</span>, <span class="ident">redirect</span>)<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">response</span>.<span class="ident">as_bytes</span>();
-		<span class="ident">wh</span>.<span class="ident">write</span>(<span class="ident">response</span>)<span class="question-mark">?</span>;
-		<span class="kw">if</span> <span class="op">!</span><span class="ident">found</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">keep_alive</span> {
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">size</span> <span class="op">=</span> <span class="number">1000</span>;
+		<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">additional_headers</span>.<span class="ident">len</span>() {
+			<span class="ident">size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">additional_headers</span>[<span class="ident">i</span>].<span class="number">0</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">additional_headers</span>[<span class="ident">i</span>].<span class="number">1</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="number">10</span>;
+		}
+		<span class="ident">buf</span>.<span class="ident">resize</span>(<span class="ident">size</span>, <span class="number">0</span>);
+		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::build_headers</span>(
+			<span class="ident">config</span>,
+			<span class="ident">found</span>,
+			<span class="ident">found_404_content</span>,
+			<span class="ident">keep_alive</span>,
+			<span class="ident">additional_headers</span>,
+			<span class="ident">redirect</span>,
+			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>,
+		)<span class="question-mark">?</span>;
+		<span class="ident">wh</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[<span class="number">0</span>..<span class="ident">len</span>])<span class="question-mark">?</span>;
+		<span class="kw">if</span> <span class="op">!</span><span class="ident">found</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">found_404_content</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">keep_alive</span> {
 			<span class="ident">wh</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
 		}
 
 		<span class="prelude-val">Ok</span>(())
+	}
+
+	<span class="kw">fn</span> <span class="ident">build_date</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">itt</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">chrono::Utc::now</span>();
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">DATE_PRE</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">DATE_PRE</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">day_of_week_bytes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">now</span>.<span class="ident">weekday</span>() {
+			<span class="ident">Weekday::Sun</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SUN_BYTES</span>,
+			<span class="ident">Weekday::Mon</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MON_BYTES</span>,
+			<span class="ident">Weekday::Tue</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TUE_BYTES</span>,
+			<span class="ident">Weekday::Wed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">WED_BYTES</span>,
+			<span class="ident">Weekday::Thu</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">THU_BYTES</span>,
+			<span class="ident">Weekday::Fri</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FRI_BYTES</span>,
+			<span class="ident">Weekday::Sat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SAT_BYTES</span>,
+		};
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">day_of_week_bytes</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">day_of_week_bytes</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">day_of_month</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">day</span>();
+		<span class="kw">if</span> <span class="ident">day_of_month</span> <span class="op">&lt;</span> <span class="number">10</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="ident">day_of_month</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		} <span class="kw">else</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">day_of_month</span> <span class="op">/</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">day_of_month</span> <span class="op">%</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		}
+		<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39; &#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+		<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		<span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">month</span>();
+		<span class="kw">let</span> <span class="ident">month_bytes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">month</span> {
+			<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">JAN_BYTES</span>,
+			<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FEB_BYTES</span>,
+			<span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MAR_BYTES</span>,
+			<span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">APR_BYTES</span>,
+			<span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MAY_BYTES</span>,
+			<span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">JUN_BYTES</span>,
+			<span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">JUL_BYTES</span>,
+			<span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AUG_BYTES</span>,
+			<span class="number">9</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SEP_BYTES</span>,
+			<span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">OCT_BYTES</span>,
+			<span class="number">11</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">NOV_BYTES</span>,
+			<span class="number">12</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DEC_BYTES</span>,
+			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DEC_BYTES</span>, <span class="comment">// should not happen</span>
+		};
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">month_bytes</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">month_bytes</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="ident">itoa::write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>[<span class="ident">itt</span>..], <span class="ident">now</span>.<span class="ident">year</span>())<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">4</span>;
+		<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39; &#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+		<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		<span class="kw">let</span> <span class="ident">hour</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">hour</span>();
+		<span class="kw">if</span> <span class="ident">hour</span> <span class="op">&lt;</span> <span class="number">10</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="ident">hour</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		} <span class="kw">else</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">hour</span> <span class="op">/</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">hour</span> <span class="op">%</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		}
+		<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;:&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+		<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+
+		<span class="kw">let</span> <span class="ident">minute</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">minute</span>();
+		<span class="kw">if</span> <span class="ident">minute</span> <span class="op">&lt;</span> <span class="number">10</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="ident">minute</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		} <span class="kw">else</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">minute</span> <span class="op">/</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">minute</span> <span class="op">%</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		}
+		<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;:&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+		<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+
+		<span class="kw">let</span> <span class="ident">second</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">second</span>();
+		<span class="kw">if</span> <span class="ident">second</span> <span class="op">&lt;</span> <span class="number">10</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="ident">second</span> <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		} <span class="kw">else</span> {
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">second</span> <span class="op">/</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+			<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39;0&#39;</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> (<span class="ident">second</span> <span class="op">%</span> <span class="number">10</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+			<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+		}
+		<span class="ident">buf</span>[<span class="ident">itt</span>] <span class="op">=</span> <span class="string">&#39; &#39;</span> <span class="kw">as</span> <span class="ident">u8</span>;
+		<span class="ident">itt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">DATE_POST</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">DATE_POST</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="prelude-val">Ok</span>(<span class="ident">itt</span>)
 	}
 
 	<span class="doccomment">/// Build (but do not write) headers based on specified parameters.</span>
@@ -2948,61 +3323,103 @@
 	<span class="doccomment">/// * `keep-alive` - Whether or not to keep the connection alive after this response is sent.</span>
 	<span class="doccomment">/// * `additional_headers` - Additional headers to send with this response.</span>
 	<span class="doccomment">/// * `redirect` - Optional redirect for this request.</span>
+	<span class="doccomment">/// * `buf` - The buffer to write the response into. Note: the caller is responsible for</span>
+	<span class="doccomment">/// * ensuring the capacity of this buffer is sufficient.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_headers</span>(
 		<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">HttpConfig</span>,
 		<span class="ident">found</span>: <span class="ident">bool</span>,
+		<span class="ident">found_404_content</span>: <span class="ident">bool</span>,
 		<span class="ident">keep_alive</span>: <span class="ident">bool</span>,
 		<span class="ident">additional_headers</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">String</span>)<span class="op">&gt;</span>,
 		<span class="ident">redirect</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">response_404</span> <span class="op">=</span> <span class="string">&quot;&lt;html&gt;&lt;body&gt;404 Page not found!&lt;/body&gt;&lt;/html&gt;&quot;</span>.<span class="ident">to_string</span>();
-		<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">chrono::Utc::now</span>();
+		<span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">server_bytes</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">server_name</span>.<span class="ident">as_bytes</span>();
 
-		<span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Date: {}\r\n&quot;</span>, <span class="ident">now</span>.<span class="ident">format</span>(<span class="string">&quot;%a, %d %h %Y %T GMT&quot;</span>));
-		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Server: {} {}\r\n&quot;</span>, <span class="ident">config</span>.<span class="ident">server_name</span>, <span class="ident">VERSION</span>);
-		<span class="kw">let</span> <span class="ident">transfer_encoding</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">found</span> <span class="op">&amp;&amp;</span> <span class="ident">keep_alive</span> {
-			<span class="string">&quot;Transfer-Encoding: chunked\r\n&quot;</span>.<span class="ident">to_string</span>()
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">found</span> {
-			<span class="macro">format!</span>(<span class="string">&quot;Content-Length: {}\r\n&quot;</span>, <span class="ident">response_404</span>.<span class="ident">len</span>())
+		<span class="kw">let</span> <span class="ident">transfer_encoding_bytes</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">keep_alive</span> {
+			<span class="ident">CHUNKED_ENCODING</span>
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">found</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">found_404_content</span> {
+			<span class="ident">NOT_FOUND_NO_CONTENT</span>
 		} <span class="kw">else</span> {
-			<span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>()
+			<span class="ident">FOUND_NO_KEEP_ALIVE</span>
 		};
 
-		<span class="kw">let</span> <span class="ident">not_found_message</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">found</span> {
-			<span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>()
-		} <span class="kw">else</span> {
-			<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">response_404</span>;
-			<span class="macro">format!</span>(<span class="string">&quot;{}\r\n&quot;</span>, <span class="ident">response</span>)
-		};
-
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">additional_headers_formatted</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>();
-		<span class="kw">for</span> <span class="ident">header</span> <span class="kw">in</span> <span class="ident">additional_headers</span> {
-			<span class="ident">additional_headers_formatted</span> <span class="op">=</span> <span class="macro">format!</span>(
-				<span class="string">&quot;{}{}: {}\r\n&quot;</span>,
-				<span class="ident">additional_headers_formatted</span>, <span class="ident">header</span>.<span class="number">0</span>, <span class="ident">header</span>.<span class="number">1</span>,
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">itt</span> <span class="op">=</span> <span class="number">0</span>;
+		<span class="kw">if</span> <span class="ident">redirect</span>.<span class="ident">is_some</span>() {
+			<span class="kw">let</span> <span class="ident">redir_str</span> <span class="op">=</span> <span class="macro">format!</span>(
+				<span class="string">&quot;HTTP/1.1 301 Moved Permanently\r\nLocation: {}\r\n&quot;</span>,
+				<span class="ident">redirect</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>())
 			);
+			<span class="kw">let</span> <span class="ident">redir_bytes</span> <span class="op">=</span> <span class="ident">redir_str</span>.<span class="ident">as_bytes</span>();
+			<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">redir_bytes</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">redir_bytes</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">found</span> {
+			<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">FOUND_BYTES</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">FOUND_BYTES</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		} <span class="kw">else</span> {
+			<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">NOT_FOUND_BYTES</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">NOT_FOUND_BYTES</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
 		}
 
-		<span class="kw">let</span> <span class="ident">redir_str</span> <span class="op">=</span> <span class="macro">format!</span>(
-			<span class="string">&quot;HTTP/1.1 301 Moved Permanently\r\nLocation: {}\r\n&quot;</span>,
-			<span class="ident">redirect</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>())
-		);
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::build_date</span>(<span class="ident">buf</span>, <span class="ident">itt</span>)<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">additional_headers</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> {
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">additional_headers_formatted</span> <span class="op">=</span> <span class="ident">String::new</span>();
+			<span class="kw">for</span> <span class="ident">header</span> <span class="kw">in</span> <span class="ident">additional_headers</span> {
+				<span class="ident">additional_headers_formatted</span> <span class="op">=</span> <span class="macro">format!</span>(
+					<span class="string">&quot;{}{}: {}\r\n&quot;</span>,
+					<span class="ident">additional_headers_formatted</span>, <span class="ident">header</span>.<span class="number">0</span>, <span class="ident">header</span>.<span class="number">1</span>,
+				);
+			}
+			<span class="kw">let</span> <span class="ident">additional_headers_formatted_bytes</span> <span class="op">=</span> <span class="ident">additional_headers_formatted</span>.<span class="ident">as_bytes</span>();
+			<span class="self">Self</span><span class="ident">::clone_in_bytes</span>(
+				<span class="ident">additional_headers_formatted_bytes</span>,
+				<span class="ident">buf</span>,
+				<span class="ident">itt</span>,
+				<span class="ident">additional_headers_formatted_bytes</span>.<span class="ident">len</span>(),
+			)<span class="question-mark">?</span>
+		} <span class="kw">else</span> {
+			<span class="ident">itt</span>
+		};
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">SERVER_PRE</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">SERVER_PRE</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">server_bytes</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">server_bytes</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">SEPARATOR_BYTES</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">SEPARATOR_BYTES</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(
+			<span class="ident">transfer_encoding_bytes</span>,
+			<span class="ident">buf</span>,
+			<span class="ident">itt</span>,
+			<span class="ident">transfer_encoding_bytes</span>.<span class="ident">len</span>(),
+		)<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::clone_in_bytes</span>(<span class="ident">SEPARATOR_BYTES</span>, <span class="ident">buf</span>, <span class="ident">itt</span>, <span class="ident">SEPARATOR_BYTES</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
+		<span class="ident">itt</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">found</span> <span class="op">|</span><span class="op">|</span> <span class="ident">found_404_content</span> {
+			<span class="ident">itt</span>
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">keep_alive</span> {
+			<span class="kw">let</span> <span class="ident">not_found_message</span> <span class="op">=</span>
+				<span class="macro">format!</span>(<span class="string">&quot;{:X}\r\n{}\r\n0\r\n\r\n&quot;</span>, <span class="ident">RESPONSE_404</span>.<span class="ident">len</span>(), <span class="ident">RESPONSE_404</span>);
+			<span class="kw">let</span> <span class="ident">not_found_message_bytes</span> <span class="op">=</span> <span class="ident">not_found_message</span>.<span class="ident">as_bytes</span>();
+			<span class="self">Self</span><span class="ident">::clone_in_bytes</span>(
+				<span class="ident">not_found_message_bytes</span>,
+				<span class="ident">buf</span>,
+				<span class="ident">itt</span>,
+				<span class="ident">not_found_message_bytes</span>.<span class="ident">len</span>(),
+			)<span class="question-mark">?</span>
+		} <span class="kw">else</span> {
+			<span class="kw">let</span> <span class="ident">not_found_message</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}\r\n&quot;</span>, <span class="ident">RESPONSE_404</span>);
+			<span class="kw">let</span> <span class="ident">not_found_message_bytes</span> <span class="op">=</span> <span class="ident">not_found_message</span>.<span class="ident">as_bytes</span>();
+			<span class="self">Self</span><span class="ident">::clone_in_bytes</span>(
+				<span class="ident">not_found_message_bytes</span>,
+				<span class="ident">buf</span>,
+				<span class="ident">itt</span>,
+				<span class="ident">not_found_message_bytes</span>.<span class="ident">len</span>(),
+			)<span class="question-mark">?</span>
+		};
+		<span class="prelude-val">Ok</span>(<span class="ident">itt</span>)
+	}
 
-		<span class="prelude-val">Ok</span>(<span class="macro">format!</span>(
-			<span class="string">&quot;{}{}{}{}{}\r\n{}&quot;</span>,
-			<span class="kw">if</span> <span class="ident">redirect</span>.<span class="ident">is_some</span>() {
-				<span class="kw-2">&amp;</span><span class="ident">redir_str</span>
-			} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">found</span> {
-				<span class="string">&quot;HTTP/1.1 200 OK\r\n&quot;</span>
-			} <span class="kw">else</span> {
-				<span class="string">&quot;HTTP/1.1 404 Not Found\r\n&quot;</span>
-			},
-			<span class="ident">date</span>,
-			<span class="ident">server</span>,
-			<span class="ident">additional_headers_formatted</span>,
-			<span class="ident">transfer_encoding</span>,
-			<span class="ident">not_found_message</span>,
-		))
+	<span class="kw">fn</span> <span class="ident">clone_in_bytes</span>(
+		<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+		<span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
+		<span class="ident">offset</span>: <span class="ident">usize</span>,
+		<span class="ident">len</span>: <span class="ident">usize</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="ident">dst</span>[<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>].<span class="ident">clone_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>[<span class="number">0</span>..<span class="ident">len</span>]);
+		<span class="prelude-val">Ok</span>(<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>)
 	}
 
 	<span class="kw">fn</span> <span class="ident">create_file_from_bytes</span>(
@@ -3271,6 +3688,7 @@
 			<span class="bool-val">true</span>,
 			<span class="kw-2">&amp;</span><span class="ident">header</span>,
 			<span class="bool-val">false</span>,
+			<span class="ident">http_config</span>.<span class="ident">delete_request_rotation</span>,
 		)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">http_config</span>.<span class="ident">request_log_params</span>.<span class="ident">len</span>();
@@ -3621,6 +4039,7 @@
 							<span class="kw-2">&amp;</span><span class="ident">conn_data</span>.<span class="ident">wh</span>,
 							<span class="kw-2">&amp;</span><span class="ident">conn_data</span>.<span class="ident">config</span>,
 							<span class="bool-val">true</span>,
+							<span class="bool-val">true</span>,
 							<span class="bool-val">false</span>,
 							<span class="macro">vec!</span>[],
 							<span class="prelude-val">None</span>,
@@ -3689,13 +4108,17 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idledisc</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rtimeout</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">if</span> <span class="ident">conn_data</span>.<span class="ident">last_request_time</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
+			<span class="op">&amp;&amp;</span> <span class="ident">time_now</span> <span class="op">&gt;</span> <span class="ident">conn_data</span>.<span class="ident">last_request_time</span> <span class="comment">// overflow case</span>
 			<span class="op">&amp;&amp;</span> <span class="ident">time_now</span> <span class="op">-</span> <span class="ident">conn_data</span>.<span class="ident">last_request_time</span> <span class="op">&gt;</span> <span class="ident">last_request_timeout</span>
 		{
 			<span class="ident">conn_data</span>.<span class="ident">wh</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
 			<span class="ident">idledisc</span> <span class="op">=</span> <span class="bool-val">true</span>;
 		}
 
-		<span class="kw">if</span> <span class="ident">conn_data</span>.<span class="ident">last_request_time</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">time_now</span> <span class="op">-</span> <span class="ident">conn_data</span>.<span class="ident">create_time</span> <span class="op">&gt;</span> <span class="ident">read_timeout</span> {
+		<span class="kw">if</span> <span class="ident">conn_data</span>.<span class="ident">last_request_time</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+			<span class="op">&amp;&amp;</span> <span class="ident">time_now</span> <span class="op">&gt;</span> <span class="ident">conn_data</span>.<span class="ident">create_time</span> <span class="comment">// overflow case</span>
+			<span class="op">&amp;&amp;</span> <span class="ident">time_now</span> <span class="op">-</span> <span class="ident">conn_data</span>.<span class="ident">create_time</span> <span class="op">&gt;</span> <span class="ident">read_timeout</span>
+		{
 			<span class="ident">conn_data</span>.<span class="ident">wh</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
 			<span class="ident">rtimeout</span> <span class="op">=</span> <span class="bool-val">true</span>;
 		}
@@ -4153,6 +4576,8 @@
 		<span class="ident">keep_alive</span>: <span class="ident">bool</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::get_path</span>(<span class="ident">config</span>, <span class="ident">uri</span>)<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">is_404</span> <span class="op">=</span> <span class="bool-val">false</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_404_content</span> <span class="op">=</span> <span class="bool-val">true</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flen</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">metadata</span>(<span class="ident">path</span>.<span class="ident">clone</span>()) {
 			<span class="prelude-val">Ok</span>(<span class="ident">md</span>) <span class="op">=</span><span class="op">&gt;</span> {
 				<span class="kw">if</span> <span class="ident">md</span>.<span class="ident">is_dir</span>() {
@@ -4160,6 +4585,7 @@
 					<span class="kw">match</span> <span class="ident">metadata</span>(<span class="ident">path</span>.<span class="ident">clone</span>()) {
 						<span class="prelude-val">Ok</span>(<span class="ident">md</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">md</span>.<span class="ident">len</span>(),
 						<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">is_404</span> <span class="op">=</span> <span class="bool-val">true</span>;
 							<span class="ident">path</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}/www/404.html&quot;</span>, <span class="ident">config</span>.<span class="ident">root_dir</span>);
 							<span class="kw">match</span> <span class="ident">metadata</span>(<span class="ident">path</span>.<span class="ident">clone</span>()) {
 								<span class="prelude-val">Ok</span>(<span class="ident">md</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">md</span>.<span class="ident">len</span>(),
@@ -4173,10 +4599,14 @@
 			}
 			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
 				<span class="comment">// try to return the 404 page.</span>
+				<span class="ident">is_404</span> <span class="op">=</span> <span class="bool-val">true</span>;
 				<span class="ident">path</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}/www/404.html&quot;</span>, <span class="ident">config</span>.<span class="ident">root_dir</span>);
 				<span class="kw">match</span> <span class="ident">metadata</span>(<span class="ident">path</span>.<span class="ident">clone</span>()) {
 					<span class="prelude-val">Ok</span>(<span class="ident">md</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">md</span>.<span class="ident">len</span>(),
-					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">found_404_content</span> <span class="op">=</span> <span class="bool-val">false</span>;
+						<span class="number">0</span>
+					}
 				}
 			}
 		};
@@ -4198,7 +4628,15 @@
 					<span class="kw">match</span> <span class="ident">res</span> {
 						<span class="prelude-val">Ok</span>(<span class="ident">amt</span>) <span class="op">=</span><span class="op">&gt;</span> {
 							<span class="kw">if</span> <span class="ident">first_loop</span> {
-								<span class="self">Self</span><span class="ident">::write_headers</span>(<span class="ident">wh</span>, <span class="ident">config</span>, <span class="bool-val">true</span>, <span class="ident">keep_alive</span>, <span class="macro">vec!</span>[], <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+								<span class="self">Self</span><span class="ident">::write_headers</span>(
+									<span class="ident">wh</span>,
+									<span class="ident">config</span>,
+									<span class="op">!</span><span class="ident">is_404</span>,
+									<span class="ident">found_404_content</span>,
+									<span class="ident">keep_alive</span>,
+									<span class="macro">vec!</span>[],
+									<span class="prelude-val">None</span>,
+								)<span class="question-mark">?</span>;
 							}
 							<span class="kw">if</span> <span class="ident">keep_alive</span> {
 								<span class="kw">let</span> <span class="ident">msg_len_bytes</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{:X}\r\n&quot;</span>, <span class="ident">amt</span>);
@@ -4227,7 +4665,15 @@
 						}
 						<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
 							<span class="comment">// directory</span>
-							<span class="self">Self</span><span class="ident">::write_headers</span>(<span class="ident">wh</span>, <span class="ident">config</span>, <span class="bool-val">false</span>, <span class="ident">keep_alive</span>, <span class="macro">vec!</span>[], <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+							<span class="self">Self</span><span class="ident">::write_headers</span>(
+								<span class="ident">wh</span>,
+								<span class="ident">config</span>,
+								<span class="bool-val">false</span>,
+								<span class="ident">found_404_content</span>,
+								<span class="ident">keep_alive</span>,
+								<span class="macro">vec!</span>[],
+								<span class="prelude-val">None</span>,
+							)<span class="question-mark">?</span>;
 							<span class="kw">break</span>;
 						}
 					}
@@ -4240,7 +4686,15 @@
 			}
 			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
 				<span class="comment">// file not found</span>
-				<span class="self">Self</span><span class="ident">::write_headers</span>(<span class="ident">wh</span>, <span class="ident">config</span>, <span class="bool-val">false</span>, <span class="ident">keep_alive</span>, <span class="macro">vec!</span>[], <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+				<span class="self">Self</span><span class="ident">::write_headers</span>(
+					<span class="ident">wh</span>,
+					<span class="ident">config</span>,
+					<span class="bool-val">false</span>,
+					<span class="ident">found_404_content</span>,
+					<span class="ident">keep_alive</span>,
+					<span class="macro">vec!</span>[],
+					<span class="prelude-val">None</span>,
+				)<span class="question-mark">?</span>;
 			}
 		}
 
