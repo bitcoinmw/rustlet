@@ -391,7 +391,7 @@ fn main() {
 					thread_count: 8,
 					tls_config,
 				},
-				max_log_queue: 1_000_000,
+				max_log_queue: 100_000,
 				stats_frequency: 10_000,
 				delete_request_rotation,
 				debug,
