@@ -391,6 +391,8 @@ fn main() {
 					thread_count: 8,
 					tls_config,
 				},
+				max_log_queue: 1_000_000,
+				stats_frequency: 10_000,
 				delete_request_rotation,
 				debug,
 				server_name: format!("Rustlet Httpd {}", VERSION),
