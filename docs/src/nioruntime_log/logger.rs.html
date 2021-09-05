@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/0886ba3/log/src/logger.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>logger.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/df320fd/log/src/logger.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>logger.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../nioruntime_log/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
@@ -1059,6 +1059,16 @@
 <span id="1057">1057</span>
 <span id="1058">1058</span>
 <span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -1853,6 +1863,8 @@
 	<span class="kw">pub</span> <span class="ident">show_timestamp</span>: <span class="ident">bool</span>,
 	<span class="doccomment">/// Whether or not to print the log lines to standard output. By default, this is set to true.</span>
 	<span class="kw">pub</span> <span class="ident">show_stdout</span>: <span class="ident">bool</span>,
+	<span class="doccomment">/// delete the rotated log immidiately (only used for testing)</span>
+	<span class="kw">pub</span> <span class="ident">delete_rotation</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">LogConfig</span> {
@@ -1864,6 +1876,7 @@
 			<span class="ident">file_header</span>: <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>(),
 			<span class="ident">show_timestamp</span>: <span class="bool-val">true</span>,
 			<span class="ident">show_stdout</span>: <span class="bool-val">true</span>,
+			<span class="ident">delete_rotation</span>: <span class="bool-val">false</span>,
 		}
 	}
 }
@@ -1883,7 +1896,11 @@
 			<span class="ident">rotation_string</span>,
 			<span class="ident">rand::random</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>(),
 		);
-		<span class="ident">std::fs::rename</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span>.<span class="ident">file_path</span>, <span class="ident">file_path</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">delete_rotation</span> {
+			<span class="ident">std::fs::remove_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span>.<span class="ident">file_path</span>)<span class="question-mark">?</span>;
+		} <span class="kw">else</span> {
+			<span class="ident">std::fs::rename</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span>.<span class="ident">file_path</span>, <span class="ident">file_path</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
+		}
 		<span class="self">self</span>.<span class="ident">file</span> <span class="op">=</span> <span class="prelude-val">Some</span>(
 			<span class="ident">OpenOptions::new</span>()
 				.<span class="ident">append</span>(<span class="bool-val">true</span>)
@@ -1996,6 +2013,7 @@
 			<span class="ident">config</span>.<span class="ident">show_timestamp</span>,
 			<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">file_header</span>,
 			<span class="ident">config</span>.<span class="ident">show_stdout</span>,
+			<span class="ident">config</span>.<span class="ident">delete_rotation</span>,
 		)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -2009,6 +2027,7 @@
 		<span class="ident">show_timestamp</span>: <span class="ident">bool</span>,
 		<span class="ident">file_header</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">show_stdout</span>: <span class="ident">bool</span>,
+		<span class="ident">delete_rotation</span>: <span class="ident">bool</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="comment">// create file with append option and create option</span>
 		<span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">file_path</span>.<span class="ident">clone</span>() {
@@ -2063,6 +2082,7 @@
 				<span class="ident">show_timestamp</span>,
 				<span class="ident">file_header</span>,
 				<span class="ident">show_stdout</span>,
+				<span class="ident">delete_rotation</span>,
 			},
 			<span class="ident">has_rotated</span>: <span class="bool-val">false</span>,
 		});

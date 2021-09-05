@@ -526,6 +526,10 @@
 <span id="524">524</span>
 <span id="525">525</span>
 <span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -568,6 +572,7 @@
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>};
 
 <span class="kw">const</span> <span class="ident">MAX_BUF</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">100_000</span>;
+<span class="kw">const</span> <span class="ident">VERSION</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>);
 
 <span class="macro">nioruntime_log::debug!</span>();
 
@@ -815,6 +820,7 @@
 	<span class="kw">let</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;client&quot;</span>);
 	<span class="kw">let</span> <span class="ident">nginx</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;nginx&quot;</span>);
 	<span class="kw">let</span> <span class="ident">debug</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;debug&quot;</span>);
+	<span class="kw">let</span> <span class="ident">delete_request_rotation</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;delete_request_rotation&quot;</span>);
 
 	<span class="kw">let</span> <span class="ident">certs</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;certs&quot;</span>);
 	<span class="kw">let</span> <span class="ident">private_key</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;private_key&quot;</span>);
@@ -918,7 +924,9 @@
 					<span class="ident">thread_count</span>: <span class="number">8</span>,
 					<span class="ident">tls_config</span>,
 				},
+				<span class="ident">delete_request_rotation</span>,
 				<span class="ident">debug</span>,
+				<span class="ident">server_name</span>: <span class="macro">format!</span>(<span class="string">&quot;Rustlet Httpd {}&quot;</span>, <span class="ident">VERSION</span>),
 				..<span class="ident">Default::default</span>()
 			},
 		});
