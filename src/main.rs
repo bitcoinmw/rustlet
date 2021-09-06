@@ -435,24 +435,24 @@ fn main() {
 
 		rustlet!("async", {
 			let ac = async_context!();
-			response!("first message\n");
+			response!("<html><body>Content: <span id='abc'>first message</span>\n");
 			flush!();
 
 			std::thread::spawn(move || {
 				async_context!(ac);
-				// simulate long running task:
 				std::thread::sleep(std::time::Duration::from_millis(1000));
-				response!("second message\n");
+				response!("<script>document.getElementById('abc').innerHTML = 'second message';</script>\n");
 				flush!();
 				std::thread::sleep(std::time::Duration::from_millis(1000));
-				response!("third message\n");
+				response!("<script>document.getElementById('abc').innerHTML = 'third message';</script>\n");
 				flush!();
 				std::thread::sleep(std::time::Duration::from_millis(1000));
-				response!("fourth message\n");
+				response!("<script>document.getElementById('abc').innerHTML = 'fourth message';</script>\n");
 				flush!();
 				std::thread::sleep(std::time::Duration::from_millis(1000));
-				response!("fifth message\n");
+				response!("<script>document.getElementById('abc').innerHTML = 'fifth message';</script>\n");
 				flush!();
+				response!("</body></html>");
 				async_complete!();
 			});
 		});
