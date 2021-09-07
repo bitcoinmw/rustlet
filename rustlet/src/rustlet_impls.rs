@@ -55,6 +55,7 @@ impl RustletAsyncContext {
 				log_multi!(ERROR, MAIN_LOG, "response not found in async context");
 			}
 		}
+
 		Ok(())
 	}
 }
