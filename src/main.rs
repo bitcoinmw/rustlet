@@ -25,14 +25,10 @@ use clap::load_yaml;
 use clap::App;
 use errno::errno;
 use librustlet::*;
-use nioruntime_evh::EventHandlerConfig;
+use nioruntime_evh::{EventHandlerConfig, TlsConfig};
 use nioruntime_log::*;
 use nioruntime_util::{Error, ErrorKind};
-use rustls::ServerConfig;
-use rustls_pemfile;
 use std::convert::TryInto;
-use std::fs::File;
-use std::io::BufReader;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
@@ -42,35 +38,6 @@ const MAX_BUF: usize = 100_000;
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 nioruntime_log::debug!();
-
-fn load_certs(filename: &str) -> Vec<rustls::Certificate> {
-	let certfile = File::open(filename).expect("cannot open certificate file");
-	let mut reader = BufReader::new(certfile);
-	rustls_pemfile::certs(&mut reader)
-		.unwrap()
-		.iter()
-		.map(|v| rustls::Certificate(v.clone()))
-		.collect()
-}
-
-fn load_private_key(filename: &str) -> rustls::PrivateKey {
-	let keyfile = File::open(filename).expect("cannot open private key file");
-	let mut reader = BufReader::new(keyfile);
-
-	loop {
-		match rustls_pemfile::read_one(&mut reader).expect("cannot parse private key .pem file") {
-			Some(rustls_pemfile::Item::RSAKey(key)) => return rustls::PrivateKey(key),
-			Some(rustls_pemfile::Item::PKCS8Key(key)) => return rustls::PrivateKey(key),
-			None => break,
-			_ => {}
-		}
-	}
-
-	panic!(
-		"no keys found in {:?} (encrypted keys not supported)",
-		filename
-	);
-}
 
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
@@ -298,16 +265,14 @@ fn main() {
 	}
 
 	let tls_config = match args.value_of("certs") {
-		Some(certs) => Some(
-			ServerConfig::builder()
-				.with_safe_defaults()
-				.with_no_client_auth()
-				.with_single_cert(
-					load_certs(certs),
-					load_private_key(args.value_of("private_key").unwrap()),
-				)
-				.unwrap(),
-		),
+		Some(certificates_file) => {
+			let private_key_file = args.value_of("private_key").unwrap_or("").to_string();
+			let certificates_file = certificates_file.to_string();
+			Some(TlsConfig {
+				certificates_file,
+				private_key_file,
+			})
+		}
 		None => None,
 	};
 

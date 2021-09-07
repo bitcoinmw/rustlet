@@ -567,7 +567,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_evh"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#ab6001767ce1529b801cb7818c893108106e8f9a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0db58d01027c5e76d7dce06259cc91e61030f279"
 dependencies = [
  "errno",
  "futures",
@@ -579,6 +579,7 @@ dependencies = [
  "portpicker",
  "rand",
  "rustls",
+ "rustls-pemfile",
  "wepoll-sys",
  "winapi 0.2.8",
  "ws2_32-sys",
@@ -587,7 +588,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_http"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#ab6001767ce1529b801cb7818c893108106e8f9a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0db58d01027c5e76d7dce06259cc91e61030f279"
 dependencies = [
  "bytefmt",
  "chrono",
@@ -605,7 +606,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_log"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#ab6001767ce1529b801cb7818c893108106e8f9a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0db58d01027c5e76d7dce06259cc91e61030f279"
 dependencies = [
  "chrono",
  "failure",
@@ -620,7 +621,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_util"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#ab6001767ce1529b801cb7818c893108106e8f9a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#0db58d01027c5e76d7dce06259cc91e61030f279"
 dependencies = [
  "byteorder",
  "bytes",
