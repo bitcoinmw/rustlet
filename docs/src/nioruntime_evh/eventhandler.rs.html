@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/df320fd/eventhandler/src/eventhandler.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eventhandler.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/vsts/.cargo/git/checkouts/nioruntime-5f77931d44981d86/31964ec/eventhandler/src/eventhandler.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eventhandler.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../nioruntime_evh/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
@@ -2617,6 +2617,159 @@
 <span id="2615">2615</span>
 <span id="2616">2616</span>
 <span id="2617">2617</span>
+<span id="2618">2618</span>
+<span id="2619">2619</span>
+<span id="2620">2620</span>
+<span id="2621">2621</span>
+<span id="2622">2622</span>
+<span id="2623">2623</span>
+<span id="2624">2624</span>
+<span id="2625">2625</span>
+<span id="2626">2626</span>
+<span id="2627">2627</span>
+<span id="2628">2628</span>
+<span id="2629">2629</span>
+<span id="2630">2630</span>
+<span id="2631">2631</span>
+<span id="2632">2632</span>
+<span id="2633">2633</span>
+<span id="2634">2634</span>
+<span id="2635">2635</span>
+<span id="2636">2636</span>
+<span id="2637">2637</span>
+<span id="2638">2638</span>
+<span id="2639">2639</span>
+<span id="2640">2640</span>
+<span id="2641">2641</span>
+<span id="2642">2642</span>
+<span id="2643">2643</span>
+<span id="2644">2644</span>
+<span id="2645">2645</span>
+<span id="2646">2646</span>
+<span id="2647">2647</span>
+<span id="2648">2648</span>
+<span id="2649">2649</span>
+<span id="2650">2650</span>
+<span id="2651">2651</span>
+<span id="2652">2652</span>
+<span id="2653">2653</span>
+<span id="2654">2654</span>
+<span id="2655">2655</span>
+<span id="2656">2656</span>
+<span id="2657">2657</span>
+<span id="2658">2658</span>
+<span id="2659">2659</span>
+<span id="2660">2660</span>
+<span id="2661">2661</span>
+<span id="2662">2662</span>
+<span id="2663">2663</span>
+<span id="2664">2664</span>
+<span id="2665">2665</span>
+<span id="2666">2666</span>
+<span id="2667">2667</span>
+<span id="2668">2668</span>
+<span id="2669">2669</span>
+<span id="2670">2670</span>
+<span id="2671">2671</span>
+<span id="2672">2672</span>
+<span id="2673">2673</span>
+<span id="2674">2674</span>
+<span id="2675">2675</span>
+<span id="2676">2676</span>
+<span id="2677">2677</span>
+<span id="2678">2678</span>
+<span id="2679">2679</span>
+<span id="2680">2680</span>
+<span id="2681">2681</span>
+<span id="2682">2682</span>
+<span id="2683">2683</span>
+<span id="2684">2684</span>
+<span id="2685">2685</span>
+<span id="2686">2686</span>
+<span id="2687">2687</span>
+<span id="2688">2688</span>
+<span id="2689">2689</span>
+<span id="2690">2690</span>
+<span id="2691">2691</span>
+<span id="2692">2692</span>
+<span id="2693">2693</span>
+<span id="2694">2694</span>
+<span id="2695">2695</span>
+<span id="2696">2696</span>
+<span id="2697">2697</span>
+<span id="2698">2698</span>
+<span id="2699">2699</span>
+<span id="2700">2700</span>
+<span id="2701">2701</span>
+<span id="2702">2702</span>
+<span id="2703">2703</span>
+<span id="2704">2704</span>
+<span id="2705">2705</span>
+<span id="2706">2706</span>
+<span id="2707">2707</span>
+<span id="2708">2708</span>
+<span id="2709">2709</span>
+<span id="2710">2710</span>
+<span id="2711">2711</span>
+<span id="2712">2712</span>
+<span id="2713">2713</span>
+<span id="2714">2714</span>
+<span id="2715">2715</span>
+<span id="2716">2716</span>
+<span id="2717">2717</span>
+<span id="2718">2718</span>
+<span id="2719">2719</span>
+<span id="2720">2720</span>
+<span id="2721">2721</span>
+<span id="2722">2722</span>
+<span id="2723">2723</span>
+<span id="2724">2724</span>
+<span id="2725">2725</span>
+<span id="2726">2726</span>
+<span id="2727">2727</span>
+<span id="2728">2728</span>
+<span id="2729">2729</span>
+<span id="2730">2730</span>
+<span id="2731">2731</span>
+<span id="2732">2732</span>
+<span id="2733">2733</span>
+<span id="2734">2734</span>
+<span id="2735">2735</span>
+<span id="2736">2736</span>
+<span id="2737">2737</span>
+<span id="2738">2738</span>
+<span id="2739">2739</span>
+<span id="2740">2740</span>
+<span id="2741">2741</span>
+<span id="2742">2742</span>
+<span id="2743">2743</span>
+<span id="2744">2744</span>
+<span id="2745">2745</span>
+<span id="2746">2746</span>
+<span id="2747">2747</span>
+<span id="2748">2748</span>
+<span id="2749">2749</span>
+<span id="2750">2750</span>
+<span id="2751">2751</span>
+<span id="2752">2752</span>
+<span id="2753">2753</span>
+<span id="2754">2754</span>
+<span id="2755">2755</span>
+<span id="2756">2756</span>
+<span id="2757">2757</span>
+<span id="2758">2758</span>
+<span id="2759">2759</span>
+<span id="2760">2760</span>
+<span id="2761">2761</span>
+<span id="2762">2762</span>
+<span id="2763">2763</span>
+<span id="2764">2764</span>
+<span id="2765">2765</span>
+<span id="2766">2766</span>
+<span id="2767">2767</span>
+<span id="2768">2768</span>
+<span id="2769">2769</span>
+<span id="2770">2770</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -2633,15 +2786,20 @@
 <span class="comment">// limitations under the License</span>
 
 <span class="kw">use</span> <span class="ident">errno::errno</span>;
+<span class="kw">use</span> <span class="ident">errno::Errno</span>;
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">accept</span>, <span class="ident">c_int</span>, <span class="ident">c_void</span>, <span class="ident">EAGAIN</span>};
 <span class="kw">use</span> <span class="ident">nioruntime_log</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">nioruntime_util</span>::{<span class="ident">Error</span>, <span class="ident">ErrorKind</span>};
 <span class="kw">use</span> <span class="ident">rand::Rng</span>;
-<span class="kw">use</span> <span class="ident">rustls</span>::{<span class="ident">ServerConfig</span>, <span class="ident">ServerConnection</span>};
+<span class="kw">use</span> <span class="ident">rustls</span>::{<span class="ident">Connection</span>, <span class="ident">ServerConfig</span>, <span class="ident">ServerConnection</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 <span class="kw">use</span> <span class="ident">std::collections::LinkedList</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+<span class="kw">use</span> <span class="ident">std::fs::File</span>;
+<span class="kw">use</span> <span class="ident">std::io::BufReader</span>;
+<span class="kw">use</span> <span class="ident">std::io::Read</span>;
+<span class="kw">use</span> <span class="ident">std::io::Write</span>;
 <span class="kw">use</span> <span class="ident">std::net</span>::{<span class="ident">TcpListener</span>, <span class="ident">TcpStream</span>};
 <span class="kw">use</span> <span class="ident">std::pin::Pin</span>;
 <span class="kw">use</span> <span class="ident">std::sync::mpsc::sync_channel</span>;
@@ -2678,6 +2836,7 @@
 
 <span class="kw">const</span> <span class="ident">MAIN_LOG</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;mainlog&quot;</span>;
 <span class="kw">const</span> <span class="ident">BUFFER_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1024</span>;
+<span class="kw">const</span> <span class="ident">TLS_CHUNKS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">32768</span>;
 <span class="kw">const</span> <span class="ident">MAX_EVENTS</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">100</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
 <span class="kw">const</span> <span class="ident">WINSOCK_BUF_SIZE</span>: <span class="ident">winapi::c_int</span> <span class="op">=</span> <span class="number">100_000_000</span>;
@@ -2686,6 +2845,35 @@
 <span class="kw">type</span> <span class="ident">ConnectionHandle</span> <span class="op">=</span> <span class="ident">i32</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
 <span class="kw">type</span> <span class="ident">ConnectionHandle</span> <span class="op">=</span> <span class="ident">u64</span>;
+
+<span class="kw">fn</span> <span class="ident">load_certs</span>(<span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">rustls::Certificate</span><span class="op">&gt;</span> {
+	<span class="kw">let</span> <span class="ident">certfile</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="ident">filename</span>).<span class="ident">expect</span>(<span class="string">&quot;cannot open certificate file&quot;</span>);
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">BufReader::new</span>(<span class="ident">certfile</span>);
+	<span class="ident">rustls_pemfile::certs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">reader</span>)
+		.<span class="ident">unwrap</span>()
+		.<span class="ident">iter</span>()
+		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">rustls::Certificate</span>(<span class="ident">v</span>.<span class="ident">clone</span>()))
+		.<span class="ident">collect</span>()
+}
+
+<span class="kw">fn</span> <span class="ident">load_private_key</span>(<span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">rustls::PrivateKey</span> {
+	<span class="kw">let</span> <span class="ident">keyfile</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="ident">filename</span>).<span class="ident">expect</span>(<span class="string">&quot;cannot open private key file&quot;</span>);
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">BufReader::new</span>(<span class="ident">keyfile</span>);
+
+	<span class="kw">loop</span> {
+		<span class="kw">match</span> <span class="ident">rustls_pemfile::read_one</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">reader</span>).<span class="ident">expect</span>(<span class="string">&quot;cannot parse private key .pem file&quot;</span>) {
+			<span class="prelude-val">Some</span>(<span class="ident">rustls_pemfile::Item::RSAKey</span>(<span class="ident">key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">rustls::PrivateKey</span>(<span class="ident">key</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">rustls_pemfile::Item::PKCS8Key</span>(<span class="ident">key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">rustls::PrivateKey</span>(<span class="ident">key</span>),
+			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+		}
+	}
+
+	<span class="macro">panic!</span>(
+		<span class="string">&quot;no keys found in {:?} (encrypted keys not supported)&quot;</span>,
+		<span class="ident">filename</span>
+	);
+}
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">State</span> {
@@ -2709,6 +2897,7 @@
 	<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">callback_state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">tls_conn</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ServerConnection</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">WriteHandle</span> {
@@ -2717,6 +2906,7 @@
 		<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">connection_id</span>: <span class="ident">u128</span>,
 		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">tls_conn</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ServerConnection</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">callback_state</span> <span class="op">=</span> {
 			<span class="kw">let</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>();
@@ -2728,6 +2918,7 @@
 			<span class="ident">connection_id</span>,
 			<span class="ident">global_lock</span>,
 			<span class="ident">callback_state</span>,
+			<span class="ident">tls_conn</span>,
 		}
 	}
 
@@ -2768,15 +2959,36 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">_nbwrite</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">write_data</span>(<span class="self">self</span>.<span class="ident">fd</span>, <span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">global_lock</span>)<span class="question-mark">?</span>;
-		<span class="prelude-val">Ok</span>(<span class="ident">len</span>.<span class="ident">try_into</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>))
-	}
-
 	<span class="doccomment">/// Write the specifed data to the connection associated with this write handle.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// * `data` - The data to write to this connection.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">tls_conn</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">tls_conn</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wbuf</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+				{
+					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tls_conn</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">tls_conn</span>);
+					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">start</span> <span class="op">=</span> <span class="number">0</span>;
+					<span class="kw">loop</span> {
+						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>();
+						<span class="kw">if</span> <span class="ident">end</span> <span class="op">-</span> <span class="ident">start</span> <span class="op">&gt;</span> <span class="ident">TLS_CHUNKS</span> {
+							<span class="ident">end</span> <span class="op">=</span> <span class="ident">start</span> <span class="op">+</span> <span class="ident">TLS_CHUNKS</span>;
+						}
+						<span class="ident">tls_conn</span>.<span class="ident">writer</span>().<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>[<span class="ident">start</span>..<span class="ident">end</span>])<span class="question-mark">?</span>;
+						<span class="ident">tls_conn</span>.<span class="ident">write_tls</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">wbuf</span>)<span class="question-mark">?</span>;
+						<span class="kw">if</span> <span class="ident">end</span> <span class="op">=</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>() {
+							<span class="kw">break</span>;
+						}
+						<span class="ident">start</span> <span class="op">+</span><span class="op">=</span> <span class="ident">TLS_CHUNKS</span>;
+					}
+				}
+				<span class="self">self</span>.<span class="ident">do_write</span>(<span class="kw-2">&amp;</span><span class="ident">wbuf</span>)
+			}
+			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">do_write</span>(<span class="ident">data</span>),
+		}
+	}
+
+	<span class="kw">fn</span> <span class="ident">do_write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>();
 		<span class="kw">if</span> <span class="ident">len</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
 			<span class="comment">// nothing to write</span>
@@ -2816,11 +3028,27 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TlsConfig</span> {
+	<span class="kw">pub</span> <span class="ident">private_key_file</span>: <span class="ident">String</span>,
+	<span class="kw">pub</span> <span class="ident">certificates_file</span>: <span class="ident">String</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">TlsConfig</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">private_key_file</span>: <span class="ident">String</span>, <span class="ident">certificates_file</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="ident">TlsConfig</span> {
+			<span class="ident">private_key_file</span>,
+			<span class="ident">certificates_file</span>,
+		}
+	}
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EventHandlerConfig</span> {
+	<span class="doccomment">/// Number of threads for handling read/write operations. The default value is 6.</span>
 	<span class="kw">pub</span> <span class="ident">thread_count</span>: <span class="ident">usize</span>,
 	<span class="doccomment">/// The optional TLS config. If not specified, the server will run in non-ssl</span>
 	<span class="doccomment">/// mode.</span>
-	<span class="kw">pub</span> <span class="ident">tls_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ServerConfig</span><span class="op">&gt;</span>,
+	<span class="kw">pub</span> <span class="ident">tls_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TlsConfig</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">EventHandlerConfig</span> {
@@ -2920,6 +3148,7 @@
 	<span class="ident">callbacks</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">Callbacks</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">on_panic</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OnPanic</span><span class="op">&gt;</span>,
+	<span class="ident">tls_server_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ServerConfig</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span> <span class="ident">EventHandler</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span>
@@ -3011,6 +3240,7 @@
 			<span class="ident">guarded_data</span>: <span class="self">self</span>.<span class="ident">guarded_data</span>[<span class="number">1</span>].<span class="ident">clone</span>(), <span class="comment">// TODO: not always 1.</span>
 			<span class="ident">global_lock</span>: <span class="self">self</span>.<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
 			<span class="ident">callback_state</span>,
+			<span class="ident">tls_conn</span>: <span class="prelude-val">None</span>,
 		})
 	}
 
@@ -3220,12 +3450,31 @@
 
 		<span class="kw">let</span> <span class="ident">global_lock</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="bool-val">true</span>));
 
+		<span class="kw">let</span> <span class="ident">tls_server_config</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">tls_config</span>.<span class="ident">is_some</span>() {
+			<span class="kw">let</span> <span class="ident">tls_config</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">tls_config</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>();
+			<span class="kw">match</span> <span class="ident">ServerConfig::builder</span>()
+				.<span class="ident">with_safe_defaults</span>()
+				.<span class="ident">with_no_client_auth</span>()
+				.<span class="ident">with_single_cert</span>(
+					<span class="ident">load_certs</span>(<span class="kw-2">&amp;</span><span class="ident">tls_config</span>.<span class="ident">certificates_file</span>),
+					<span class="ident">load_private_key</span>(<span class="kw-2">&amp;</span><span class="ident">tls_config</span>.<span class="ident">private_key_file</span>),
+				) {
+				<span class="prelude-val">Ok</span>(<span class="ident">tls_server_config</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">tls_server_config</span>),
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="macro">panic!</span>(<span class="string">&quot;Error loading tls configurations: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>());
+				}
+			}
+		} <span class="kw">else</span> {
+			<span class="prelude-val">None</span>
+		};
+
 		<span class="ident">EventHandler</span> {
 			<span class="ident">config</span>,
 			<span class="ident">guarded_data</span>,
 			<span class="ident">callbacks</span>,
 			<span class="ident">global_lock</span>,
 			<span class="ident">on_panic</span>: <span class="prelude-val">None</span>,
+			<span class="ident">tls_server_config</span>,
 		}
 	}
 
@@ -3392,7 +3641,6 @@
 	<span class="kw">fn</span> <span class="ident">start_generic</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">selectors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SelectorHandle</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">ensure_handlers</span>()<span class="question-mark">?</span>;
 
-		<span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">on_panic</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">on_panic</span>.<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">global_lock</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">global_lock</span>;
 		<span class="kw">let</span> <span class="ident">global_lock_clone</span> <span class="op">=</span> <span class="ident">global_lock</span>.<span class="ident">clone</span>();
@@ -3406,6 +3654,7 @@
 
 		<span class="kw">let</span> <span class="ident">on_accept</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">on_accept</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">on_close</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">on_close</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">clone</span>();
+		<span class="kw">let</span> <span class="ident">tls_server_config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tls_server_config</span>.<span class="ident">clone</span>();
 		<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
 			<span class="kw">match</span> <span class="self">Self</span><span class="ident">::listener</span>(
 				<span class="ident">selectors_clone</span>[<span class="number">0</span>],
@@ -3414,7 +3663,7 @@
 				<span class="ident">on_accept</span>.<span class="ident">clone</span>(),
 				<span class="ident">on_close</span>.<span class="ident">clone</span>(),
 				<span class="ident">global_lock_clone</span>.<span class="ident">clone</span>(),
-				<span class="kw-2">&amp;</span><span class="ident">config</span>,
+				<span class="ident">tls_server_config</span>,
 			) {
 				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
 				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -3607,7 +3856,7 @@
 		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">wakeup_fd</span>: <span class="ident">ConnectionHandle</span>,
 		<span class="ident">cid_map</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ConnectionHandle</span>, <span class="ident">u128</span><span class="op">&gt;</span>,
-		<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">EventHandlerConfig</span>,
+		<span class="ident">tls_server_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ServerConfig</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">count</span> {
 			<span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">events</span>[<span class="ident">i</span>];
@@ -3689,29 +3938,33 @@
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand::thread_rng</span>();
 				<span class="kw">let</span> <span class="ident">connection_id</span> <span class="op">=</span> <span class="ident">rng</span>.<span class="ident">gen</span>();
 
-				<span class="kw">let</span> <span class="ident">wh</span> <span class="op">=</span> <span class="ident">WriteHandle::new</span>(
-					<span class="ident">res</span>,
-					<span class="ident">guarded_data</span>[<span class="ident">index</span>].<span class="ident">clone</span>(),
-					<span class="ident">connection_id</span>,
-					<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-				);
-				(<span class="ident">on_accept</span>)(<span class="ident">connection_id</span>, <span class="ident">wh</span>)<span class="question-mark">?</span>;
-				<span class="ident">cid_map</span>.<span class="ident">insert</span>(<span class="ident">res</span>, <span class="ident">connection_id</span>);
-				{
-					<span class="kw">let</span> <span class="ident">tls_conn</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">tls_config</span>.<span class="ident">is_some</span>() {
-						<span class="kw">let</span> <span class="ident">tls_config</span> <span class="op">=</span>
-							<span class="ident">Arc::new</span>(<span class="ident">ServerConfig::clone</span>(<span class="ident">config</span>.<span class="ident">tls_config</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>()));
+				<span class="kw">let</span> <span class="ident">tls_conn</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">tls_server_config</span>.<span class="ident">clone</span>() {
+					<span class="prelude-val">Some</span>(<span class="ident">tls_server_config</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="comment">//let tls_config =</span>
+						<span class="comment">//	Arc::new(ServerConfig::clone(config.tls_config.as_ref().unwrap()));</span>
+						<span class="kw">let</span> <span class="ident">tls_config</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">tls_server_config</span>);
+
 						<span class="kw">match</span> <span class="ident">ServerConnection::new</span>(<span class="ident">tls_config</span>) {
-							<span class="prelude-val">Ok</span>(<span class="ident">tls_conn</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">tls_conn</span>)),
+							<span class="prelude-val">Ok</span>(<span class="ident">tls_conn</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">tls_conn</span>))),
 							<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
 								<span class="macro">error!</span>(<span class="string">&quot;Error building tls_connection: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>());
 								<span class="prelude-val">None</span>
 							}
 						}
-					} <span class="kw">else</span> {
-						<span class="prelude-val">None</span>
-					};
+					}
+					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				};
 
+				<span class="kw">let</span> <span class="ident">wh</span> <span class="op">=</span> <span class="ident">WriteHandle::new</span>(
+					<span class="ident">res</span>,
+					<span class="ident">guarded_data</span>[<span class="ident">index</span>].<span class="ident">clone</span>(),
+					<span class="ident">connection_id</span>,
+					<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+					<span class="ident">tls_conn</span>.<span class="ident">clone</span>(),
+				);
+				(<span class="ident">on_accept</span>)(<span class="ident">connection_id</span>, <span class="ident">wh</span>)<span class="question-mark">?</span>;
+				<span class="ident">cid_map</span>.<span class="ident">insert</span>(<span class="ident">res</span>, <span class="ident">connection_id</span>);
+				{
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guarded_data_next</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data_next</span>);
 
 					<span class="ident">guarded_data_next</span>.<span class="ident">nconns</span>.<span class="ident">push</span>(<span class="ident">ConnectionInfo</span> {
@@ -3736,7 +3989,7 @@
 		<span class="ident">on_accept</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">G</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">on_close</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">EventHandlerConfig</span>,
+		<span class="ident">tls_server_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ServerConfig</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cid_map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
@@ -3810,7 +4063,7 @@
 				<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
 				<span class="ident">wakeup_fd</span>,
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">cid_map</span>,
-				<span class="ident">config</span>,
+				<span class="ident">tls_server_config</span>.<span class="ident">clone</span>(),
 			)<span class="question-mark">?</span>;
 		}
 		<span class="prelude-val">Ok</span>(())
@@ -3843,6 +4096,7 @@
 				<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
 				<span class="ident">conn</span>.<span class="ident">connection_id</span>,
 				<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+				<span class="ident">conn</span>.<span class="ident">tls_conn</span>,
 			);
 			(<span class="ident">on_read</span>)(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">0</span>], <span class="number">0</span>, <span class="ident">wh</span>)<span class="question-mark">?</span>;
 		}
@@ -3907,9 +4161,9 @@
 		} <span class="kw">else</span> {
 			<span class="kw">let</span> <span class="ident">error</span> <span class="op">=</span> <span class="ident">errno</span>();
 			<span class="kw">if</span> <span class="ident">errno</span>().<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">EAGAIN</span> {
+				<span class="ident">errno::set_errno</span>(<span class="ident">Errno</span>(<span class="number">0</span>));
 				<span class="comment">// break because we&#39;re edge triggered.</span>
 				<span class="comment">// a new event occurs.</span>
-
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>));
 			} <span class="kw">else</span> {
 				<span class="comment">// this is an actual write error.</span>
@@ -3934,7 +4188,6 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disconnect</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">let</span> <span class="ident">list</span> <span class="op">=</span> <span class="ident">write_buffers</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">connection_id</span>);
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">break_received</span> <span class="op">=</span> <span class="bool-val">false</span>;
-
 		<span class="kw">match</span> <span class="ident">list</span> {
 			<span class="prelude-val">Some</span>(<span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">loop</span> {
 				<span class="kw">if</span> <span class="ident">list</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">break_received</span> {
@@ -4012,7 +4265,13 @@
 		<span class="kw">if</span> <span class="ident">connection_info</span>.<span class="ident">is_some</span>() {
 			<span class="kw">let</span> <span class="ident">connection_info</span> <span class="op">=</span> <span class="ident">connection_info</span>.<span class="ident">unwrap</span>();
 			<span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="number">0</span> {
-				<span class="kw">let</span> <span class="ident">wh</span> <span class="op">=</span> <span class="ident">WriteHandle::new</span>(<span class="ident">fd</span>, <span class="ident">guarded_data</span>, <span class="ident">connection_id</span>, <span class="ident">global_lock</span>);
+				<span class="kw">let</span> <span class="ident">wh</span> <span class="op">=</span> <span class="ident">WriteHandle::new</span>(
+					<span class="ident">fd</span>,
+					<span class="ident">guarded_data</span>,
+					<span class="ident">connection_id</span>,
+					<span class="ident">global_lock</span>,
+					<span class="ident">connection_info</span>.<span class="ident">tls_conn</span>.<span class="ident">clone</span>(),
+				);
 				<span class="kw">match</span> <span class="ident">connection_info</span>.<span class="ident">ctype</span> {
 					<span class="ident">ConnectionType::Inbound</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">on_read</span>)(<span class="ident">buf</span>, <span class="ident">len</span>.<span class="ident">try_into</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>), <span class="ident">wh</span>)<span class="question-mark">?</span>,
 					<span class="ident">ConnectionType::Outbound</span> <span class="op">=</span><span class="op">&gt;</span> {
@@ -4026,6 +4285,7 @@
 				<span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">errno</span>();
 				<span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
 					<span class="kw">if</span> <span class="ident">e</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">EAGAIN</span> {
+						<span class="ident">errno::set_errno</span>(<span class="ident">Errno</span>(<span class="number">0</span>));
 						<span class="ident">do_close</span> <span class="op">=</span> <span class="bool-val">false</span>;
 					}
 				}
@@ -4062,11 +4322,18 @@
 	}
 
 	<span class="kw">fn</span> <span class="ident">process_writes</span>(
-		<span class="ident">write_queue</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">WriteBuffer</span><span class="op">&gt;</span>,
+		<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">write_buffers</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">LinkedList</span><span class="op">&lt;</span><span class="ident">WriteBuffer</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">input_events</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenericEvent</span><span class="op">&gt;</span>,
 		<span class="ident">connection_id_map</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u128</span>, <span class="ident">ConnectionInfo</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">write_queue</span> <span class="op">=</span> {
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data</span>);
+			<span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">write_queue</span>.<span class="ident">clone</span>();
+			<span class="ident">guarded_data</span>.<span class="ident">write_queue</span>.<span class="ident">clear</span>();
+			<span class="ident">ret</span>
+		};
+
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash_set</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
 
 		<span class="kw">for</span> <span class="ident">write_buffer</span> <span class="kw">in</span> <span class="ident">write_queue</span> {
@@ -4155,11 +4422,22 @@
 			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hash_set</span>,
 		)<span class="question-mark">?</span>;
 
+		<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">res</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+			<span class="ident">input_events</span>.<span class="ident">clear</span>();
+		}
 		<span class="ident">output_events</span>.<span class="ident">clear</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wakeup</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
 		<span class="kw">loop</span> {
+			<span class="comment">// see if there&#39;s any new write buffers to process</span>
+			<span class="self">Self</span><span class="ident">::process_writes</span>(
+				<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write_buffers</span>,
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input_events</span>,
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_id_map</span>,
+			)<span class="question-mark">?</span>;
+
 			<span class="comment">// get new handles</span>
 			<span class="kw">let</span> <span class="ident">stop</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::update_rw_input_events</span>(
 				<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
@@ -4187,7 +4465,7 @@
 				<span class="ident">wakeup</span>,
 			)<span class="question-mark">?</span>;
 
-			<span class="kw">let</span> <span class="ident">write_queue</span> <span class="op">=</span> {
+			{
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guarded_data</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">guarded_data</span>);
 				<span class="kw">if</span> <span class="ident">guarded_data</span>.<span class="ident">wakeup_scheduled</span> {
 					<span class="ident">wakeup</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -4200,19 +4478,7 @@
 				} <span class="kw">else</span> {
 					<span class="ident">wakeup</span> <span class="op">=</span> <span class="bool-val">false</span>;
 				}
-				<span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">guarded_data</span>.<span class="ident">write_queue</span>.<span class="ident">clone</span>();
-				<span class="ident">guarded_data</span>.<span class="ident">write_queue</span>.<span class="ident">clear</span>();
-				<span class="ident">ret</span>
-			};
-
-			<span class="ident">input_events</span>.<span class="ident">clear</span>();
-
-			<span class="self">Self</span><span class="ident">::process_writes</span>(
-				<span class="ident">write_queue</span>,
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write_buffers</span>,
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input_events</span>,
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">connection_id_map</span>,
-			)<span class="question-mark">?</span>;
+			}
 
 			<span class="kw-2">*</span><span class="ident">counter</span> <span class="op">=</span> <span class="number">0</span>;
 			<span class="self">Self</span><span class="ident">::process_events</span>(
@@ -4233,6 +4499,7 @@
 			)<span class="question-mark">?</span>;
 
 			<span class="ident">output_events</span>.<span class="ident">clear</span>();
+			<span class="ident">input_events</span>.<span class="ident">clear</span>();
 		}
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -4253,55 +4520,35 @@
 		<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">filter_set</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ConnectionHandle</span><span class="op">&gt;</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">res</span> <span class="op">&gt;</span> <span class="number">0</span> {
-			<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">counter</span>..<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">res</span> {
-				<span class="kw">match</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">etype</span> {
-					<span class="ident">GenericEventType::AddReadET</span> <span class="op">|</span> <span class="ident">GenericEventType::AddReadLT</span> <span class="op">=</span><span class="op">&gt;</span> {
-						<span class="kw">if</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span> <span class="op">=</span><span class="op">=</span> <span class="ident">wakeup_fd</span> {
-							<span class="comment">// ignore wakeupfd here process in main loop.</span>
-						} <span class="kw">else</span> {
-							<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
-							<span class="kw">match</span> <span class="ident">conn_info</span> {
-								<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> {
-									<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">conn_info</span>.<span class="ident">handle</span>;
-									<span class="kw">let</span> <span class="ident">connection_id</span> <span class="op">=</span> <span class="ident">conn_info</span>.<span class="ident">connection_id</span>;
-									<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">conn_info</span>.<span class="ident">tls_conn</span> {
-										<span class="prelude-val">Some</span>(<span class="ident">_tls_conn</span>) <span class="op">=</span><span class="op">&gt;</span> {
-											<span class="comment">// for now tls not implemented</span>
-											<span class="kw">loop</span> {
-												<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">BUFFER_SIZE</span>];
-												<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::do_read</span>(
-													<span class="ident">handle</span>,
-													<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>,
-													<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-												)<span class="question-mark">?</span>;
-												<span class="kw">if</span> <span class="op">!</span><span class="self">Self</span><span class="ident">::process_read_result</span>(
-													<span class="ident">selector</span>,
-													<span class="ident">handle</span>,
-													<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
-													<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
-													<span class="kw-2">&amp;</span><span class="ident">buf</span>,
-													<span class="ident">len</span>,
-													<span class="ident">connection_id</span>,
-													<span class="ident">on_read</span>.<span class="ident">clone</span>(),
-													<span class="ident">on_client_read</span>.<span class="ident">clone</span>(),
-													<span class="ident">connection_id_map</span>,
-													<span class="ident">connection_info_map</span>,
-													<span class="ident">write_buffers</span>,
-													<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-													<span class="ident">filter_set</span>,
-												)<span class="question-mark">?</span> {
-													<span class="kw">break</span>;
-												}
-											}
-										}
-										<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">loop</span> {
-											<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">BUFFER_SIZE</span>];
-											<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::do_read</span>(
-												<span class="ident">handle</span>,
-												<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>,
-												<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-											)<span class="question-mark">?</span>;
+		<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">counter</span>..<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">res</span> {
+			<span class="kw">match</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">etype</span> {
+				<span class="ident">GenericEventType::AddReadET</span> <span class="op">|</span> <span class="ident">GenericEventType::AddReadLT</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw">if</span> <span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span> <span class="op">=</span><span class="op">=</span> <span class="ident">wakeup_fd</span> {
+						<span class="comment">// ignore wakeupfd here process in main loop.</span>
+					} <span class="kw">else</span> {
+						<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
+						<span class="kw">match</span> <span class="ident">conn_info</span> {
+							<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> {
+								<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">conn_info</span>.<span class="ident">handle</span>;
+								<span class="kw">let</span> <span class="ident">connection_id</span> <span class="op">=</span> <span class="ident">conn_info</span>.<span class="ident">connection_id</span>;
+								<span class="kw">match</span> <span class="ident">conn_info</span>.<span class="ident">tls_conn</span>.<span class="ident">clone</span>() {
+									<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">tls_conn</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">loop</span> {
+										<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+										<span class="kw">let</span> (<span class="ident">raw_len</span>, <span class="ident">tls_len</span>) <span class="op">=</span> <span class="self">Self</span><span class="ident">::do_tls_read</span>(
+											<span class="ident">handle</span>,
+											<span class="ident">connection_id</span>,
+											<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+											<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>,
+											<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+											<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tls_conn</span>,
+										)<span class="question-mark">?</span>;
+										<span class="kw">if</span> <span class="ident">raw_len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">tls_len</span> <span class="op">&gt;</span> <span class="number">0</span> {
+											<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">tls_len</span> <span class="op">&gt;</span> <span class="number">0</span> {
+												<span class="ident">tls_len</span>.<span class="ident">try_into</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>)
+											} <span class="kw">else</span> {
+												<span class="ident">raw_len</span>
+											};
+
 											<span class="kw">if</span> <span class="op">!</span><span class="self">Self</span><span class="ident">::process_read_result</span>(
 												<span class="ident">selector</span>,
 												<span class="ident">handle</span>,
@@ -4320,40 +4567,31 @@
 											)<span class="question-mark">?</span> {
 												<span class="kw">break</span>;
 											}
-										},
-									}
-								}
-								<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
-									<span class="comment">// looks to be spurious. connection already disconnected</span>
-									<span class="macro">log_multi!</span>(
-										<span class="ident">DEBUG</span>,
-										<span class="ident">MAIN_LOG</span>,
-										<span class="string">&quot;connection not found (add read): {}&quot;</span>,
-										<span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>
-									);
-								}
-							}
-						}
-					}
-					<span class="ident">GenericEventType::AddWriteET</span> <span class="op">=</span><span class="op">&gt;</span> {
-						<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
-
-						<span class="kw">match</span> <span class="ident">conn_info</span> {
-							<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> {
-								<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">conn_info</span>.<span class="ident">tls_conn</span> {
-									<span class="prelude-val">Some</span>(<span class="ident">_tls_conn</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="comment">// for now tls not implemented</span>
-									}
-									<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::process_write_event</span>(
-										<span class="ident">selector</span>,
-										<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>],
-										<span class="ident">conn_info</span>.<span class="ident">connection_id</span>,
-										<span class="ident">write_buffers</span>,
-										<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
-										<span class="ident">connection_id_map</span>,
-										<span class="ident">connection_info_map</span>,
-										<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
-										<span class="ident">filter_set</span>,
-									)<span class="question-mark">?</span>,
+										}
+									},
+									<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">loop</span> {
+										<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">BUFFER_SIZE</span>];
+										<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span>
+											<span class="self">Self</span><span class="ident">::do_read</span>(<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="ident">global_lock</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
+										<span class="kw">if</span> <span class="op">!</span><span class="self">Self</span><span class="ident">::process_read_result</span>(
+											<span class="ident">selector</span>,
+											<span class="ident">handle</span>,
+											<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
+											<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+											<span class="kw-2">&amp;</span><span class="ident">buf</span>,
+											<span class="ident">len</span>,
+											<span class="ident">connection_id</span>,
+											<span class="ident">on_read</span>.<span class="ident">clone</span>(),
+											<span class="ident">on_client_read</span>.<span class="ident">clone</span>(),
+											<span class="ident">connection_id_map</span>,
+											<span class="ident">connection_info_map</span>,
+											<span class="ident">write_buffers</span>,
+											<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+											<span class="ident">filter_set</span>,
+										)<span class="question-mark">?</span> {
+											<span class="kw">break</span>;
+										}
+									},
 								}
 							}
 							<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
@@ -4361,25 +4599,93 @@
 								<span class="macro">log_multi!</span>(
 									<span class="ident">DEBUG</span>,
 									<span class="ident">MAIN_LOG</span>,
-									<span class="string">&quot;connection not found (add write): {}&quot;</span>,
+									<span class="string">&quot;connection not found (add read): {}&quot;</span>,
 									<span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>
 								);
 							}
 						}
-					} <span class="comment">//_ =&gt; {}</span>
+					}
 				}
-				<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+				<span class="ident">GenericEventType::AddWriteET</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw">let</span> <span class="ident">conn_info</span> <span class="op">=</span> <span class="ident">connection_info_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>);
+
+					<span class="kw">match</span> <span class="ident">conn_info</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">conn_info</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="self">Self</span><span class="ident">::process_write_event</span>(
+								<span class="ident">selector</span>,
+								<span class="kw-2">&amp;</span><span class="ident">output_events</span>[<span class="ident">i</span>],
+								<span class="ident">conn_info</span>.<span class="ident">connection_id</span>,
+								<span class="ident">write_buffers</span>,
+								<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+								<span class="ident">connection_id_map</span>,
+								<span class="ident">connection_info_map</span>,
+								<span class="ident">listener_guarded_data</span>.<span class="ident">clone</span>(),
+								<span class="ident">filter_set</span>,
+							)<span class="question-mark">?</span>;
+						}
+						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="comment">// looks to be spurious. connection already disconnected</span>
+							<span class="macro">log_multi!</span>(
+								<span class="ident">DEBUG</span>,
+								<span class="ident">MAIN_LOG</span>,
+								<span class="string">&quot;connection not found (add write): {}&quot;</span>,
+								<span class="ident">output_events</span>[<span class="ident">i</span>].<span class="ident">fd</span>
+							);
+						}
+					}
+				} <span class="comment">//_ =&gt; {}</span>
 			}
+			<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 		}
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">_do_tls_read</span>(
-		<span class="ident">_handle</span>: <span class="ident">ConnectionHandle</span>,
-		<span class="ident">_buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-		<span class="ident">_global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">isize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="prelude-val">Ok</span>(<span class="number">0</span>)
+	<span class="kw">fn</span> <span class="ident">do_tls_read</span>(
+		<span class="ident">handle</span>: <span class="ident">ConnectionHandle</span>,
+		<span class="ident">connection_id</span>: <span class="ident">u128</span>,
+		<span class="ident">guarded_data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">GuardedData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+		<span class="ident">global_lock</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">tls_conn</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ServerConnection</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">isize</span>, <span class="ident">usize</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">pt_len</span>;
+		<span class="ident">buf</span>.<span class="ident">resize</span>(<span class="ident">BUFFER_SIZE</span>, <span class="number">0u8</span>);
+		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::do_read</span>(<span class="ident">handle</span>, <span class="ident">buf</span>, <span class="ident">global_lock</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
+
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wbuf</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+		{
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tls_conn</span> <span class="op">=</span> <span class="macro">nioruntime_util::lockw!</span>(<span class="ident">tls_conn</span>);
+
+			<span class="ident">tls_conn</span>.<span class="ident">read_tls</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">buf</span>[<span class="number">0</span>..<span class="ident">len</span>.<span class="ident">try_into</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>)])<span class="question-mark">?</span>;
+
+			<span class="kw">match</span> <span class="ident">tls_conn</span>.<span class="ident">process_new_packets</span>() {
+				<span class="prelude-val">Ok</span>(<span class="ident">io_state</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">pt_len</span> <span class="op">=</span> <span class="ident">io_state</span>.<span class="ident">plaintext_bytes_to_read</span>();
+					<span class="ident">buf</span>.<span class="ident">resize</span>(<span class="ident">pt_len</span>, <span class="number">0u8</span>);
+					<span class="ident">tls_conn</span>.<span class="ident">reader</span>().<span class="ident">read_exact</span>(<span class="ident">buf</span>)<span class="question-mark">?</span>;
+				}
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="macro">warn!</span>(
+						<span class="string">&quot;error generated processing packets for handle={}. Error={}&quot;</span>,
+						<span class="ident">handle</span>,
+						<span class="ident">e</span>.<span class="ident">to_string</span>()
+					);
+					<span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="op">-</span><span class="number">1</span>, <span class="number">0</span>)); <span class="comment">// invalid text received. Close conn.</span>
+				}
+			}
+			<span class="ident">tls_conn</span>.<span class="ident">write_tls</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">wbuf</span>)<span class="question-mark">?</span>;
+		}
+
+		<span class="kw">let</span> <span class="ident">wh</span> <span class="op">=</span> <span class="ident">WriteHandle::new</span>(
+			<span class="ident">handle</span>,
+			<span class="ident">guarded_data</span>.<span class="ident">clone</span>(),
+			<span class="ident">connection_id</span>,
+			<span class="ident">global_lock</span>.<span class="ident">clone</span>(),
+			<span class="prelude-val">None</span>,
+		);
+		<span class="ident">wh</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">wbuf</span>)<span class="question-mark">?</span>;
+
+		<span class="prelude-val">Ok</span>((<span class="ident">len</span>, <span class="ident">pt_len</span>))
 	}
 
 	<span class="kw">fn</span> <span class="ident">do_read</span>(
@@ -4818,7 +5124,7 @@
 	<span class="ident">connection_id</span>: <span class="ident">u128</span>,
 	<span class="ident">ctype</span>: <span class="ident">ConnectionType</span>,
 	<span class="ident">sender</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SyncSender</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
-	<span class="ident">tls_conn</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">ServerConnection</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">tls_conn</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ServerConnection</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">struct</span> <span class="ident">GuardedData</span> {

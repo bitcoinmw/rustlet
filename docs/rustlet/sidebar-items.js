@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["LOG_LEVEL",""],["MAX_BUF",""],["VERSION",""]],"fn":[["client_thread",""],["fun",""],["fun2",""],["load_certs",""],["load_private_key",""],["main",""]],"mod":[["built_info",""]],"struct":[["Example",""],["Example2",""]]});
+initSidebarItems({"constant":[["LOG_LEVEL",""],["MAX_BUF",""],["VERSION",""]],"fn":[["client_thread",""],["fun",""],["fun2",""],["main",""]],"mod":[["built_info",""]],"struct":[["Example",""],["Example2",""]]});
