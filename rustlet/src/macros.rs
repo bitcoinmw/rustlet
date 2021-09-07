@@ -72,6 +72,9 @@ lazy_static! {
 ///
 /// fn test() -> Result<(), Error> {
 ///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     // this rustlet gets the value stored in session variable "abc". If it has not been set
 ///     // (i.e. by the set_session rustlet, 'none' is displayed.
 ///     rustlet!("get_session", {
@@ -102,6 +105,11 @@ lazy_static! {
 ///     rustlet!("delete_abc", {
 ///         session_delete!("abc");
 ///     });
+///
+///     rustlet_mapping!("/get_session", "get_session");
+///     rustlet_mapping!("/set_session", "set_session");
+///     rustlet_mapping!("/delete_session", "delete_session");
+///     rustlet_mapping!("/delete_abc", "delete_abc");
 ///
 ///     Ok(())
 /// }
@@ -181,6 +189,9 @@ macro_rules! session_delete {
 ///
 /// fn test() -> Result<(), Error> {
 ///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     // this rustlet gets the value stored in session variable "abc". If it has not been set
 ///     // (i.e. by the set_session rustlet, 'none' is displayed.
 ///     rustlet!("get_session", {
@@ -211,6 +222,11 @@ macro_rules! session_delete {
 ///     rustlet!("delete_abc", {
 ///         session_delete!("abc");
 ///     });
+///
+///     rustlet_mapping!("/get_session", "get_session");
+///     rustlet_mapping!("/set_session", "set_session");
+///     rustlet_mapping!("/delete_session", "delete_session");
+///     rustlet_mapping!("/delete_abc", "delete_abc");
 ///     
 ///     Ok(())
 /// }
@@ -258,6 +274,10 @@ macro_rules! session {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("set_content_type", {
 ///         set_content_type!("text/html");
 ///         response!("<html><body><strong>Some Content Here");
@@ -265,6 +285,9 @@ macro_rules! session {
 ///         response!("</strong></body></html>");
 ///         // flush called automatically by the container after control is returned.
 ///     });
+///
+///     rustlet_mapping!("/set_content_type", "set_content_type");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -299,6 +322,10 @@ macro_rules! flush {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("async", {
 ///         response!("first message\n");
 ///         let ac = async_context!();
@@ -310,7 +337,10 @@ macro_rules! flush {
 ///             response!("second message\n");
 ///             async_complete!();
 ///         });            
-///     });        
+///     });
+///
+///     rustlet_mapping!("/async", "async");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -346,6 +376,10 @@ macro_rules! async_complete {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("async", {
 ///         response!("first message\n");
 ///         let ac = async_context!();
@@ -358,6 +392,9 @@ macro_rules! async_complete {
 ///             async_complete!();
 ///         });
 ///     });
+///
+///     rustlet_mapping!("/", "async");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -530,10 +567,16 @@ macro_rules! rustlet {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init rustlet container with defaults
 ///     rustlet_init!(RustletConfig::default()); // use default config
+///
 ///     rustlet!("hello_world", {
 ///         response!("Hello World\n");
 ///     });
+///
+///     rustlet_mapping!("/", "hello_world");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -558,6 +601,9 @@ macro_rules! rustlet {
 ///     rustlet!("hello_world", {
 ///         response!("Hello World\n");
 ///     });
+///
+///     rustlet_mapping!("/", "hello_world");
+///
 ///     Ok(())
 /// }           
 /// ```
@@ -679,10 +725,17 @@ macro_rules! rustlet_mapping {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("set_content_type", {
 ///         set_content_type!("text/html");
 ///         response!("<html><body><strong>Some Content Here</strong></body></html>");
 ///     });
+///
+///     rustlet_mapping!("/", "set_content_type");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -704,10 +757,17 @@ macro_rules! set_content_type {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("set_content_type", {
 ///         add_header!("Cache-Control", "no-cache");
 ///         response!("<html><body><strong>Some Content Here</strong></body></html>");
 ///     });
+///
+///     rustlet_mapping!("/", "set_content_type");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -754,9 +814,16 @@ macro_rules! add_header {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("set_redirect", {
 ///         set_redirect!("http://www.example.com");
 ///     });
+///
+///     rustlet_mapping!("/", "set_redirect");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -805,9 +872,16 @@ macro_rules! set_redirect {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("hello_world", {
 ///         response!("hello world {}", "any formatted value can go here");
 ///     });
+///
+///     rustlet_mapping!("/", "hello_world");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -881,11 +955,18 @@ macro_rules! response {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("show_content_as_utf8", {
 ///         let content = request_content!();
 ///         let content_as_ut8 = std::str::from_utf8(&content)?;
 ///         response!("content='{}'\n", content_as_ut8);
 ///     });
+///
+///     rustlet_mapping!("/", "show_content_as_utf8");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -919,11 +1000,18 @@ macro_rules! request_content {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("cookies", {
 ///         let cookie = cookie!("abc");
 ///         set_cookie!("abc", "def");
 ///         response!("cookie={:?}\n", cookie);
 ///     });
+///
+///     rustlet_mapping!("/", "cookies");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -957,11 +1045,18 @@ macro_rules! cookie {
 /// debug!();
 ///             
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("cookies", {
 ///         let cookie = cookie!("abc");
 ///         set_cookie!("abc", "def");
 ///         response!("cookie={:?}\n", cookie);
-///     });        
+///     });
+///
+///     rustlet_mapping!("/", "cookies");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -1006,6 +1101,10 @@ macro_rules! set_cookie {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("header_len", {
 ///         for i in 0..header_len!() {
 ///             let header_name = header_name!(i);
@@ -1013,6 +1112,9 @@ macro_rules! set_cookie {
 ///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
 ///         }
 ///     });
+///
+///     rustlet_mapping!("/", "header_len");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -1035,6 +1137,10 @@ macro_rules! header_len {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("header_name", {
 ///         for i in 0..header_len!() {
 ///             let header_name = header_name!(i);
@@ -1042,6 +1148,9 @@ macro_rules! header_len {
 ///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
 ///         }
 ///     });
+///
+///     rustlet_mapping!("/", "header_name");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -1063,6 +1172,10 @@ macro_rules! header_name {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("header_value", {
 ///         for i in 0..header_len!() {
 ///             let header_name = header_name!(i);
@@ -1070,6 +1183,9 @@ macro_rules! header_name {
 ///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
 ///         }
 ///     });
+///
+///     rustlet_mapping!("/", "header_value");
+///
 ///     Ok(())
 /// }
 /// ```
@@ -1092,6 +1208,10 @@ macro_rules! header_value {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("header_value", {
 ///         for i in 0..header_len!() {
 ///             let header_name = header_name!(i);
@@ -1099,6 +1219,9 @@ macro_rules! header_value {
 ///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
 ///         }
 ///     });
+///
+///     rustlet_mapping!("/", "header_value");
+///
 ///     Ok(())
 /// }           
 /// ```
@@ -1121,6 +1244,10 @@ macro_rules! query {
 /// debug!();
 ///
 /// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
 ///     rustlet!("request", {
 ///         let method = request!("method"); // the HTTP request method (GET or POST).
 ///         response!("method='{}'\n", method);
@@ -1133,6 +1260,9 @@ macro_rules! query {
 ///         let query = request!("query"); // the full query for the request
 ///         response!("query='{}'\n", query);
 ///     });
+///
+///     rustlet_mapping!("/", "request");
+///
 ///     Ok(())
 /// }
 /// ```
