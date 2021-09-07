@@ -1212,15 +1212,14 @@ macro_rules! header_value {
 ///     // init the rustlet container, in this case with default values
 ///     rustlet_init!(RustletConfig::default());
 ///
-///     rustlet!("header_value", {
-///         for i in 0..header_len!() {
-///             let header_name = header_name!(i);
-///             let header_value = header_value!(i);
-///             response!("header[{}] [{}] -> [{}]\n", i, header_name, header_value);
-///         }
+///     rustlet!("query", {
+///         let query = request!("query"); // the full query for the request
+///         response!("query='{}'\n", query);
+///         let email = request!("query", "email"); // get a specific value associated with the key. In this case "email"
+///         response!("email='{}'\n", email);
 ///     });
 ///
-///     rustlet_mapping!("/", "header_value");
+///     rustlet_mapping!("/", "query");
 ///
 ///     Ok(())
 /// }           
