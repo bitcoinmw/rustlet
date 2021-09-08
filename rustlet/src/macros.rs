@@ -454,6 +454,7 @@ macro_rules! async_context {
 /// * [`add_header`]
 /// * [`async_complete`]
 /// * [`async_context`]
+/// * [`bin_write`]
 /// * [`cookie`]
 /// * [`flush`]
 /// * [`header_len`]
