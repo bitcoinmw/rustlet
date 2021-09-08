@@ -497,6 +497,35 @@
 <span id="495">495</span>
 <span id="496">496</span>
 <span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -518,17 +547,13 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">use</span> <span class="ident">std::os::unix::io::AsRawFd</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-<span class="kw">use</span> <span class="ident">libc::close</span>;
-
 <span class="kw">use</span> <span class="ident">clap::load_yaml</span>;
 <span class="kw">use</span> <span class="ident">clap::App</span>;
-<span class="kw">use</span> <span class="ident">errno::errno</span>;
 <span class="kw">use</span> <span class="ident">librustlet</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">native_tls::TlsConnector</span>;
 <span class="kw">use</span> <span class="ident">nioruntime_evh</span>::{<span class="ident">EventHandlerConfig</span>, <span class="ident">TlsConfig</span>};
 <span class="kw">use</span> <span class="ident">nioruntime_log</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">nioruntime_util</span>::{<span class="ident">Error</span>, <span class="ident">ErrorKind</span>};
-<span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::io::Write</span>;
 <span class="kw">use</span> <span class="ident">std::net::TcpStream</span>;
@@ -537,7 +562,7 @@
 <span class="kw">const</span> <span class="ident">MAX_BUF</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">100_000</span>;
 <span class="kw">const</span> <span class="ident">VERSION</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>);
 
-<span class="macro">nioruntime_log::debug!</span>();
+<span class="macro">nioruntime_log::info!</span>();
 
 <span class="kw">fn</span> <span class="ident">fun</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="macro">rustlet!</span>(<span class="string">&quot;error&quot;</span>, {
@@ -570,21 +595,34 @@
 	<span class="ident">tlat_sum</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">tlat_max</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">u128</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">nginx</span>: <span class="ident">bool</span>,
+	<span class="ident">tls</span>: <span class="ident">bool</span>,
+	<span class="ident">connector</span>: <span class="kw-2">&amp;</span><span class="ident">TlsConnector</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lat_sum</span> <span class="op">=</span> <span class="number">0.0</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lat_max</span> <span class="op">=</span> <span class="number">0</span>;
-	<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">stream</span>, <span class="ident">fd</span>) <span class="op">=</span> {
+	<span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nginx</span> {
+		<span class="string">&quot;127.0.0.1:80&quot;</span>
+	} <span class="kw">else</span> {
+		<span class="string">&quot;127.0.0.1:8080&quot;</span>
+	};
+	<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">stream</span>, <span class="kw-2">mut</span> <span class="ident">tls_stream</span>, <span class="ident">fd</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">tls</span> {
 		<span class="kw">let</span> <span class="ident">_lock</span> <span class="op">=</span> <span class="ident">tlat_sum</span>.<span class="ident">lock</span>();
-		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nginx</span> {
-			<span class="ident">TcpStream::connect</span>(<span class="string">&quot;127.0.0.1:80&quot;</span>)<span class="question-mark">?</span>
-		} <span class="kw">else</span> {
-			<span class="ident">TcpStream::connect</span>(<span class="string">&quot;127.0.0.1:8080&quot;</span>)<span class="question-mark">?</span>
-		};
+		<span class="kw">let</span> <span class="ident">tls_stream</span> <span class="op">=</span> <span class="ident">connector</span>
+			.<span class="ident">connect</span>(<span class="string">&quot;example.com&quot;</span>, <span class="ident">TcpStream::connect</span>(<span class="ident">addr</span>)<span class="question-mark">?</span>)
+			.<span class="ident">unwrap</span>();
+		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">get_ref</span>().<span class="ident">as_raw_fd</span>();
+		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
+		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">get_ref</span>().<span class="ident">as_raw_fd</span>();
+		(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">tls_stream</span>), <span class="ident">fd</span>)
+	} <span class="kw">else</span> {
+		<span class="kw">let</span> <span class="ident">_lock</span> <span class="op">=</span> <span class="ident">tlat_sum</span>.<span class="ident">lock</span>();
+		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">TcpStream::connect</span>(<span class="ident">addr</span>)<span class="question-mark">?</span>;
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">as_raw_fd</span>();
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
 		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">as_raw_socket</span>();
-		(<span class="ident">stream</span>, <span class="ident">fd</span>)
+		(<span class="prelude-val">Some</span>(<span class="ident">stream</span>), <span class="prelude-val">None</span>, <span class="ident">fd</span>)
 	};
 	<span class="kw">let</span> <span class="ident">buf2</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="number">0u8</span>; <span class="ident">MAX_BUF</span>];
 	<span class="kw">let</span> <span class="ident">start_itt</span> <span class="op">=</span> <span class="ident">std::time::SystemTime::now</span>();
@@ -608,7 +646,13 @@
 			<span class="macro">info!</span>(<span class="string">&quot;Request {} on thread {}, qps={}&quot;</span>, <span class="ident">i</span>, <span class="ident">id</span>, <span class="ident">qps</span>);
 		}
 		<span class="kw">let</span> <span class="ident">start_query</span> <span class="op">=</span> <span class="ident">std::time::SystemTime::now</span>();
-		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">request_bytes</span>);
+		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">stream</span> {
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">stream</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">stream</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">request_bytes</span>),
+			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
+				<span class="ident">stream</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">request_bytes</span>)
+			}
+		};
 
 		<span class="kw">match</span> <span class="ident">res</span> {
 			<span class="prelude-val">Ok</span>(<span class="ident">_x</span>) <span class="op">=</span><span class="op">&gt;</span> {}
@@ -620,7 +664,14 @@
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">len_sum</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">loop</span> {
-			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf2</span>[<span class="ident">len_sum</span>..]);
+			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">stream</span> {
+				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">stream</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">stream</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf2</span>[<span class="ident">len_sum</span>..]),
+				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
+					<span class="ident">stream</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf2</span>[<span class="ident">len_sum</span>..])
+				}
+			};
+
 			<span class="kw">match</span> <span class="ident">res</span> {
 				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
 				<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -667,18 +718,6 @@
 		}
 	}
 
-	{
-		<span class="kw">let</span> <span class="ident">_lock</span> <span class="op">=</span> <span class="ident">tlat_sum</span>.<span class="ident">lock</span>();
-		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-		<span class="kw">let</span> <span class="ident">close_res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">close</span>(<span class="ident">fd</span>.<span class="ident">try_into</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>)) };
-		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
-		<span class="kw">let</span> <span class="ident">close_res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ws2_32::closesocket</span>(<span class="ident">fd</span>.<span class="ident">try_into</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>)) };
-		<span class="kw">if</span> <span class="ident">close_res</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-			<span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">errno</span>();
-			<span class="macro">info!</span>(<span class="string">&quot;error close {} (fd={})&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>(), <span class="ident">fd</span>);
-		}
-		<span class="ident">drop</span>(<span class="ident">stream</span>);
-	}
 	{
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tlat_sum</span> <span class="op">=</span> <span class="ident">tlat_sum</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
 		(<span class="kw-2">*</span><span class="ident">tlat_sum</span>) <span class="op">+</span><span class="op">=</span> <span class="ident">lat_sum</span>;
@@ -780,6 +819,7 @@
 		<span class="kw">let</span> <span class="ident">threads</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;threads&quot;</span>);
 		<span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;count&quot;</span>);
 		<span class="kw">let</span> <span class="ident">itt</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;itt&quot;</span>);
+		<span class="kw">let</span> <span class="ident">tls</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">is_present</span>(<span class="string">&quot;tls&quot;</span>);
 
 		<span class="kw">let</span> <span class="ident">threads</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">threads</span> {
 			<span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">args</span>.<span class="ident">value_of</span>(<span class="string">&quot;threads&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
@@ -810,6 +850,10 @@
 		<span class="kw">let</span> <span class="ident">time</span> <span class="op">=</span> <span class="ident">std::time::SystemTime::now</span>();
 		<span class="kw">let</span> <span class="ident">tlat_sum</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="number">0.0</span>));
 		<span class="kw">let</span> <span class="ident">tlat_max</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="number">0</span>));
+		<span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">TlsConnector::builder</span>()
+			.<span class="ident">danger_accept_invalid_hostnames</span>(<span class="bool-val">true</span>)
+			.<span class="ident">build</span>()
+			.<span class="ident">unwrap</span>();
 
 		<span class="kw">for</span> <span class="ident">x</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">itt</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">jhs</span> <span class="op">=</span> <span class="macro">vec!</span>[];
@@ -817,8 +861,17 @@
 				<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">i</span>.<span class="ident">clone</span>();
 				<span class="kw">let</span> <span class="ident">tlat_sum</span> <span class="op">=</span> <span class="ident">tlat_sum</span>.<span class="ident">clone</span>();
 				<span class="kw">let</span> <span class="ident">tlat_max</span> <span class="op">=</span> <span class="ident">tlat_max</span>.<span class="ident">clone</span>();
+				<span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">connector</span>.<span class="ident">clone</span>();
 				<span class="ident">jhs</span>.<span class="ident">push</span>(<span class="ident">std::thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-					<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">client_thread</span>(<span class="ident">count</span>, <span class="ident">id</span>, <span class="ident">tlat_sum</span>.<span class="ident">clone</span>(), <span class="ident">tlat_max</span>.<span class="ident">clone</span>(), <span class="ident">nginx</span>);
+					<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">client_thread</span>(
+						<span class="ident">count</span>,
+						<span class="ident">id</span>,
+						<span class="ident">tlat_sum</span>.<span class="ident">clone</span>(),
+						<span class="ident">tlat_max</span>.<span class="ident">clone</span>(),
+						<span class="ident">nginx</span>,
+						<span class="ident">tls</span>,
+						<span class="kw-2">&amp;</span><span class="ident">connector</span>,
+					);
 					<span class="kw">match</span> <span class="ident">res</span> {
 						<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
 						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -974,9 +1027,14 @@
 			<span class="macro">response!</span>(<span class="string">&quot;content=&#39;{}&#39;\n&quot;</span>, <span class="ident">content_as_ut8</span>);
 		});
 
+		<span class="macro">rustlet!</span>(<span class="string">&quot;bin_write&quot;</span>, {
+			<span class="macro">bin_write!</span>(<span class="string">&quot;test of bin write&quot;</span>.<span class="ident">as_bytes</span>());
+		});
+
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">fun</span>();
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">fun2</span>();
 
+		<span class="macro">rustlet_mapping!</span>(<span class="string">&quot;/bin_write&quot;</span>, <span class="string">&quot;bin_write&quot;</span>);
 		<span class="macro">rustlet_mapping!</span>(<span class="string">&quot;/myrustlet&quot;</span>, <span class="string">&quot;myrustlet&quot;</span>);
 		<span class="macro">rustlet_mapping!</span>(<span class="string">&quot;/myrustlet2&quot;</span>, <span class="string">&quot;myrustlet2&quot;</span>);
 		<span class="macro">rustlet_mapping!</span>(<span class="string">&quot;/printheaders&quot;</span>, <span class="string">&quot;printheaders&quot;</span>);
