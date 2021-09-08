@@ -135,6 +135,10 @@ Statistical Log V_1.0:         REQUESTS       CONNS        CONNECTS         QPS 
 [2021-09-05 20:16:24]:        1,156,421          67          11,574   115642.10           0           0   0.0070367   14.203071
 ```
 
+# Configuration
+
+The rustlet container is configured via the [rustlet-init](https://bitcoinmw.github.io/rustlet/librustlet/macro.rustlet_init.html) macro. All configuration structs implement the Default trait so the defaults can be used. Also, all of the fields are fully documented in the documentation linked to above.
+
 # Samples
 
 The Rustlet [macro library](https://bitcoinmw.github.io/rustlet/librustlet/index.html)  documentation provides numerous working examples. Also, the [rustlet-simple](https://github.com/bitcoinmw/rustlet-simple) project shows how to write and deploy a hello world rustlet in 3 easy steps. More examples to come...
