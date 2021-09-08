@@ -30,9 +30,9 @@ native-tls = "0.2.8"
 librustlet = { path = "./rustlet" }
 
 # master
-nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_evh = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_err = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_evh = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_err = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 
 # local testing
 #nioruntime_util = { path = "../nioruntime/util" }

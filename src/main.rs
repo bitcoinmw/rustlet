@@ -22,8 +22,6 @@ use clap::load_yaml;
 use clap::App;
 use librustlet::*;
 use native_tls::TlsConnector;
-use nioruntime_err::{Error, ErrorKind};
-use nioruntime_evh::{EventHandlerConfig, TlsConfig};
 use nioruntime_log::*;
 use std::io::Read;
 use std::io::Write;

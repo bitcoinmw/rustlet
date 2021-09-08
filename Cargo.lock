@@ -537,6 +537,7 @@ version = "0.0.1"
 dependencies = [
  "lazy_static",
  "nioruntime_err",
+ "nioruntime_evh",
  "nioruntime_http",
  "nioruntime_log",
  "nioruntime_util",
@@ -1001,9 +1002,6 @@ dependencies = [
  "libc",
  "librustlet",
  "native-tls",
- "nioruntime_err",
- "nioruntime_evh",
- "nioruntime_util",
  "rand",
  "rustls",
  "rustls-pemfile",

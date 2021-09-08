@@ -15,7 +15,6 @@
 pub mod macros;
 pub mod rustlet_impls;
 
-pub use nioruntime_err::Error;
 pub use nioruntime_http;
 pub use nioruntime_log;
 pub use rustlet_impls::{
@@ -23,4 +22,6 @@ pub use rustlet_impls::{
 	RustletResponse,
 };
 
+pub use nioruntime_err::{Error, ErrorKind};
+pub use nioruntime_evh::{EventHandlerConfig, TlsConfig};
 pub use nioruntime_util::ser::{Readable, Reader, Writeable, Writer};
