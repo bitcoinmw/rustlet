@@ -137,7 +137,7 @@ Statistical Log V_1.0:         REQUESTS       CONNS        CONNECTS         QPS 
 
 # Configuration
 
-The rustlet container is configured via the [rustlet-init](https://bitcoinmw.github.io/rustlet/librustlet/macro.rustlet_init.html) macro. All configuration structs implement the Default trait so the defaults can be used. Also, all of the fields are fully documented in the documentation linked to above.
+The rustlet container is configured via the [rustlet_init](https://bitcoinmw.github.io/rustlet/librustlet/macro.rustlet_init.html) macro. All configuration structs implement the Default trait so the defaults can be used. Also, all of the fields are fully documented in the documentation linked to above.
 
 # Samples
 
