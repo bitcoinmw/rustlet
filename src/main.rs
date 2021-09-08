@@ -38,7 +38,7 @@ use std::sync::{Arc, Mutex};
 const MAX_BUF: usize = 100_000;
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-nioruntime_log::debug!();
+nioruntime_log::info!();
 
 fn fun() -> Result<(), Error> {
 	rustlet!("error", {
@@ -205,7 +205,7 @@ fn client_thread(
 		let close_res = unsafe { ws2_32::closesocket(fd.try_into().unwrap_or(0)) };
 		if close_res != 0 {
 			let e = errno();
-			info!("error close {} (fd={})", e.to_string(), fd);
+			debug!("error close {} (fd={})", e.to_string(), fd);
 		}
 		drop(stream);
 	}
