@@ -72,6 +72,7 @@ fn client_thread(
 	tlat_max: Arc<Mutex<u128>>,
 	nginx: bool,
 	tls: bool,
+	connector: &TlsConnector,
 ) -> Result<(), Error> {
 	let mut lat_sum = 0.0;
 	let mut lat_max = 0;
@@ -82,10 +83,6 @@ fn client_thread(
 	};
 	let (mut stream, mut tls_stream, fd) = if tls {
 		let _lock = tlat_sum.lock();
-		let connector = TlsConnector::builder()
-			.danger_accept_invalid_hostnames(true)
-			.build()
-			.unwrap();
 		let tls_stream = connector
 			.connect("example.com", TcpStream::connect(addr)?)
 			.unwrap();
@@ -341,6 +338,10 @@ fn main() {
 		let time = std::time::SystemTime::now();
 		let tlat_sum = Arc::new(Mutex::new(0.0));
 		let tlat_max = Arc::new(Mutex::new(0));
+		let connector = TlsConnector::builder()
+			.danger_accept_invalid_hostnames(true)
+			.build()
+			.unwrap();
 
 		for x in 0..itt {
 			let mut jhs = vec![];
@@ -348,9 +349,17 @@ fn main() {
 				let id = i.clone();
 				let tlat_sum = tlat_sum.clone();
 				let tlat_max = tlat_max.clone();
+				let connector = connector.clone();
 				jhs.push(std::thread::spawn(move || {
-					let res =
-						client_thread(count, id, tlat_sum.clone(), tlat_max.clone(), nginx, tls);
+					let res = client_thread(
+						count,
+						id,
+						tlat_sum.clone(),
+						tlat_max.clone(),
+						nginx,
+						tls,
+						&connector,
+					);
 					match res {
 						Ok(_) => {}
 						Err(e) => {
