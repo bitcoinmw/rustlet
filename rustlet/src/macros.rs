@@ -38,7 +38,7 @@ lazy_static! {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -155,7 +155,7 @@ macro_rules! session_delete {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -267,7 +267,7 @@ macro_rules! session {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -315,7 +315,7 @@ macro_rules! flush {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -369,7 +369,7 @@ macro_rules! async_complete {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -474,7 +474,7 @@ macro_rules! async_context {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use std::sync::{Mutex, Arc};
 /// use nioruntime_log::*;
@@ -561,7 +561,7 @@ macro_rules! rustlet {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -583,7 +583,7 @@ macro_rules! rustlet {
 /// ```
 ///
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -661,7 +661,7 @@ macro_rules! rustlet_init {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -719,7 +719,7 @@ macro_rules! rustlet_mapping {
 /// Sets the content-type header of this request.
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -751,7 +751,7 @@ macro_rules! set_content_type {
 /// to set and the second parameter is the value of the header. See examples below.
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -808,7 +808,7 @@ macro_rules! add_header {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -865,7 +865,7 @@ macro_rules! set_redirect {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -923,7 +923,7 @@ macro_rules! bin_write {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1006,7 +1006,7 @@ macro_rules! response {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1051,7 +1051,7 @@ macro_rules! request_content {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1096,7 +1096,7 @@ macro_rules! cookie {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1152,7 +1152,7 @@ macro_rules! set_cookie {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1188,7 +1188,7 @@ macro_rules! header_len {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1223,7 +1223,7 @@ macro_rules! header_name {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1259,7 +1259,7 @@ macro_rules! header_value {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
@@ -1294,7 +1294,7 @@ macro_rules! query {
 ///
 /// # Examples
 /// ```
-/// use nioruntime_util::Error;
+/// use nioruntime_err::Error;
 /// use librustlet::*;
 /// use nioruntime_log::*;
 ///
