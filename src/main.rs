@@ -498,9 +498,14 @@ fn main() {
 			response!("content='{}'\n", content_as_ut8);
 		});
 
+		rustlet!("bin_write", {
+			bin_write!("test of bin write".as_bytes());
+		});
+
 		let _ = fun();
 		let _ = fun2();
 
+		rustlet_mapping!("/bin_write", "bin_write");
 		rustlet_mapping!("/myrustlet", "myrustlet");
 		rustlet_mapping!("/myrustlet2", "myrustlet2");
 		rustlet_mapping!("/printheaders", "printheaders");

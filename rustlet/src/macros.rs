@@ -858,6 +858,63 @@ macro_rules! set_redirect {
 	}};
 }
 
+/// Writes a binary response to the client. The parameter must be a byte array.
+/// Note that: data written via bin_write is buffered and is not necessarily sent immidiately.
+/// To ensure all data is written, the user must call the [`flush`] macro.
+///
+/// # Examples
+/// ```
+/// use nioruntime_util::Error;
+/// use librustlet::*;
+/// use nioruntime_log::*;
+///
+/// debug!();
+///
+/// fn test() -> Result<(), Error> {
+///
+///     // init the rustlet container, in this case with default values
+///     rustlet_init!(RustletConfig::default());
+///
+///     rustlet!("bin_write", {
+///         bin_write!("test of bin write".as_bytes());
+///     });
+///
+///     rustlet_mapping!("/", "bin_write");
+///
+///     Ok(())
+/// }
+/// ```
+#[macro_export]
+macro_rules! bin_write {
+	($a:expr) => {{
+		librustlet::macros::LOCALRUSTLET.with(|f| match &mut (*f.borrow_mut()) {
+			Some((request, response)) => {
+				let res = response.write($a);
+				match res {
+					Ok(_) => {}
+					Err(e) => {
+						const MAIN_LOG: &str = "mainlog";
+						nioruntime_log::log_multi!(
+							nioruntime_log::ERROR,
+							MAIN_LOG,
+							"Couldn't call response.write: {}",
+							e.to_string()
+						);
+					}
+				}
+			}
+			None => {
+				const MAIN_LOG: &str = "mainlog";
+				nioruntime_log::log_multi!(
+					nioruntime_log::ERROR,
+					MAIN_LOG,
+					"Couldn't find response struct",
+				);
+			}
+		});
+	}};
+}
+
 /// Writes a formated response to the client. The formatting is the same formatting as
 /// the format! macro, as that is used internally to format the response. Note that
 /// data written via response is buffered and is not necessarily sent immidiately.
