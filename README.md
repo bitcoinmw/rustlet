@@ -135,6 +135,14 @@ Statistical Log V_1.0:         REQUESTS       CONNS        CONNECTS         QPS 
 [2021-09-05 20:16:24]:        1,156,421          67          11,574   115642.10           0           0   0.0070367   14.203071
 ```
 
+# TLS support
+
+TLS is supported. See the documentation mentioned in the configuration section. [Rustls](https://github.com/rustls/rustls) is used for TLS support on all platforms. Performance is only slightly impacted. On the same Linux box used for testing of non-tls, the performance is about 62,000 requests per second compared to about 114,000 requests per second for non-tls. Latency actually improves a bit (probably due to the lower throughput). For convenience, the rustls main.rs adds the tls configuration options.
+
+```
+# ./target/release/rustlet --help
+```
+
 # Configuration
 
 The rustlet container is configured via the [rustlet_init](https://bitcoinmw.github.io/rustlet/librustlet/macro.rustlet_init.html) macro. All configuration structs implement the Default trait so the defaults can be used. Also, all of the fields are fully documented in the documentation linked to above.
