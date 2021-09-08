@@ -14,6 +14,9 @@ another thread thus allowing the rustlet thread pool to continue processing othe
 rustlets. The first call to <a href="macro.async_context.html" title="async_context"><code>async_context</code></a> should not specify any parameters
 and the second call should specify the returned parameter of the first call and be
 in another thread. See the example below for details.</p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.bin_write.html" title="librustlet::bin_write macro">bin_write</a></td><td class="docblock-short"><p>Writes a binary response to the client. The parameter must be a byte array.
+Note that: data written via bin_write is buffered and is not necessarily sent immidiately.
+To ensure all data is written, the user must call the <a href="macro.flush.html" title="flush"><code>flush</code></a> macro.</p>
 </td></tr><tr class="module-item"><td><a class="macro" href="macro.cookie.html" title="librustlet::cookie macro">cookie</a></td><td class="docblock-short"><p>Get the value of the specified cookie. To set cookies, see <a href="macro.set_cookie.html" title="set_cookie"><code>set_cookie</code></a>.</p>
 </td></tr><tr class="module-item"><td><a class="macro" href="macro.flush.html" title="librustlet::flush macro">flush</a></td><td class="docblock-short"><p>Flushes any buffered data previously sent via the <a href="macro.response.html" title="response"><code>response</code></a> macro.</p>
 </td></tr><tr class="module-item"><td><a class="macro" href="macro.header_len.html" title="librustlet::header_len macro">header_len</a></td><td class="docblock-short"><p>Returns the number of headers sent in this HTTP request.</p>
