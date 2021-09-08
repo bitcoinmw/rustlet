@@ -15,9 +15,9 @@
 pub mod macros;
 pub mod rustlet_impls;
 
+pub use nioruntime_err::Error;
 pub use nioruntime_http;
 pub use nioruntime_log;
-pub use nioruntime_util::Error;
 pub use rustlet_impls::{
 	HttpConfig, RustletAsyncContext, RustletConfig, RustletContainer, RustletRequest,
 	RustletResponse,

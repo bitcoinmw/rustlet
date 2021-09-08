@@ -15,11 +15,13 @@ edition = "2018"
 nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 nioruntime_log  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+nioruntime_err  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 
 # local testing
-#nioruntime_util = { path = "../../nioruntime/util" }
-#nioruntime_http = { path = "../../nioruntime/http" }
-#nioruntime_log  = { path = "../../nioruntime/log" }
+#nioruntime_util = { path = "../../nioruntime/util"  }
+#nioruntime_http = { path = "../../nioruntime/http"  }
+#nioruntime_log  = { path = "../../nioruntime/log"   }
+#nioruntime_err =  { path = "../../nioruntime/error" }
 
 lazy_static = "1.4.0"
 querystring = "1.1.0"

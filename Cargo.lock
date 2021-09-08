@@ -536,6 +536,7 @@ name = "librustlet"
 version = "0.0.1"
 dependencies = [
  "lazy_static",
+ "nioruntime_err",
  "nioruntime_http",
  "nioruntime_log",
  "nioruntime_util",
@@ -614,14 +615,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "nioruntime_err"
+version = "0.0.1"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#9d680307687266e49065f3e2ddb597e60e7b434c"
+dependencies = [
+ "byteorder",
+ "bytes",
+ "chrono",
+ "failure",
+ "failure_derive",
+ "futures",
+ "lazy_static",
+ "nix",
+ "rand",
+ "serde",
+]
+
+[[package]]
 name = "nioruntime_evh"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#483138a1aa089b5b6a52e08ca7ab09d70f116b21"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#9d680307687266e49065f3e2ddb597e60e7b434c"
 dependencies = [
  "errno",
  "futures",
  "kqueue-sys",
  "libc",
+ "nioruntime_err",
  "nioruntime_log",
  "nioruntime_util",
  "nix",
@@ -637,7 +656,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_http"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#483138a1aa089b5b6a52e08ca7ab09d70f116b21"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#9d680307687266e49065f3e2ddb597e60e7b434c"
 dependencies = [
  "bytefmt",
  "chrono",
@@ -645,6 +664,7 @@ dependencies = [
  "fsutils",
  "itoa",
  "lazy_static",
+ "nioruntime_err",
  "nioruntime_evh",
  "nioruntime_log",
  "nioruntime_util",
@@ -655,13 +675,14 @@ dependencies = [
 [[package]]
 name = "nioruntime_log"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#483138a1aa089b5b6a52e08ca7ab09d70f116b21"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#9d680307687266e49065f3e2ddb597e60e7b434c"
 dependencies = [
  "chrono",
  "failure",
  "failure_derive",
  "futures",
  "lazy_static",
+ "nioruntime_err",
  "nioruntime_util",
  "nix",
  "rand",
@@ -670,7 +691,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_util"
 version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#483138a1aa089b5b6a52e08ca7ab09d70f116b21"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#9d680307687266e49065f3e2ddb597e60e7b434c"
 dependencies = [
  "byteorder",
  "bytes",
@@ -679,6 +700,7 @@ dependencies = [
  "failure_derive",
  "futures",
  "lazy_static",
+ "nioruntime_err",
  "nix",
  "rand",
  "serde",
@@ -979,6 +1001,7 @@ dependencies = [
  "libc",
  "librustlet",
  "native-tls",
+ "nioruntime_err",
  "nioruntime_evh",
  "nioruntime_util",
  "rand",

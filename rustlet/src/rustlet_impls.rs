@@ -14,12 +14,12 @@
 
 use crate::{Readable, Writeable};
 use lazy_static::lazy_static;
+use nioruntime_err::{Error, ErrorKind};
 pub use nioruntime_http::{ConnData, HttpConfig, HttpServer};
 use nioruntime_http::{HttpMethod, HttpVersion, State, WriteHandle};
 use nioruntime_log::*;
 use nioruntime_util::ser::BinReader;
 use nioruntime_util::ser::BinWriter;
-use nioruntime_util::{Error, ErrorKind};
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::fs::metadata;
