@@ -18,18 +18,13 @@ use std::os::windows::io::AsRawSocket;
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 
-#[cfg(unix)]
-use libc::close;
-
 use clap::load_yaml;
 use clap::App;
-use errno::errno;
 use librustlet::*;
 use native_tls::TlsConnector;
 use nioruntime_evh::{EventHandlerConfig, TlsConfig};
 use nioruntime_log::*;
 use nioruntime_util::{Error, ErrorKind};
-use std::convert::TryInto;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
@@ -194,18 +189,6 @@ fn client_thread(
 		}
 	}
 
-	{
-		let _lock = tlat_sum.lock();
-		#[cfg(unix)]
-		let close_res = unsafe { close(fd.try_into().unwrap_or(0)) };
-		#[cfg(target_os = "windows")]
-		let close_res = unsafe { ws2_32::closesocket(fd.try_into().unwrap_or(0)) };
-		if close_res != 0 {
-			let e = errno();
-			debug!("error close {} (fd={})", e.to_string(), fd);
-		}
-		drop(stream);
-	}
 	{
 		let mut tlat_sum = tlat_sum.lock().unwrap();
 		(*tlat_sum) += lat_sum;
