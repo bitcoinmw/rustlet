@@ -25,6 +25,7 @@ errno = "0.2.7"
 libc = "^0.2.17"
 rustls = "0.20.0-beta1"
 rustls-pemfile = "0.2.0"
+native-tls = "0.2.8"
 
 librustlet = { path = "./rustlet" }
 

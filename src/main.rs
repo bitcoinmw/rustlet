@@ -25,6 +25,7 @@ use clap::load_yaml;
 use clap::App;
 use errno::errno;
 use librustlet::*;
+use native_tls::TlsConnector;
 use nioruntime_evh::{EventHandlerConfig, TlsConfig};
 use nioruntime_log::*;
 use nioruntime_util::{Error, ErrorKind};
@@ -70,21 +71,37 @@ fn client_thread(
 	tlat_sum: Arc<Mutex<f64>>,
 	tlat_max: Arc<Mutex<u128>>,
 	nginx: bool,
+	tls: bool,
 ) -> Result<(), Error> {
 	let mut lat_sum = 0.0;
 	let mut lat_max = 0;
-	let (mut stream, fd) = {
+	let addr = if nginx {
+		"127.0.0.1:80"
+	} else {
+		"127.0.0.1:8080"
+	};
+	let (mut stream, mut tls_stream, fd) = if tls {
 		let _lock = tlat_sum.lock();
-		let stream = if nginx {
-			TcpStream::connect("127.0.0.1:80")?
-		} else {
-			TcpStream::connect("127.0.0.1:8080")?
-		};
+		let connector = TlsConnector::builder()
+			.danger_accept_invalid_hostnames(true)
+			.build()
+			.unwrap();
+		let tls_stream = connector
+			.connect("example.com", TcpStream::connect(addr)?)
+			.unwrap();
+		#[cfg(unix)]
+		let fd = tls_stream.get_ref().as_raw_fd();
+		#[cfg(target_os = "windows")]
+		let fd = tls_stream.get_ref().as_raw_fd();
+		(None, Some(tls_stream), fd)
+	} else {
+		let _lock = tlat_sum.lock();
+		let stream = TcpStream::connect(addr)?;
 		#[cfg(unix)]
 		let fd = stream.as_raw_fd();
 		#[cfg(target_os = "windows")]
 		let fd = stream.as_raw_socket();
-		(stream, fd)
+		(Some(stream), None, fd)
 	};
 	let buf2 = &mut [0u8; MAX_BUF];
 	let start_itt = std::time::SystemTime::now();
@@ -108,7 +125,13 @@ fn client_thread(
 			info!("Request {} on thread {}, qps={}", i, id, qps);
 		}
 		let start_query = std::time::SystemTime::now();
-		let res = stream.write(&request_bytes);
+		let res = match stream {
+			Some(ref mut stream) => stream.write(&request_bytes),
+			None => {
+				let stream = tls_stream.as_mut().unwrap();
+				stream.write(&request_bytes)
+			}
+		};
 
 		match res {
 			Ok(_x) => {}
@@ -120,7 +143,14 @@ fn client_thread(
 
 		let mut len_sum = 0;
 		loop {
-			let res = stream.read(&mut buf2[len_sum..]);
+			let res = match stream {
+				Some(ref mut stream) => stream.read(&mut buf2[len_sum..]),
+				None => {
+					let stream = tls_stream.as_mut().unwrap();
+					stream.read(&mut buf2[len_sum..])
+				}
+			};
+
 			match res {
 				Ok(_) => {}
 				Err(ref e) => {
@@ -280,6 +310,7 @@ fn main() {
 		let threads = args.is_present("threads");
 		let count = args.is_present("count");
 		let itt = args.is_present("itt");
+		let tls = args.is_present("tls");
 
 		let threads = match threads {
 			true => args.value_of("threads").unwrap().parse().unwrap(),
@@ -318,7 +349,8 @@ fn main() {
 				let tlat_sum = tlat_sum.clone();
 				let tlat_max = tlat_max.clone();
 				jhs.push(std::thread::spawn(move || {
-					let res = client_thread(count, id, tlat_sum.clone(), tlat_max.clone(), nginx);
+					let res =
+						client_thread(count, id, tlat_sum.clone(), tlat_max.clone(), nginx, tls);
 					match res {
 						Ok(_) => {}
 						Err(e) => {
