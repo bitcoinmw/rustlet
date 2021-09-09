@@ -11,12 +11,19 @@ edition = "2018"
 
 [dependencies]
 
+# release
+nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", tag = "0.0.1" }
+nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", tag = "0.0.1" }
+nioruntime_log  = { git = "http://github.com/bitcoinmw/nioruntime", tag = "0.0.1" }
+nioruntime_err  = { git = "http://github.com/bitcoinmw/nioruntime", tag = "0.0.1" }
+nioruntime_evh  = { git = "http://github.com/bitcoinmw/nioruntime", tag = "0.0.1" }
+
 # master
-nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_log  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_err  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
-nioruntime_evh  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_util = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_http = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_log  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_err  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
+#nioruntime_evh  = { git = "http://github.com/bitcoinmw/nioruntime", branch = "master" }
 
 # local testing
 #nioruntime_util = { path = "../../nioruntime/util"         }
