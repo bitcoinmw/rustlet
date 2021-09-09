@@ -82,7 +82,7 @@ fn client_thread(
 		#[cfg(unix)]
 		let fd = tls_stream.get_ref().as_raw_fd();
 		#[cfg(target_os = "windows")]
-		let fd = tls_stream.get_ref().as_raw_fd();
+		let fd = tls_stream.get_ref().as_raw_socket();
 		(None, Some(tls_stream), fd)
 	} else {
 		let _lock = tlat_sum.lock();
