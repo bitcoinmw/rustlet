@@ -533,7 +533,7 @@ dependencies = [
 
 [[package]]
 name = "librustlet"
-version = "0.0.1"
+version = "0.0.2-beta1"
 dependencies = [
  "lazy_static",
  "nioruntime_err",
@@ -617,8 +617,8 @@ dependencies = [
 
 [[package]]
 name = "nioruntime_err"
-version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?tag=0.0.1#bec261ef9ab662665be4f2d173cf6adb1bee602f"
+version = "0.0.2-beta1"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
 dependencies = [
  "byteorder",
  "bytes",
@@ -634,8 +634,8 @@ dependencies = [
 
 [[package]]
 name = "nioruntime_evh"
-version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?tag=0.0.1#bec261ef9ab662665be4f2d173cf6adb1bee602f"
+version = "0.0.2-beta1"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
 dependencies = [
  "errno",
  "futures",
@@ -656,8 +656,8 @@ dependencies = [
 
 [[package]]
 name = "nioruntime_http"
-version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?tag=0.0.1#bec261ef9ab662665be4f2d173cf6adb1bee602f"
+version = "0.0.2-beta1"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
 dependencies = [
  "bytefmt",
  "chrono",
@@ -675,8 +675,8 @@ dependencies = [
 
 [[package]]
 name = "nioruntime_log"
-version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?tag=0.0.1#bec261ef9ab662665be4f2d173cf6adb1bee602f"
+version = "0.0.2-beta1"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
 dependencies = [
  "chrono",
  "failure",
@@ -691,8 +691,8 @@ dependencies = [
 
 [[package]]
 name = "nioruntime_util"
-version = "0.0.1"
-source = "git+http://github.com/bitcoinmw/nioruntime?tag=0.0.1#bec261ef9ab662665be4f2d173cf6adb1bee602f"
+version = "0.0.2-beta1"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
 dependencies = [
  "byteorder",
  "bytes",
@@ -992,7 +992,7 @@ checksum = "7ef03e0a2b150c7a90d01faf6254c9c48a41e95fb2a8c2ac1c6f0d2b9aefc342"
 
 [[package]]
 name = "rustlet"
-version = "0.0.1"
+version = "0.0.2-beta1"
 dependencies = [
  "built",
  "byte-tools",
