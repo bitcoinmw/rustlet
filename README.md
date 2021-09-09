@@ -96,7 +96,7 @@ The data logged in this file are:
 * 5.) IDLE_DISC - The number of connections which were disconnected after being idle for a period of time (the default is 2 minutes).
 * 6.) RTIMEOUT - The number of connections which were disconnected after not making any requests at all for a period of time (the default is 30 seconds).
 * 7.) AVG_LAT - The average latency per request (this includes the portion of the request that is either executing the rustlet or reading the file to return to the user for static HTTP requests.
-* 8.) MAX_LAT - The maximum latency for a request.
+* 8.) MAX_LAT - The maximum latency for a request in milliseconds.
 
 A sample of the statistical log looks like this:
 
