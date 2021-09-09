@@ -913,22 +913,45 @@ fn do_api_callback(
 		None => {
 			// see if it's an RSP.
 			if uri.to_lowercase().ends_with(".rsp") {
-				process_rsp(
-					conn_data_is_async,
+				let res = process_rsp(
+					conn_data_is_async.clone(),
 					conn_data,
 					has_content,
 					start_content,
 					end_content,
 					method,
-					config,
-					wh,
+					config.clone(),
+					wh.clone(),
 					version,
 					uri,
 					query,
 					headers,
 					keep_alive,
 					session_map,
-				)?;
+				);
+
+				match res {
+					Ok(_) => {}
+					Err(e) => {
+						log_multi!(
+							ERROR,
+							MAIN_LOG,
+							"rsp '{}' generated error: {}",
+							uri,
+							e.to_string()
+						);
+						let mut response = RustletResponse::new(
+							conn_data_is_async,
+							wh.clone(),
+							config,
+							false,
+							false,
+						);
+						response
+							.write("Internal Server error. See logs for details.".as_bytes())?;
+						response.complete()?;
+					}
+				}
 			} else {
 				log_multi!(ERROR, MAIN_LOG, "error, no mapping for '{}'", uri);
 				let mut response =
