@@ -609,7 +609,7 @@
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">get_ref</span>().<span class="ident">as_raw_fd</span>();
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
-		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">get_ref</span>().<span class="ident">as_raw_fd</span>();
+		<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="ident">tls_stream</span>.<span class="ident">get_ref</span>().<span class="ident">as_raw_socket</span>();
 		(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">tls_stream</span>), <span class="ident">fd</span>)
 	} <span class="kw">else</span> {
 		<span class="kw">let</span> <span class="ident">_lock</span> <span class="op">=</span> <span class="ident">tlat_sum</span>.<span class="ident">lock</span>();

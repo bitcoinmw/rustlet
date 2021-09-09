@@ -1149,6 +1149,29 @@
 <span id="1147">1147</span>
 <span id="1148">1148</span>
 <span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2021 The BMW Developers</span>
 <span class="comment">//</span>
@@ -2065,22 +2088,45 @@
 		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
 			<span class="comment">// see if it&#39;s an RSP.</span>
 			<span class="kw">if</span> <span class="ident">uri</span>.<span class="ident">to_lowercase</span>().<span class="ident">ends_with</span>(<span class="string">&quot;.rsp&quot;</span>) {
-				<span class="ident">process_rsp</span>(
-					<span class="ident">conn_data_is_async</span>,
+				<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">process_rsp</span>(
+					<span class="ident">conn_data_is_async</span>.<span class="ident">clone</span>(),
 					<span class="ident">conn_data</span>,
 					<span class="ident">has_content</span>,
 					<span class="ident">start_content</span>,
 					<span class="ident">end_content</span>,
 					<span class="ident">method</span>,
-					<span class="ident">config</span>,
-					<span class="ident">wh</span>,
+					<span class="ident">config</span>.<span class="ident">clone</span>(),
+					<span class="ident">wh</span>.<span class="ident">clone</span>(),
 					<span class="ident">version</span>,
 					<span class="ident">uri</span>,
 					<span class="ident">query</span>,
 					<span class="ident">headers</span>,
 					<span class="ident">keep_alive</span>,
 					<span class="ident">session_map</span>,
-				)<span class="question-mark">?</span>;
+				);
+
+				<span class="kw">match</span> <span class="ident">res</span> {
+					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="macro">log_multi!</span>(
+							<span class="ident">ERROR</span>,
+							<span class="ident">MAIN_LOG</span>,
+							<span class="string">&quot;rsp &#39;{}&#39; generated error: {}&quot;</span>,
+							<span class="ident">uri</span>,
+							<span class="ident">e</span>.<span class="ident">to_string</span>()
+						);
+						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">RustletResponse::new</span>(
+							<span class="ident">conn_data_is_async</span>,
+							<span class="ident">wh</span>.<span class="ident">clone</span>(),
+							<span class="ident">config</span>,
+							<span class="bool-val">false</span>,
+							<span class="bool-val">false</span>,
+						);
+						<span class="ident">response</span>
+							.<span class="ident">write</span>(<span class="string">&quot;Internal Server error. See logs for details.&quot;</span>.<span class="ident">as_bytes</span>())<span class="question-mark">?</span>;
+						<span class="ident">response</span>.<span class="ident">complete</span>()<span class="question-mark">?</span>;
+					}
+				}
 			} <span class="kw">else</span> {
 				<span class="macro">log_multi!</span>(<span class="ident">ERROR</span>, <span class="ident">MAIN_LOG</span>, <span class="string">&quot;error, no mapping for &#39;{}&#39;&quot;</span>, <span class="ident">uri</span>);
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">response</span> <span class="op">=</span>
