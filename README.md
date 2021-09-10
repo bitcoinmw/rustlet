@@ -29,6 +29,8 @@ RSPs are rust server pages. A RSP page is a text document that contains two type
 
 In this example '<@=header>', '<@=middlecontent>', and '<@=footer>' are each rustlets that share the same parameters as the RSP page when executed. RSPs can be placed anywhere in the HTTP server's webroot and the rustlet container will interpret them to their dynamic form. RSP files must end with the .rsp extension so that the rustlet container knows to execute them as RSPs.
 
+Please note that RSPs do not currently support async rustlets. If you embed a rustlet that uses the async_context or async_complete macros, it will result in undefined behaviour. Support for this is on the list of TODOs.
+
 # Logging
 
 The rustlet container comes with a logging library. The full documentation of the logging library can be [found here](https://bitcoinmw.github.io/rustlet/nioruntime_log/). This logging library uses the same syntax of the standard logging library for rust. See the example for info [here](https://bitcoinmw.github.io/rustlet/nioruntime_log/macro.info.html). Log level is set per file as seen in the previous example. The rustlet container itself uses this logging library for three log files. Each log file has a configurable location, max_size, and max_age. Further details about each of these log files is below.
