@@ -145,6 +145,47 @@ TLS is supported. See the documentation mentioned in the configuration section. 
 # ./target/release/rustlet --help
 ```
 
+Here is the output of the statistical log during a run on a 6-core intel cpu:
+
+```
+Statistical Log V_1.0:         REQUESTS       CONNS        CONNECTS         QPS   IDLE_DISC    RTIMEOUT     AVG_LAT     MAX_LAT
+-------------------------------------------------------------------------------------------------------------------------------
+      3 Days 18:02:11:   20,119,048,913          45     201,190,551   62070.733           5           1   0.0109919   4000.7869
+-------------------------------------------------------------------------------------------------------------------------------
+[2021-09-11 13:10:05]:          623,324          45           6,236   62332.400           0           0   0.0109845   10.740607
+[2021-09-11 13:10:15]:          619,026          31           6,188   61902.600           0           0   0.0110722   17.283270
+[2021-09-11 13:10:25]:          625,097          83           6,253   62509.700           0           0   0.0109907   14.433026
+[2021-09-11 13:10:35]:          620,377          83           6,203   62037.700           0           0   0.0110005   13.617574
+[2021-09-11 13:10:45]:          617,451          59           6,174   61745.100           0           0   0.0109883   12.331127
+[2021-09-11 13:10:55]:          620,085          67           6,205   62008.500           0           0   0.0109998   11.800872
+```
+
+So, as seen above low latency and high throughput (60,000 requests per second on moderately priced ($182) cpu) is possible with rustlets + tls). Here's the output of the benchmark for reference:
+
+```
+$ ./target/release/rustlet -c -x 100 -t 100 -i 10 --tls
+[2021-09-11 18:52:33]: Running client 
+[2021-09-11 18:52:33]: Threads=100
+[2021-09-11 18:52:33]: Iterations=10
+[2021-09-11 18:52:33]: Requests per thread per iteration=100
+--------------------------------------------------------------------------------
+[2021-09-11 18:52:33]: Iteration 1 complete. 
+[2021-09-11 18:52:34]: Iteration 2 complete. 
+[2021-09-11 18:52:34]: Iteration 3 complete. 
+[2021-09-11 18:52:34]: Iteration 4 complete. 
+[2021-09-11 18:52:34]: Iteration 5 complete. 
+[2021-09-11 18:52:34]: Iteration 6 complete. 
+[2021-09-11 18:52:34]: Iteration 7 complete. 
+[2021-09-11 18:52:35]: Iteration 8 complete. 
+[2021-09-11 18:52:35]: Iteration 9 complete. 
+[2021-09-11 18:52:35]: Iteration 10 complete. 
+--------------------------------------------------------------------------------
+[2021-09-11 18:52:35]: Test complete in 1583 ms
+[2021-09-11 18:52:35]: QPS=63171.19393556538
+[2021-09-11 18:52:35]: Average latency=0.15323981941ms
+[2021-09-11 18:52:35]: Max latency=14.611269ms
+```
+
 # Configuration
 
 The rustlet container is configured via the [rustlet_init](https://bitcoinmw.github.io/rustlet/librustlet/macro.rustlet_init.html) macro. All configuration structs implement the Default trait so the defaults can be used. Also, all of the fields are fully documented in the documentation linked to above.
