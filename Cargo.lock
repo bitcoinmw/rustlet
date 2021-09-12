@@ -618,7 +618,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_err"
 version = "0.0.2-beta1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#f4a78cc3e909a08c3ad09ce7dc1bb7ea2c6fc22a"
 dependencies = [
  "byteorder",
  "bytes",
@@ -629,13 +629,14 @@ dependencies = [
  "lazy_static",
  "nix",
  "rand",
+ "rustls",
  "serde",
 ]
 
 [[package]]
 name = "nioruntime_evh"
 version = "0.0.2-beta1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#f4a78cc3e909a08c3ad09ce7dc1bb7ea2c6fc22a"
 dependencies = [
  "errno",
  "futures",
@@ -649,6 +650,7 @@ dependencies = [
  "rand",
  "rustls",
  "rustls-pemfile",
+ "webpki-roots",
  "wepoll-sys",
  "winapi 0.2.8",
  "ws2_32-sys",
@@ -657,7 +659,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_http"
 version = "0.0.2-beta1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#f4a78cc3e909a08c3ad09ce7dc1bb7ea2c6fc22a"
 dependencies = [
  "bytefmt",
  "chrono",
@@ -676,7 +678,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_log"
 version = "0.0.2-beta1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#f4a78cc3e909a08c3ad09ce7dc1bb7ea2c6fc22a"
 dependencies = [
  "chrono",
  "failure",
@@ -692,7 +694,7 @@ dependencies = [
 [[package]]
 name = "nioruntime_util"
 version = "0.0.2-beta1"
-source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#56b7546b516e3dea639e90d6d95c8db55fe48b3a"
+source = "git+http://github.com/bitcoinmw/nioruntime?branch=master#f4a78cc3e909a08c3ad09ce7dc1bb7ea2c6fc22a"
 dependencies = [
  "byteorder",
  "bytes",
@@ -1193,9 +1195,9 @@ dependencies = [
 
 [[package]]
 name = "tinyvec"
-version = "1.3.1"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "848a1e1181b9f6753b5e96a092749e29b11d19ede67dfbbd6c7dc7e0f49b5338"
+checksum = "5241dd6f21443a3606b432718b166d3cedc962fd4b8bea54a8bc7f514ebda986"
 dependencies = [
  "tinyvec_macros",
 ]
@@ -1350,6 +1352,15 @@ checksum = "f095d78192e208183081cc07bc5515ef55216397af48b873e5edcd72637fa1bd"
 dependencies = [
  "ring",
  "untrusted",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b533367e7546a31c15093b12a273004b79eb3b57b15359af710460f9aee94cf8"
+dependencies = [
+ "webpki",
 ]
 
 [[package]]

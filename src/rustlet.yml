@@ -57,3 +57,8 @@ args:
         short: l
         long: tls
         takes_value: false
+    - mio:
+        help: Run test against mio instead of rustlet
+        short: m
+        long: mio
+        takes_value: false

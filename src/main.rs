@@ -64,6 +64,7 @@ fn client_thread(
 	tlat_sum: Arc<Mutex<f64>>,
 	tlat_max: Arc<Mutex<u128>>,
 	nginx: bool,
+	mio: bool,
 	tls: bool,
 	connector: &TlsConnector,
 ) -> Result<(), Error> {
@@ -159,6 +160,15 @@ fn client_thread(
 					&& buf2[len_sum - 3] == 108
 					&& buf2[len_sum - 4] == 109
 					&& buf2[len_sum - 5] == 116
+				{
+					break;
+				}
+			} else if mio {
+				if len_sum >= 5
+					&& buf2[len_sum - 1] == 10
+					&& buf2[len_sum - 2] == 13
+					&& buf2[len_sum - 3] == 114
+					&& buf2[len_sum - 4] == 101
 				{
 					break;
 				}
@@ -260,6 +270,7 @@ fn main() {
 		.get_matches();
 
 	let client = args.is_present("client");
+	let mio = args.is_present("mio");
 	let nginx = args.is_present("nginx");
 	let debug = args.is_present("debug");
 	let delete_request_rotation = args.is_present("delete_request_rotation");
@@ -338,6 +349,7 @@ fn main() {
 						tlat_sum.clone(),
 						tlat_max.clone(),
 						nginx,
+						mio,
 						tls,
 						&connector,
 					);
